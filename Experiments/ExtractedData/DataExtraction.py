@@ -5,7 +5,7 @@ import numpy as np
 import scipy.io
 import scipy.linalg
 
-import ExtractedData.Features as Features
+import Features as Features
 
 
 def saveFile(timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database):
@@ -127,6 +127,7 @@ for database in ['Nina5', 'Cote', 'EPN']:
         people = 10
 
         for person in range(1, people + 1):
+            print(person)
             aux = scipy.io.loadmat(place + '/ninaDB5/s' + str(person) + '/S' + str(person) + '_E2_A1.mat')
             auxEMG = aux['emg']
             auxRestimulus = aux['restimulus']

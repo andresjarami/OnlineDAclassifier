@@ -25,7 +25,8 @@ for typeDatabase in typeDatabaseSet:
     printR = bool(1)
     hyper = bool(0)
     eval = bool(1)
-    nameFile = typeDatabase+'_Uns_2Shots.csv'
+    # nameFile = typeDatabase+'_Uns_2Shots_SemiAdapt.csv'
+    nameFile = None
 
     shotStart=2
 

@@ -10,7 +10,7 @@ from sklearn import preprocessing
 
 def uploadDatabases(Database, featureSet=1):
     # Setting general variables
-    path = '../DA-basedAdaptationTechnique/FewShotLearningEMG/'
+    path = '../'
     CH = 8
 
     if Database == 'EPN':
@@ -400,7 +400,7 @@ def resultsDataframeUnsupervised(currentValues, preTrainedDataMatrix, trainFeatu
 
     ldaUnsupervisedModel, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
         ldaUnsupervisedModel, unsuperMatrixLDA, classes, allFeatures, oneShotFeatures, oneShotLabels, oneShotModel,
-        step, 'QDA', 1, typeDatabase)
+        step, 'LDA', 1, typeDatabase)
 
     qdaUnsupervisedModel, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
         qdaUnsupervisedModel, unsuperMatrixQDA, classes, allFeatures, oneShotFeatures, oneShotLabels, oneShotModel,
