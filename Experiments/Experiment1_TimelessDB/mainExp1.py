@@ -19,8 +19,8 @@ typeDatabaseSet = ['EPN']
 for typeDatabase in typeDatabaseSet:
 
     featureSet = 1
-    startPerson = 1
-    endPerson = 30
+    startPerson = 32 #Cote 20-36,EPN 31-60, Nina5 1-10
+    endPerson = 32
     pca = bool(1)
     printR = bool(1)
     hyper = bool(0)
@@ -28,7 +28,7 @@ for typeDatabase in typeDatabaseSet:
     # nameFile = typeDatabase+'_Uns_2Shots_SemiAdapt.csv'
     nameFile = None
 
-    shotStart=2
+    shotStart=1
 
     # Upload Data
     dataMatrix, _, _, classes, peoplePriorK, _, numberShots, _, allFeatures, _ = functionsExp1.uploadDatabases(

@@ -1,8 +1,10 @@
-import DA_Classifiers as DA_Classifiers
+import time
+
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
-import time
+
+import DA_Classifiers as DA_Classifiers
 
 
 # from numpy.random import default_rng
@@ -97,6 +99,8 @@ def VidovicModel(currentValues, preTrainedDataMatrix, classes, allFeatures):
 def OurModel(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels, step,
              typeModel, k):
     t = time.time()
+    numSamples=20
+    trainFeatures, trainLabels = subsetTraining(trainFeatures, trainLabels, numSamples, classes)
 
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
 
@@ -1305,6 +1309,7 @@ def OurModelUnsupervised(currentValues, preTrainedDataMatrix, classes, allFeatur
 
 def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
                                 oneShotModel, step, typeModel, k, typeDatabase):
+    typeModelWeights='QDA'
     peopleClass = len(preTrainedDataMatrix.index)
     if typeDatabase == 'Nina5':
         preTrainedDataMatrix2 = pd.DataFrame(columns=['cov', 'mean', 'class', 'prob', 'samples'])
@@ -1312,7 +1317,7 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
         idxSetBase = np.array([0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1])
 
         for j in range(int(peopleClass / classes)):
-            idxSet = classes*j + idxSetBase
+            idxSet = classes * j + idxSetBase
 
             for i in idxSet:
                 preTrainedDataMatrix2.at[i2] = preTrainedDataMatrix.loc[i]
@@ -1341,19 +1346,17 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
 
         for cla in range(classes):
             if preTrainedDataMatrix['prob'].loc[person][cla] != 0:
-                wPeopleMean[person, cla] = weightPerPersonMean(oneShotModel, personMean, cla, classes
-                                                               , trainFeatures, trainLabels, step, typeModel) * \
+                wPeopleMean[person, cla] = weightPerPersonMean(
+                    oneShotModel, personMean, cla, classes, trainFeatures, trainLabels, step, typeModelWeights) * \
                                            preTrainedDataMatrix['prob'].loc[person][cla]
-                wPeopleCov[person, cla] = weightPerPersonCov(oneShotModel, personCov, cla, classes
-                                                             , trainFeatures, trainLabels, step, typeModel) * \
+                wPeopleCov[person, cla] = weightPerPersonCov(
+                    oneShotModel, personCov, cla, classes, trainFeatures, trainLabels, step, typeModelWeights) * \
                                           preTrainedDataMatrix['prob'].loc[person][cla]
 
             wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentValues['mean'].loc[cla], cla, classes,
-                                                   trainFeatures, trainLabels,
-                                                   step, typeModel)
+                                                   trainFeatures, trainLabels, step, typeModelWeights)
             wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentValues['cov'].loc[cla], cla, classes,
-                                                 trainFeatures, trainLabels,
-                                                 step, typeModel)
+                                                 trainFeatures, trainLabels, step, typeModelWeights)
 
     sumWMean = np.sum(wPeopleMean, axis=0) + wTargetMean
     sumWCov = np.sum(wPeopleCov, axis=0) + wTargetCov
@@ -1373,7 +1376,7 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
         adaptiveModel.at[cla, 'mean'] = means[:, cla].sum() + currentValues['mean'].loc[cla] * wTargetMean[cla]
         if typeModel == 'LDA':
             adaptiveModel.at[cla, 'cov'] = (np.sum(preTrainedDataMatrix['cov']) + currentValues['cov'].loc[cla]) / (
-                        peopleClass + 1)
+                    peopleClass + 1)
         else:
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + currentValues['cov'].loc[cla] * wTargetCov[cla]
 
