@@ -14,47 +14,47 @@ def saveFile(timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, data
     myFile = database + '/' + auxName + '.csv'
     np.savetxt(myFile, timesFeatures, delimiter=',')
 
-    auxName = 'mav_' + windowFile
+    auxName = 'mav' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(mavMatrix)
-    auxName = 'wl_' + windowFile
+    auxName = 'wl' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(wlMatrix)
-    auxName = 'zc_' + windowFile
+    auxName = 'zc' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(zcMatrix)
-    auxName = 'ssc_' + windowFile
+    auxName = 'ssc' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(sscMatrix)
-    auxName = 'lscale_' + windowFile
+    auxName = 'lscale' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(lscaleMatrix)
-    auxName = 'mfl_' + windowFile
+    auxName = 'mfl' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(mflMatrix)
-    auxName = 'msr_' + windowFile
+    auxName = 'msr' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(msrMatrix)
-    auxName = 'wamp_' + windowFile
+    auxName = 'wamp' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(wampMatrix)
-    auxName = 'logvar_' + windowFile
+    auxName = 'logvar' + windowFile
     myFile = open(database + '/' + auxName + '.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
@@ -100,7 +100,7 @@ for database in ['Nina5', 'Cote', 'EPN']:
     sampleRate = 200
     window = 295
     overlap = 290
-    windowFile = '295ms'
+    windowFile = '_295ms'
     windowSamples = int(window * sampleRate / 1000)
     incrmentSamples = windowSamples - int(overlap * sampleRate / 1000)
     timeFeatureSet1 = []
@@ -127,7 +127,7 @@ for database in ['Nina5', 'Cote', 'EPN']:
         people = 10
 
         for person in range(1, people + 1):
-            print(person)
+
             aux = scipy.io.loadmat(place + '/ninaDB5/s' + str(person) + '/S' + str(person) + '_E2_A1.mat')
             auxEMG = aux['emg']
             auxRestimulus = aux['restimulus']
