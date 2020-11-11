@@ -112,10 +112,7 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
     results = pd.DataFrame(
         columns=['person', 'subset', '# shots', 'Feature Set'])
     idx = 0
-    # typeData = 0
-    # shotStart = 3
-    # shotStart += 1
-    # initialShots = list(range(1, shotStart))
+
 
     # if typeDatabase != 'Nina5':
     #     trainFeaturesGenPre = dataMatrix[dataMatrix[:, allFeatures + 1] <= peoplePriorK, :allFeatures]
@@ -169,47 +166,7 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                 (shot >= dataMatrix[:, allFeatures + 3]), allFeatures + 2].T
 
             subset = list(range(shotStart, shot + 1))
-            #
-            # trainFeatures = np.empty((0, allFeatures))
-            # trainLabels = []
-            # trainRep = []
-            # for auxIndex in subset:
-            #     if typeDatabase == 'Nina5':
-            #         trainFeatures = np.vstack((trainFeatures, dataMatrix[np.where(
-            #             (dataMatrix[:, allFeatures] == person) * (dataMatrix[:, allFeatures + 2] == auxIndex)),
-            #                                                   0:allFeatures][0]))
-            #         trainLabels = np.hstack((trainLabels, dataMatrix[np.where(
-            #             (dataMatrix[:, allFeatures] == person) * (dataMatrix[:, allFeatures + 2] == auxIndex))
-            #         , allFeatures + 1][0].T))
-            #     elif typeDatabase == 'Cote':
-            #         trainFeatures = np.vstack((trainFeatures, dataMatrix[np.where(
-            #             (dataMatrix[:, allFeatures] == typeData) * (dataMatrix[:, allFeatures + 1] == person) * (
-            #                     dataMatrix[:, allFeatures + 2] == carpet)
-            #             * (dataMatrix[:, allFeatures + 4] == auxIndex)), 0:allFeatures][0]))
-            #         trainLabels = np.hstack((trainLabels, dataMatrix[np.where(
-            #             (dataMatrix[:, allFeatures] == typeData) * (dataMatrix[:, allFeatures + 1] == person)
-            #             * (dataMatrix[:, allFeatures + 2] == carpet) * (
-            #                     dataMatrix[:, allFeatures + 4] == auxIndex)), allFeatures + 3][0].T))
-            #     elif typeDatabase == 'EPN':
-            #         trainFeatures = np.vstack(
-            #             (trainFeatures, dataMatrix[np.where((dataMatrix[:, allFeatures] == typeData) * (
-            #                     dataMatrix[:, allFeatures + 1] == person) * (
-            #                                                         dataMatrix[:, allFeatures + 3] == auxIndex)),
-            #                             0:allFeatures][0]))
-            #         trainLabels = np.hstack(
-            #             (trainLabels, dataMatrix[np.where((dataMatrix[:, allFeatures] == typeData) * (
-            #                     dataMatrix[:, allFeatures + 1] == person) * (dataMatrix[:,
-            #                                                                  allFeatures + 3] == auxIndex)), allFeatures + 2][
-            #                 0].T))
-            #
-            #         trainRep = np.hstack(
-            #             (trainRep, dataMatrix[np.where((dataMatrix[:, allFeatures] == typeData) * (
-            #                     dataMatrix[:, allFeatures + 1] == person) * (dataMatrix[:,
-            #                                                                  allFeatures + 3] == auxIndex)), allFeatures + 3][
-            #                 0].T))
 
-            # trainFeaturesGen = np.vstack((trainFeaturesGenPre, trainFeatures))
-            # trainLabelsGen = np.hstack((trainLabelsGenPre, trainLabels))
 
             trainFeatures = scaler.transform(trainFeatures)
             # trainFeaturesGen = scaler.transform(trainFeaturesGen)
@@ -258,7 +215,7 @@ def resultsDataframeUnsupervised(trainFeatures, trainLabels, classes, allFeature
                                  semiSupervisedLearning_adaptationModelLDA, semiSupervisedLearning_adaptationModelQDA,
                                  fewShotModel, adaptedModel, typeDatabase):
     step = 1
-    numSamples = 50
+    numSamples = 10
     fewShotFeatures, fewShotLabels = adaptive.subsetTraining(fewShotFeatures, fewShotLabels, numSamples, classes)
 
     # lenOneShot = len(oneShotLabels)
