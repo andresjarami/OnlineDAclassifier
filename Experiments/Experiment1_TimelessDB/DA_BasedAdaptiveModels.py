@@ -99,7 +99,7 @@ def VidovicModel(currentValues, preTrainedDataMatrix, classes, allFeatures):
 def OurModel(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels, step,
              typeModel, k):
     t = time.time()
-    numSamples=20
+    numSamples=50
     trainFeatures, trainLabels = subsetTraining(trainFeatures, trainLabels, numSamples, classes)
 
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
@@ -1211,8 +1211,7 @@ def weightPerPersonCovProb(currentValues, personCov, currentClass, classes, trai
 
 
 def OurModelUnsupervised(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
-                         oneShotModel, step,
-                         typeModel, k):
+                         oneShotModel, step, typeModel, k):
     t = time.time()
 
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
@@ -1308,7 +1307,7 @@ def OurModelUnsupervised(currentValues, preTrainedDataMatrix, classes, allFeatur
 
 
 def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
-                                oneShotModel, step, typeModel, k, typeDatabase):
+                                oneShotModel, step, typeModel, typeDatabase):
     typeModelWeights='QDA'
     peopleClass = len(preTrainedDataMatrix.index)
     if typeDatabase == 'Nina5':
