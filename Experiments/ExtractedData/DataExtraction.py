@@ -8,7 +8,8 @@ import scipy.linalg
 import Features as Features
 
 
-def saveFile(timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database):
+def saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
+             wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database):
     timesFeatures = np.vstack((timeFeatureSet1, timeFeatureSet2, timeFeatureSet3))
     auxName = 'timesFeatures' + windowFile
     myFile = database + '/' + auxName + '.csv'
@@ -85,6 +86,9 @@ def appendFeatureMatrix(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, 
 
     return logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix, wampMatrix, \
            timeFeatureSet1, timeFeatureSet2, timeFeatureSet3
+
+
+
 
 
 def emgCoteAllard(group, gender, person, carpet, gesture):
@@ -197,7 +201,8 @@ for database in ['Nina5', 'Cote', 'EPN']:
                                 wiR += incrmentSamples
                         rpR += 1
 
-        saveFile(timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
+        saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
+                 wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
 
     elif database == 'Cote':
         # COTE ALLARD DATABASE
@@ -268,7 +273,8 @@ for database in ['Nina5', 'Cote', 'EPN']:
                                 rp = rp + 1
                     person += 1
 
-        saveFile(timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
+        saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
+                 wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
 
     elif database == 'EPN':
 
@@ -302,4 +308,5 @@ for database in ['Nina5', 'Cote', 'EPN']:
 
                             wi += incrmentSamples
 
-        saveFile(timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
+        saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
+                 wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)

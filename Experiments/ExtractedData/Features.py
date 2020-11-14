@@ -17,7 +17,7 @@ def MAV(EMG, ch):
     else:
         EMG = abs(EMG)
         mavVector = EMG.mean(axis=0)
-    return mavVector[0]
+    return mavVector
 
 
 def WL(EMG, ch):
