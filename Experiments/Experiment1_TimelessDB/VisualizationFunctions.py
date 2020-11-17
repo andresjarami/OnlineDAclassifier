@@ -170,15 +170,12 @@ def uploadResultsDatabase(folder, database):
     if database == 'NinaPro5':
         samples = 4
         people = 10
-        shots = 4
     elif database == 'Cote':
         samples = 4
         people = 17
-        shots = 4
     elif database == 'EPN':
         samples = 25
         people = 30
-        shots = 25
     place = folder + database
     resultsTest = pd.read_csv(place + "_FeatureSet_1_startPerson_1_endPerson_1.csv")
     if len(resultsTest) != samples:
@@ -201,7 +198,7 @@ def uploadResultsDatabase(folder, database):
                 print('error' + ' ' + str(j) + ' ' + str(i))
                 print(len(auxFrame))
 
-    return analysisResults(resultsTest.drop(columns='Unnamed: 0'), shots)
+    return analysisResults(resultsTest.drop(columns='Unnamed: 0'), samples)
 
 
 def analysisTime(extractionT, timeM):
