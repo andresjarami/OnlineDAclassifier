@@ -88,7 +88,8 @@ def uploadDatabases(Database, featureSet=1):
         numberFeatures = 4
         allFeatures = numberFeatures * CH
         # Getting Data
-        lscaleMatrix = np.genfromtxt(path + 'ExtractedData/' + Database + '/' + Feature1 + segment + '.csv',                                     delimiter=',')
+        lscaleMatrix = np.genfromtxt(path + 'ExtractedData/' + Database + '/' + Feature1 + segment + '.csv',
+                                     delimiter=',')
         mflMatrix = np.genfromtxt(path + 'ExtractedData/' + Database + '/' + Feature2 + segment + '.csv', delimiter=',')
         msrMatrix = np.genfromtxt(path + 'ExtractedData/' + Database + '/' + Feature3 + segment + '.csv', delimiter=',')
         wampMatrix = np.genfromtxt(path + 'ExtractedData/' + Database + '/' + Feature4 + segment + '.csv',
@@ -234,14 +235,12 @@ def PKModels(dataMatrix, classes, peoplePriorK, evaluatedPerson, allFeatures):
 
 def resultsDataframeUnsupervised(
         trainFeatures, trainLabels, trainRep, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes, allFeatures,
-        results, testFeatures,
-        testLabels, idx, person, subset, featureSet, nameFile, printR, fewShotFeatures, fewShotLabels,
-        semiSupervisedLearningModelLDA_shot, semiSupervisedLearningModelQDA_shot,
+        results, testFeatures, testLabels, idx, person, subset, featureSet, nameFile, printR, fewShotFeatures,
+        fewShotLabels, semiSupervisedLearningModelLDA_shot, semiSupervisedLearningModelQDA_shot,
         semiSupervisedLearning_adaptationModelLDA_shot, semiSupervisedLearning_adaptationModelQDA_shot,
         semiSupervisedLearningModelLDA_accumulative, semiSupervisedLearningModelQDA_accumulative,
         semiSupervisedLearning_adaptationModelLDA_accumulative, semiSupervisedLearning_adaptationModelQDA_accumulative,
-        fewShotModel,
-        adaptedModel, typeDatabase):
+        fewShotModel, adaptedModel, typeDatabase):
     step = 1
     numSamples = 50
     fewShotFeatures, fewShotLabels = adaptive.subsetTraining(fewShotFeatures, fewShotLabels, numSamples, classes)

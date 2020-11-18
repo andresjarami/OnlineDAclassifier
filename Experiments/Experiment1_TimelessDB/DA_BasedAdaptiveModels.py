@@ -1210,100 +1210,100 @@ def weightPerPersonCovProb(currentValues, personCov, currentClass, classes, trai
     return weight
 
 
-def OurModelUnsupervised(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
-                         oneShotModel, step, typeModel, k):
-    t = time.time()
-
-    adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
-
-    for cla in range(classes):
-        adaptiveModel.at[cla, 'cov'] = np.zeros((allFeatures, allFeatures))
-        adaptiveModel.at[cla, 'mean'] = np.zeros((1, allFeatures))[0]
-
-    # if typeModel == 'LDA':
-    #     wTarget = mccModelLDA_ALL(trainFeatures, trainLabels, currentValues, classes, step)
-    # elif typeModel == 'QDA':
-    #     wTarget = mccModelQDA_ALL(trainFeatures, trainLabels, currentValues, classes, step)
-    # wTargetCov = wTarget.copy()
-    # wTargetMean = wTarget.copy()
-
-    wTargetCov = np.ones(classes)
-    wTargetMean = np.ones(classes)
-
-    print('allpeople', preTrainedDataMatrix[['class', 'prob']])
-    for cla in range(classes):
-        preTrainedMatrix_Class = pd.DataFrame(
-            preTrainedDataMatrix[['cov', 'mean', 'prob']].loc[(preTrainedDataMatrix['class'] == cla + 1)])
-        if preTrainedMatrix_Class.empty:
-            adaptiveModel.at[cla, 'cov'] = currentValues['cov'].loc[cla]
-            adaptiveModel.at[cla, 'mean'] = currentValues['mean'].loc[cla]
-            adaptiveModel.at[cla, 'class'] = cla + 1
-        else:
-
-            preTrainedMatrix_Class = preTrainedMatrix_Class.reset_index(drop=True)
-            currentCov = currentValues['cov'].loc[cla]
-            currentMean = currentValues['mean'].loc[cla]
-            peopleClass = len(preTrainedMatrix_Class.index)
-
-            wPeopleMean = np.zeros(peopleClass)
-            wPeopleCov = np.zeros(peopleClass)
-
-            for i in range(peopleClass):
-                personMean = preTrainedMatrix_Class['mean'].loc[i]
-                personCov = preTrainedMatrix_Class['cov'].loc[i]
-                # wPeopleMean[i] = JSDdivergence(currentMean, personMean, 8, currentCov, personCov)
-
-                wPeopleMean[i] = weightPerPersonMean(oneShotModel, personMean, cla, classes
-                                                     , trainFeatures, trainLabels, step, typeModel) * \
-                                 preTrainedMatrix_Class['prob'].loc[i]
-                wPeopleCov[i] = weightPerPersonCov(oneShotModel, personCov, cla, classes
-                                                   , trainFeatures, trainLabels, step, typeModel) * \
-                                preTrainedMatrix_Class['prob'].loc[i]
-
-            wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentMean, cla, classes, trainFeatures, trainLabels,
-                                                   step, typeModel)
-            wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentCov, cla, classes, trainFeatures, trainLabels,
-                                                 step, typeModel)
-
-            sumWMean = np.sum(wPeopleMean)
-            # print('before class', cla + 1, wPeopleMean)
-            if (sumWMean != 0):
-                wPeopleMean = wPeopleMean / (sumWMean + wTargetMean[cla])
-                wTargetMean[cla] = wTargetMean[cla] / (sumWMean + wTargetMean[cla])
-
-                # wTargetMean[cla] = wTargetMean[cla] / (wTargetMean[cla] + np.mean(wPeopleMean[wPeopleMean != 0]) * k)
-                # wPeopleMean = (wPeopleMean / sumWMean) * (1 - wTargetMean[cla])
-
-            else:
-                wTargetMean[cla] = 1
-                wPeopleMean = np.zeros(peopleClass)
-
-            sumWCov = np.sum(wPeopleCov)
-            if (sumWCov != 0):
-                wPeopleCov = wPeopleCov / (sumWCov + wTargetCov[cla])
-                wTargetCov[cla] = wTargetCov[cla] / (sumWCov + wTargetCov[cla])
-
-                # wTargetCov[cla] = wTargetCov[cla] / (wTargetCov[cla] + np.mean(wPeopleCov[wPeopleCov != 0]) * k)
-                # wPeopleCov = (wPeopleCov / sumWCov) * (1 - wTargetCov[cla])
-
-            else:
-                wTargetCov[cla] = 1
-                wPeopleCov = np.zeros(peopleClass)
-
-            if typeModel == 'LDA':
-                adaptiveModel.at[cla, 'cov'] = (np.sum(preTrainedMatrix_Class['cov']) + currentCov) / (peopleClass + 1)
-            else:
-                adaptiveModel.at[cla, 'cov'] = np.sum(preTrainedMatrix_Class['cov'] * wPeopleCov) + currentCov * \
-                                               wTargetCov[cla]
-
-            print('class', cla + 1, wPeopleMean, wTargetMean[cla])
-            print('class cov', cla + 1, wPeopleCov, wTargetCov[cla])
-            adaptiveModel.at[cla, 'mean'] = np.sum(preTrainedMatrix_Class['mean'] * wPeopleMean) + currentMean * \
-                                            wTargetMean[cla]
-            adaptiveModel.at[cla, 'class'] = cla + 1
-
-    trainingTime = time.time() - t
-    return adaptiveModel, wTargetMean, wTargetMean.mean(), wTargetCov, wTargetCov.mean(), trainingTime
+# def OurModelUnsupervised(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
+#                          oneShotModel, step, typeModel, k):
+#     t = time.time()
+#
+#     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
+#
+#     for cla in range(classes):
+#         adaptiveModel.at[cla, 'cov'] = np.zeros((allFeatures, allFeatures))
+#         adaptiveModel.at[cla, 'mean'] = np.zeros((1, allFeatures))[0]
+#
+#     # if typeModel == 'LDA':
+#     #     wTarget = mccModelLDA_ALL(trainFeatures, trainLabels, currentValues, classes, step)
+#     # elif typeModel == 'QDA':
+#     #     wTarget = mccModelQDA_ALL(trainFeatures, trainLabels, currentValues, classes, step)
+#     # wTargetCov = wTarget.copy()
+#     # wTargetMean = wTarget.copy()
+#
+#     wTargetCov = np.ones(classes)
+#     wTargetMean = np.ones(classes)
+#
+#     print('allpeople', preTrainedDataMatrix[['class', 'prob']])
+#     for cla in range(classes):
+#         preTrainedMatrix_Class = pd.DataFrame(
+#             preTrainedDataMatrix[['cov', 'mean', 'prob']].loc[(preTrainedDataMatrix['class'] == cla + 1)])
+#         if preTrainedMatrix_Class.empty:
+#             adaptiveModel.at[cla, 'cov'] = currentValues['cov'].loc[cla]
+#             adaptiveModel.at[cla, 'mean'] = currentValues['mean'].loc[cla]
+#             adaptiveModel.at[cla, 'class'] = cla + 1
+#         else:
+#
+#             preTrainedMatrix_Class = preTrainedMatrix_Class.reset_index(drop=True)
+#             currentCov = currentValues['cov'].loc[cla]
+#             currentMean = currentValues['mean'].loc[cla]
+#             peopleClass = len(preTrainedMatrix_Class.index)
+#
+#             wPeopleMean = np.zeros(peopleClass)
+#             wPeopleCov = np.zeros(peopleClass)
+#
+#             for i in range(peopleClass):
+#                 personMean = preTrainedMatrix_Class['mean'].loc[i]
+#                 personCov = preTrainedMatrix_Class['cov'].loc[i]
+#                 # wPeopleMean[i] = JSDdivergence(currentMean, personMean, 8, currentCov, personCov)
+#
+#                 wPeopleMean[i] = weightPerPersonMean(oneShotModel, personMean, cla, classes
+#                                                      , trainFeatures, trainLabels, step, typeModel) * \
+#                                  preTrainedMatrix_Class['prob'].loc[i]
+#                 wPeopleCov[i] = weightPerPersonCov(oneShotModel, personCov, cla, classes
+#                                                    , trainFeatures, trainLabels, step, typeModel) * \
+#                                 preTrainedMatrix_Class['prob'].loc[i]
+#
+#             wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentMean, cla, classes, trainFeatures, trainLabels,
+#                                                    step, typeModel)
+#             wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentCov, cla, classes, trainFeatures, trainLabels,
+#                                                  step, typeModel)
+#
+#             sumWMean = np.sum(wPeopleMean)
+#             # print('before class', cla + 1, wPeopleMean)
+#             if (sumWMean != 0):
+#                 wPeopleMean = wPeopleMean / (sumWMean + wTargetMean[cla])
+#                 wTargetMean[cla] = wTargetMean[cla] / (sumWMean + wTargetMean[cla])
+#
+#                 # wTargetMean[cla] = wTargetMean[cla] / (wTargetMean[cla] + np.mean(wPeopleMean[wPeopleMean != 0]) * k)
+#                 # wPeopleMean = (wPeopleMean / sumWMean) * (1 - wTargetMean[cla])
+#
+#             else:
+#                 wTargetMean[cla] = 1
+#                 wPeopleMean = np.zeros(peopleClass)
+#
+#             sumWCov = np.sum(wPeopleCov)
+#             if (sumWCov != 0):
+#                 wPeopleCov = wPeopleCov / (sumWCov + wTargetCov[cla])
+#                 wTargetCov[cla] = wTargetCov[cla] / (sumWCov + wTargetCov[cla])
+#
+#                 # wTargetCov[cla] = wTargetCov[cla] / (wTargetCov[cla] + np.mean(wPeopleCov[wPeopleCov != 0]) * k)
+#                 # wPeopleCov = (wPeopleCov / sumWCov) * (1 - wTargetCov[cla])
+#
+#             else:
+#                 wTargetCov[cla] = 1
+#                 wPeopleCov = np.zeros(peopleClass)
+#
+#             if typeModel == 'LDA':
+#                 adaptiveModel.at[cla, 'cov'] = (np.sum(preTrainedMatrix_Class['cov']) + currentCov) / (peopleClass + 1)
+#             else:
+#                 adaptiveModel.at[cla, 'cov'] = np.sum(preTrainedMatrix_Class['cov'] * wPeopleCov) + currentCov * \
+#                                                wTargetCov[cla]
+#
+#             print('class', cla + 1, wPeopleMean, wTargetMean[cla])
+#             print('class cov', cla + 1, wPeopleCov, wTargetCov[cla])
+#             adaptiveModel.at[cla, 'mean'] = np.sum(preTrainedMatrix_Class['mean'] * wPeopleMean) + currentMean * \
+#                                             wTargetMean[cla]
+#             adaptiveModel.at[cla, 'class'] = cla + 1
+#
+#     trainingTime = time.time() - t
+#     return adaptiveModel, wTargetMean, wTargetMean.mean(), wTargetCov, wTargetCov.mean(), trainingTime
 
 
 def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
@@ -1330,40 +1330,42 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
         adaptiveModel.at[cla, 'cov'] = np.zeros((allFeatures, allFeatures))
         adaptiveModel.at[cla, 'mean'] = np.zeros((1, allFeatures))[0]
 
-    wTargetCov = np.ones(classes)
-    wTargetMean = np.ones(classes)
+    wTargetCov = np.zeros(classes)
+    wTargetMean = np.zeros(classes)
 
     print('allpeople', preTrainedDataMatrix[['class', 'prob']])
 
     wPeopleMean = np.zeros((peopleClass, classes))
     wPeopleCov = np.zeros((peopleClass, classes))
 
-    for person in range(peopleClass):
-        personMean = preTrainedDataMatrix['mean'].loc[person]
-        personCov = preTrainedDataMatrix['cov'].loc[person]
-        # wPeopleMean[i] = JSDdivergence(currentMean, personMean, 8, currentCov, personCov)
+    for cla in range(classes):
+        wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentValues['mean'].loc[cla], cla, classes,
+                                               trainFeatures, trainLabels, step, typeModelWeights)
+        wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentValues['cov'].loc[cla], cla, classes,
+                                             trainFeatures, trainLabels, step, typeModelWeights)
 
-        for cla in range(classes):
+        for person in range(peopleClass):
+            # wPeopleMean[i] = JSDdivergence(currentMean, personMean, 8, currentCov, personCov)
+
             if preTrainedDataMatrix['prob'].loc[person][cla] != 0:
+                personMean = preTrainedDataMatrix['mean'].loc[person]
+                personCov = preTrainedDataMatrix['cov'].loc[person]
                 wPeopleMean[person, cla] = weightPerPersonMean(
                     oneShotModel, personMean, cla, classes, trainFeatures, trainLabels, step, typeModelWeights) * \
                                            preTrainedDataMatrix['prob'].loc[person][cla]
                 wPeopleCov[person, cla] = weightPerPersonCov(
                     oneShotModel, personCov, cla, classes, trainFeatures, trainLabels, step, typeModelWeights) * \
                                           preTrainedDataMatrix['prob'].loc[person][cla]
-
-            wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentValues['mean'].loc[cla], cla, classes,
-                                                   trainFeatures, trainLabels, step, typeModelWeights)
-            wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentValues['cov'].loc[cla], cla, classes,
-                                                 trainFeatures, trainLabels, step, typeModelWeights)
-
     sumWMean = np.sum(wPeopleMean, axis=0) + wTargetMean
     sumWCov = np.sum(wPeopleCov, axis=0) + wTargetCov
     wTargetMean /= sumWMean
     wTargetCov /= sumWCov
     wPeopleMean /= sumWMean
     wPeopleCov /= sumWCov
-
+    wTargetMean=np.nan_to_num(wTargetMean)
+    wTargetCov = np.nan_to_num(wTargetCov)
+    wPeopleMean = np.nan_to_num(wPeopleMean)
+    wPeopleCov = np.nan_to_num(wPeopleCov)
     print('mean weights', wPeopleMean)
     print(wTargetMean)
     print('cov weights', wPeopleCov)

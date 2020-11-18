@@ -13,6 +13,16 @@ printR = bool(int(sys.argv[6]))
 shotStart = int(sys.argv[7])
 nameFile = place + '_FeatureSet_' + sys.argv[1] + '_startPerson_' + sys.argv[2] + '_endPerson_' + sys.argv[3] + '.csv'
 
+# featureSet = 2
+# startPerson = 4 # Cote 20-36,EPN 31-60, Nina5 1-10
+# endPerson = 4 # Cote 20-36,EPN 31-60, Nina5 1-10
+# place = 'example'
+# typeDatabase = 'Nina5'
+# printR = 1
+# shotStart = 1
+# nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
+#     startPerson) + '_endPerson_' + str(endPerson) + '.csv'
+
 # # typeDatabaseSet = ['Cote']
 # typeDatabaseSet = ['Cote', 'Nina5']
 # for typeDatabase in typeDatabaseSet:
