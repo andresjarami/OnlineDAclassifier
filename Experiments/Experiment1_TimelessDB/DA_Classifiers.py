@@ -106,7 +106,62 @@ def accuracyModelQDA(testFeatures, testLabels, model, classes):
             count += 1
     return true / count, t / np.size(testLabels)
 
+######
 
+# def accuracyModelLDAconfusionMatrix(testFeatures, testLabels, model, classes):
+#     t = 0
+#     true = 0
+#     prob = 0
+#     LDACov = LDA_Cov(model, classes)
+#     currentPredictor = np.zeros(np.size(testLabels))
+#     for i in range(np.size(testLabels)):
+#         auxt = time.time()
+#         currentPredictor[i], currentProb = predictedModelLDAProb(testFeatures[i, :], model, classes, LDACov)
+#         t += (time.time() - auxt)
+#         if currentPredictor[i] == testLabels[i]:
+#             true += 1
+#             prob += currentProb
+#     cm = np.array(confusion_matrix(testLabels, currentPredictor))
+#     pre = np.zeros(classes)
+#     recall = np.zeros(classes)
+#     w = np.zeros(classes)
+#     for cla in range(classes):
+#         pre[cla] = cm[cla, cla] / cm[cla, :].sum()
+#         recall[cla] = cm[cla, cla] / cm[:, cla].sum()
+#         w[cla] = pre[cla] * recall[cla]
+#
+#     print(cm, pre, recall)
+#     return true / np.size(testLabels), prob, t / np.size(testLabels), w
+#
+#
+# def accuracyModelQDAconfusionMatrix(testFeatures, testLabels, model, classes):
+#     t = 0
+#     true = 0
+#     prob = 0
+#     currentPredictor = np.zeros(np.size(testLabels))
+#     for i in range(np.size(testLabels)):
+#         auxt = time.time()
+#         currentPredictor[i], currentProb = predictedModelQDAProb(testFeatures[i, :], model, classes)
+#         t += (time.time() - auxt)
+#         if currentPredictor[i] == testLabels[i]:
+#             true += 1
+#             prob += currentProb
+#     cm = np.array(confusion_matrix(testLabels, currentPredictor))
+#     pre = np.zeros(classes)
+#     recall = np.zeros(classes)
+#     w = np.zeros(classes)
+#     for cla in range(classes):
+#         pre[cla] = cm[cla, cla] / cm[cla, :].sum()
+#         recall[cla] = cm[cla, cla] / cm[:, cla].sum()
+#         w[cla] = pre[cla] * recall[cla]
+#
+#     print(cm, pre, recall)
+#     return true / np.size(testLabels), prob, t / np.size(testLabels), w
+#
+#
+
+
+########
 def scoreModelLDA_ClassificationUnsupervised(testFeatures, model, classes, testLabels, testRepetitions):
     LDACov = LDA_Cov(model, classes)
     auxLabel = testLabels[0]

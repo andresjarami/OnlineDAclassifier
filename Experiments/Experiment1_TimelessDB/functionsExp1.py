@@ -184,7 +184,7 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                         shotStart < dataMatrix[:, allFeatures + 3]) &
                 (shot >= dataMatrix[:, allFeatures + 3]), allFeatures + 3].T
 
-            subset = list(range(shotStart, shot + 1))
+            subset = list(range(1, shot + 1))
 
             trainFeatures = scaler.transform(trainFeatures)
             trainFeatures_shot = scaler.transform(trainFeatures_shot)
@@ -200,9 +200,8 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
             semiSupervisedLearning_adaptationModelLDA_accumulative, semiSupervisedLearning_adaptationModelQDA_accumulative = \
                 resultsDataframeUnsupervised(
                     trainFeatures, trainLabels, trainRep, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
-                    allFeaturesPK, results,
-                    testFeaturesTransform, testLabels, idx, person, subset, featureSet, nameFile, printR,
-                    fewShotFeatures, fewShotLabels, semiSupervisedLearningModelLDA_shot,
+                    allFeaturesPK, results, testFeaturesTransform, testLabels, idx, person, subset, featureSet,
+                    nameFile, printR, fewShotFeatures, fewShotLabels, semiSupervisedLearningModelLDA_shot,
                     semiSupervisedLearningModelQDA_shot, semiSupervisedLearning_adaptationModelLDA_shot,
                     semiSupervisedLearning_adaptationModelQDA_shot, semiSupervisedLearningModelLDA_accumulative,
                     semiSupervisedLearningModelQDA_accumulative, semiSupervisedLearning_adaptationModelLDA_accumulative,
@@ -344,69 +343,69 @@ def resultsDataframeUnsupervised(
 
     # LDA results
     print('AccLDAfew')
-    results.at[idx, 'AccLDAfew'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAfew'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, fewShotModel, classes)
 
     print('AccLDAadapted')
-    results.at[idx, 'AccLDAadapted'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAadapted'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, adaptedModel, classes)
 
     print('AccLDAsemi')
-    results.at[idx, 'AccLDAsemi'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAsemi'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, semiSupervisedLearningModelLDA, classes)
 
     print('AccLDAsemiAdapt')
-    results.at[idx, 'AccLDAsemiAdapt'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAsemiAdapt'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, semiSupervisedLearning_adaptationModelLDA, classes)
 
     print('AccLDAsemi_shot')
-    results.at[idx, 'AccLDAsemi_shot'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAsemi_shot'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, semiSupervisedLearningModelLDA_shot, classes)
 
     print('AccLDAsemiAdapt_shot')
-    results.at[idx, 'AccLDAsemiAdapt_shot'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAsemiAdapt_shot'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, semiSupervisedLearning_adaptationModelLDA_shot, classes)
 
     print('AccLDAsemi_accumulative')
-    results.at[idx, 'AccLDAsemi_accumulative'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAsemi_accumulative'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, semiSupervisedLearningModelLDA_accumulative, classes)
 
     print('AccLDAsemiAdapt_accumulative')
-    results.at[idx, 'AccLDAsemiAdapt_accumulative'], _, _, _ = DA_Classifiers.accuracyModelLDAconfusionMatrix(
+    results.at[idx, 'AccLDAsemiAdapt_accumulative'], _ = DA_Classifiers.accuracyModelLDA(
         testFeatures, testLabels, semiSupervisedLearning_adaptationModelLDA_accumulative, classes)
 
     # QDA
 
     print('AccQDAfew')
-    results.at[idx, 'AccQDAfew'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAfew'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, fewShotModel, classes)
 
     print('AccQDAadapted')
-    results.at[idx, 'AccQDAadapted'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAadapted'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, adaptedModel, classes)
 
     print('AccQDAsemi')
-    results.at[idx, 'AccQDAsemi'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAsemi'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, semiSupervisedLearningModelQDA, classes)
 
     print('AccQDAsemiAdapt')
-    results.at[idx, 'AccQDAsemiAdapt'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAsemiAdapt'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, semiSupervisedLearning_adaptationModelQDA, classes)
 
     print('AccQDAsemi_shot')
-    results.at[idx, 'AccQDAsemi_shot'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAsemi_shot'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, semiSupervisedLearningModelQDA_shot, classes)
 
     print('AccQDAsemiAdapt_shot')
-    results.at[idx, 'AccQDAsemiAdapt_shot'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAsemiAdapt_shot'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, semiSupervisedLearning_adaptationModelQDA_shot, classes)
 
     print('AccQDAsemi_accumulative')
-    results.at[idx, 'AccQDAsemi_accumulative'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAsemi_accumulative'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, semiSupervisedLearningModelQDA_accumulative, classes)
 
     print('AccQDAsemiAdapt_accumulative')
-    results.at[idx, 'AccQDAsemiAdapt_accumulative'], _, _, _ = DA_Classifiers.accuracyModelQDAconfusionMatrix(
+    results.at[idx, 'AccQDAsemiAdapt_accumulative'], _ = DA_Classifiers.accuracyModelQDA(
         testFeatures, testLabels, semiSupervisedLearning_adaptationModelQDA_accumulative, classes)
 
     if nameFile is not None:
@@ -444,4 +443,3 @@ def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures):
 def preprocessingPK(dataMatrix, allFeatures, scaler):
     dataMatrixFeatures = scaler.transform(dataMatrix[:, :allFeatures])
     return np.hstack((dataMatrixFeatures, dataMatrix[:, allFeatures:])), np.size(dataMatrixFeatures, axis=1)
-

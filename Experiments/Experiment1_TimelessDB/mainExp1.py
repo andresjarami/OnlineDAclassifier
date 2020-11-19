@@ -4,24 +4,25 @@ import sys
 ## Input Variables
 
 
-# featureSet = int(sys.argv[1])
-# startPerson = int(sys.argv[2])
-# endPerson = int(sys.argv[3])
-# place = str(sys.argv[4])
-# typeDatabase = str(sys.argv[5])
-# printR = bool(int(sys.argv[6]))
-# shotStart = int(sys.argv[7])
-# nameFile = place + '_FeatureSet_' + sys.argv[1] + '_startPerson_' + sys.argv[2] + '_endPerson_' + sys.argv[3] + '.csv'
+featureSet = int(sys.argv[1])
+startPerson = int(sys.argv[2])
+endPerson = int(sys.argv[3])
+place = str(sys.argv[4])
+typeDatabase = str(sys.argv[5])
+printR = bool(int(sys.argv[6]))
+shotStart = int(sys.argv[7])
+nameFile = place + '_FeatureSet_' + sys.argv[1] + '_startPerson_' + sys.argv[2] + '_endPerson_' + sys.argv[
+    3] + 'shotStart' + sys.argv[7] + '.csv'
 
-featureSet = 2
-startPerson = 21 # Cote 20-36,EPN 31-60, Nina5 1-10
-endPerson = 21 # Cote 20-36,EPN 31-60, Nina5 1-10
-place = 'example'
-typeDatabase = 'Cote'
-printR = 1
-shotStart = 2
-nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
-    startPerson) + '_endPerson_' + str(endPerson) + '.csv'
+# featureSet = 1
+# startPerson = 21  # Cote 20-36,EPN 31-60, Nina5 1-10
+# endPerson = 21  # Cote 20-36,EPN 31-60, Nina5 1-10
+# place = 'example'
+# typeDatabase = 'Cote'
+# printR = 1
+# shotStart = 2
+# nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
+#     startPerson) + '_endPerson_' + str(endPerson) + 'shotStart' + str(shotStart) + '.csv'
 
 # # typeDatabaseSet = ['Cote']
 # typeDatabaseSet = ['Cote', 'Nina5']
