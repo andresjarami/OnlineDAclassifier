@@ -1362,8 +1362,8 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
     wTargetCov /= sumWCov
     wPeopleMean /= sumWMean
     wPeopleCov /= sumWCov
-    wTargetMean=np.nan_to_num(wTargetMean)
-    wTargetCov = np.nan_to_num(wTargetCov)
+    wTargetMean=np.nan_to_num(wTargetMean,nan=1)
+    wTargetCov = np.nan_to_num(wTargetCov,nan=1)
     wPeopleMean = np.nan_to_num(wPeopleMean)
     wPeopleCov = np.nan_to_num(wPeopleCov)
     print('mean weights', wPeopleMean)
