@@ -124,10 +124,10 @@ def OurModel(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFea
         for i in range(peopleClass):
             personMean = preTrainedMatrix_Class['mean'].loc[i]
             personCov = preTrainedMatrix_Class['cov'].loc[i]
-            wPeopleMean[i] = weightPerPersonMean(currentValues, personMean, cla, classes
-                                                 , trainFeatures, trainLabels, step, typeModel)
-            wPeopleCov[i] = weightPerPersonCov(currentValues, personCov, cla, classes
-                                               , trainFeatures, trainLabels, step, typeModel)
+            wPeopleMean[i] = weightPerPersonMean(currentValues, personMean, cla, classes, trainFeatures, trainLabels,
+                                                 step, typeModel)
+            wPeopleCov[i] = weightPerPersonCov(currentValues, personCov, cla, classes, trainFeatures, trainLabels, step,
+                                               typeModel)
 
         sumWMean = np.sum(wPeopleMean)
 
@@ -317,22 +317,22 @@ def JSDdivergence(mean0, mean1, k, cov0, cov1):
 ### Unsupervised Methods
 
 def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
-                                oneShotModel, step, typeModel, typeDatabase):
+                                oneShotModel, typeModel):
     typeModelWeights = 'QDA'
     peopleClass = len(preTrainedDataMatrix.index)
-    if typeDatabase == 'Nina5':
-        preTrainedDataMatrix2 = pd.DataFrame(columns=['cov', 'mean', 'class', 'prob', 'samples'])
-        i2 = 0
-        idxSetBase = np.array([0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1])
-
-        for j in range(int(peopleClass / classes)):
-            idxSet = classes * j + idxSetBase
-
-            for i in idxSet:
-                preTrainedDataMatrix2.at[i2] = preTrainedDataMatrix.loc[i]
-                i2 += 1
-
-        preTrainedDataMatrix = preTrainedDataMatrix2.copy()
+    # if typeDatabase == 'Nina5':
+    #     preTrainedDataMatrix2 = pd.DataFrame(columns=['cov', 'mean', 'class', 'prob', 'samples'])
+    #     i2 = 0
+    #     idxSetBase = np.array([0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1])
+    #
+    #     for j in range(int(peopleClass / classes)):
+    #         idxSet = classes * j + idxSetBase
+    #
+    #         for i in idxSet:
+    #             preTrainedDataMatrix2.at[i2] = preTrainedDataMatrix.loc[i]
+    #             i2 += 1
+    #
+    #     preTrainedDataMatrix = preTrainedDataMatrix2.copy()
 
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
 
@@ -343,16 +343,16 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
     wTargetCov = np.zeros(classes)
     wTargetMean = np.zeros(classes)
 
-    print('allpeople', preTrainedDataMatrix[['class', 'prob']])
+    # print('allpeople', preTrainedDataMatrix[['class', 'prob']])
 
     wPeopleMean = np.zeros((peopleClass, classes))
     wPeopleCov = np.zeros((peopleClass, classes))
 
     for cla in range(classes):
         wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentValues['mean'].loc[cla], cla, classes,
-                                               trainFeatures, trainLabels, step, typeModelWeights)
+                                               trainFeatures, trainLabels, step=1, typeModel=typeModelWeights)
         wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentValues['cov'].loc[cla], cla, classes,
-                                             trainFeatures, trainLabels, step, typeModelWeights)
+                                             trainFeatures, trainLabels, step=1, typeModel=typeModelWeights)
 
         for person in range(peopleClass):
             # wPeopleMean[i] = JSDdivergence(currentMean, personMean, 8, currentCov, personCov)
@@ -361,10 +361,10 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
                 personMean = preTrainedDataMatrix['mean'].loc[person]
                 personCov = preTrainedDataMatrix['cov'].loc[person]
                 wPeopleMean[person, cla] = weightPerPersonMean(
-                    oneShotModel, personMean, cla, classes, trainFeatures, trainLabels, step, typeModelWeights) * \
+                    oneShotModel, personMean, cla, classes, trainFeatures, trainLabels, step=1, typeModel=typeModelWeights) * \
                                            preTrainedDataMatrix['prob'].loc[person][cla]
                 wPeopleCov[person, cla] = weightPerPersonCov(
-                    oneShotModel, personCov, cla, classes, trainFeatures, trainLabels, step, typeModelWeights) * \
+                    oneShotModel, personCov, cla, classes, trainFeatures, trainLabels, step=1, typeModel=typeModelWeights) * \
                                           preTrainedDataMatrix['prob'].loc[person][cla]
     sumWMean = np.sum(wPeopleMean, axis=0) + wTargetMean
     sumWCov = np.sum(wPeopleCov, axis=0) + wTargetCov
@@ -395,21 +395,21 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
 
 
 def OurModelUnsupervisedAllProb_noRQ1(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures,
-                                      trainLabels, oneShotModel, step, typeModel, typeDatabase):
+                                      trainLabels, oneShotModel,  typeModel):
     peopleClass = len(preTrainedDataMatrix.index)
-    if typeDatabase == 'Nina5':
-        preTrainedDataMatrix2 = pd.DataFrame(columns=['cov', 'mean', 'class', 'prob', 'samples'])
-        i2 = 0
-        idxSetBase = np.array([0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1])
-
-        for j in range(int(peopleClass / classes)):
-            idxSet = classes * j + idxSetBase
-
-            for i in idxSet:
-                preTrainedDataMatrix2.at[i2] = preTrainedDataMatrix.loc[i]
-                i2 += 1
-
-        preTrainedDataMatrix = preTrainedDataMatrix2.copy()
+    # if typeDatabase == 'Nina5':
+    #     preTrainedDataMatrix2 = pd.DataFrame(columns=['cov', 'mean', 'class', 'prob', 'samples'])
+    #     i2 = 0
+    #     idxSetBase = np.array([0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1])
+    #
+    #     for j in range(int(peopleClass / classes)):
+    #         idxSet = classes * j + idxSetBase
+    #
+    #         for i in idxSet:
+    #             preTrainedDataMatrix2.at[i2] = preTrainedDataMatrix.loc[i]
+    #             i2 += 1
+    #
+    #     preTrainedDataMatrix = preTrainedDataMatrix2.copy()
 
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
 
@@ -420,7 +420,7 @@ def OurModelUnsupervisedAllProb_noRQ1(currentValues, preTrainedDataMatrix, class
     wTargetCov = np.zeros(classes)
     wTargetMean = np.zeros(classes)
 
-    print('allpeople', preTrainedDataMatrix[['class', 'prob']])
+    # print('allpeople', preTrainedDataMatrix[['class', 'prob']])
 
     wPeopleMean = np.zeros((peopleClass, classes))
     wPeopleCov = np.zeros((peopleClass, classes))
@@ -463,3 +463,81 @@ def OurModelUnsupervisedAllProb_noRQ1(currentValues, preTrainedDataMatrix, class
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + currentValues['cov'].loc[cla] * wTargetCov[cla]
 
     return adaptiveModel, wTargetMean, wTargetMean.mean(), wTargetCov, wTargetCov.mean(), 0
+
+
+
+def OurModelUnsupervisedAllProb_onlyRQ1(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
+                                oneShotModel, typeModel):
+    typeModelWeights = 'QDA'
+    peopleClass = len(preTrainedDataMatrix.index)
+    # if typeDatabase == 'Nina5':
+    #     preTrainedDataMatrix2 = pd.DataFrame(columns=['cov', 'mean', 'class', 'prob', 'samples'])
+    #     i2 = 0
+    #     idxSetBase = np.array([0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1])
+    #
+    #     for j in range(int(peopleClass / classes)):
+    #         idxSet = classes * j + idxSetBase
+    #
+    #         for i in idxSet:
+    #             preTrainedDataMatrix2.at[i2] = preTrainedDataMatrix.loc[i]
+    #             i2 += 1
+    #
+    #     preTrainedDataMatrix = preTrainedDataMatrix2.copy()
+
+    adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class'])
+
+    for cla in range(classes):
+        adaptiveModel.at[cla, 'cov'] = np.zeros((allFeatures, allFeatures))
+        adaptiveModel.at[cla, 'mean'] = np.zeros((1, allFeatures))[0]
+
+    wTargetCov = np.zeros(classes)
+    wTargetMean = np.zeros(classes)
+
+
+
+    wPeopleMean = np.zeros((peopleClass, classes))
+    wPeopleCov = np.zeros((peopleClass, classes))
+
+    for cla in range(classes):
+        wTargetMean[cla] = weightPerPersonMean(oneShotModel, currentValues['mean'].loc[cla], cla, classes,
+                                               trainFeatures, trainLabels, step=1, typeModel=typeModelWeights)
+        wTargetCov[cla] = weightPerPersonCov(oneShotModel, currentValues['cov'].loc[cla], cla, classes,
+                                             trainFeatures, trainLabels, step=1, typeModel=typeModelWeights)
+
+        for person in range(peopleClass):
+            # wPeopleMean[i] = JSDdivergence(currentMean, personMean, 8, currentCov, personCov)
+
+            # if preTrainedDataMatrix['prob'].loc[person][cla] != 0:
+            personMean = preTrainedDataMatrix['mean'].loc[person]
+            personCov = preTrainedDataMatrix['cov'].loc[person]
+            wPeopleMean[person, cla] = weightPerPersonMean(
+                oneShotModel, personMean, cla, classes, trainFeatures, trainLabels, step=1, typeModel=typeModelWeights)
+            wPeopleCov[person, cla] = weightPerPersonCov(
+                oneShotModel, personCov, cla, classes, trainFeatures, trainLabels, step=1, typeModel=typeModelWeights)
+    sumWMean = np.sum(wPeopleMean, axis=0) + wTargetMean
+    sumWCov = np.sum(wPeopleCov, axis=0) + wTargetCov
+    wTargetMean /= sumWMean
+    wTargetCov /= sumWCov
+    wPeopleMean /= sumWMean
+    wPeopleCov /= sumWCov
+    wTargetMean = np.nan_to_num(wTargetMean, nan=1)
+    wTargetCov = np.nan_to_num(wTargetCov, nan=1)
+    wPeopleMean = np.nan_to_num(wPeopleMean)
+    wPeopleCov = np.nan_to_num(wPeopleCov)
+    # print('mean weights', wPeopleMean)
+    # print(wTargetMean)
+    # print('cov weights', wPeopleCov)
+    # print(wTargetCov)
+    means = np.resize(preTrainedDataMatrix['mean'], (classes, len(preTrainedDataMatrix['mean']))).T * wPeopleMean
+    covs = np.resize(preTrainedDataMatrix['cov'], (classes, len(preTrainedDataMatrix['cov']))).T * wPeopleCov
+    for cla in range(classes):
+        adaptiveModel.at[cla, 'class'] = cla + 1
+        adaptiveModel.at[cla, 'mean'] = means[:, cla].sum() + currentValues['mean'].loc[cla] * wTargetMean[cla]
+        if typeModel == 'LDA':
+            adaptiveModel.at[cla, 'cov'] = (np.sum(preTrainedDataMatrix['cov']) + currentValues['cov'].loc[cla]) / (
+                    peopleClass + 1)
+        else:
+            adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + currentValues['cov'].loc[cla] * wTargetCov[cla]
+
+    return adaptiveModel, wTargetMean, wTargetMean.mean(), wTargetCov, wTargetCov.mean(), 0
+
