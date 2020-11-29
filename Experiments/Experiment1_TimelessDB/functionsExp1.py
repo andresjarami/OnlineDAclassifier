@@ -442,7 +442,7 @@ def resultsDataframeUnsupervised(
         semiSupervisedLearning_adaptationModelLDA_shot, results = adaptPrint(
             semiSupervisedLearning_adaptationModelLDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
             allFeatures, type_DA, 1, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_accumulative')
+            testLabels, 'adapt_shot')
 
         semiSupervisedLearningModelLDA_shot_noRQ1, results = adaptPrint(
             semiSupervisedLearningModelLDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
