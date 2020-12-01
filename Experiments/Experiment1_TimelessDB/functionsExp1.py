@@ -139,7 +139,7 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                     dataMatrix[:, allFeatures + 3] <= shotStart), allFeatures + 2].T
 
         fewShotFeatures = scaler.fit_transform(fewShotFeatures)
-        fewShotModel = currentDistributionValues(fewShotFeatures, fewShotLabels, classes, allFeatures)
+        fewShotModel = currentDistributionValues(fewShotFeatures, fewShotLabels, classes, allFeatures,shotStart)
 
         dataPK, allFeaturesPK = preprocessingPK(dataMatrix, allFeatures, scaler)
         preTrainedDataMatrix = PKModels(dataPK, classes, peoplePriorK, person, allFeatures)
@@ -208,11 +208,8 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
 
             trainFeatures = scaler.transform(trainFeatures)
             trainFeatures_shot = scaler.transform(trainFeatures_shot)
-            # trainFeaturesGen = scaler.transform(trainFeaturesGen)
             testFeaturesTransform = scaler.transform(testFeatures)
 
-            # currentValues = currentDistributionValues(trainFeatures, trainLabels, classes, allFeaturesPK)
-            # pkValues = currentDistributionValues(trainFeaturesGen, trainLabelsGen, classes, allFeaturesPK)
 
             results, idx, semiSupervisedLearningModelLDA_shot, semiSupervisedLearningModelQDA_shot, \
             semiSupervisedLearning_adaptationModelLDA_shot, semiSupervisedLearning_adaptationModelQDA_shot, \
@@ -246,7 +243,7 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                     semiSupervisedLearningModelQDA_accumulative_onlyRQ1,
                     semiSupervisedLearning_adaptationModelLDA_accumulative_onlyRQ1,
                     semiSupervisedLearning_adaptationModelQDA_accumulative_onlyRQ1, fewShotModel, adaptedModel,
-                    typeDatabase)
+                    typeDatabase,shotStart)
 
     return results
 
@@ -274,20 +271,25 @@ def PKModels(dataMatrix, classes, peoplePriorK, evaluatedPerson, allFeatures):
 # Unsupervised
 
 def adaptPrint(adaptedModel, trainFeatures, trainLabels, trainRep, classes, allFeatures, type_DA, type_Unsup,
-               fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, name):
+               fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, name,shotStart):
+    name = type_DA + '_ACC_' + name
+    print(name)
     posteriorProb = DA_Classifiers.scoreModel_ClassificationUnsupervised(
         trainFeatures, adaptedModel, classes, trainLabels, trainRep, type_DA)
     if type_Unsup == 1:
-        adaptedModel, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA)
+        adaptedModel, results.at[idx, 'time_'+name] = adaptive.OurModelUnsupervisedAllProb(
+            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA,shotStart)
     elif type_Unsup == 2:
-        adaptedModel, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb_noRQ1(
-            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA)
+        adaptedModel, results.at[idx, 'time_'+name] = adaptive.OurModelUnsupervisedAllProb_noRQ1(
+            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA,shotStart)
     elif type_Unsup == 3:
-        adaptedModel, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb_onlyRQ1(
-            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA)
-    name = type_DA + '_ACC_' + name
-    print(name)
+        adaptedModel, results.at[idx, 'time_'+name] = adaptive.OurModelUnsupervisedAllProb_shot(
+            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA,shotStart)
+    elif type_Unsup == 4:
+        adaptedModel, results.at[idx, 'time_'+name] = adaptive.OurModelUnsupervisedAllProb_noRQ1_shot(
+            adaptedModel, posteriorProb, classes, allFeatures, fewShotFeatures, fewShotLabels, fewShotModel, type_DA,shotStart)
+
+
     if type_DA == 'LDA':
         results.at[idx, name], _ = DA_Classifiers.accuracyModelLDA(
             testFeatures, testLabels, adaptedModel, classes)
@@ -315,70 +317,11 @@ def resultsDataframeUnsupervised(
         semiSupervisedLearningModelLDA_accumulative_onlyRQ1, semiSupervisedLearningModelQDA_accumulative_onlyRQ1,
         semiSupervisedLearning_adaptationModelLDA_accumulative_onlyRQ1,
         semiSupervisedLearning_adaptationModelQDA_accumulative_onlyRQ1,
-        fewShotModel, adaptedModel, typeDatabase):
+        fewShotModel, adaptedModel, typeDatabase,shotStart):
     # step = 1
     numSamples = 50
     fewShotFeatures, fewShotLabels = adaptive.subsetTraining(fewShotFeatures, fewShotLabels, numSamples, classes)
 
-    # semiPostProbabilitiesLDA = DA_Classifiers.scoreModelLDA_ClassificationUnsupervised(
-    #     trainFeatures, fewShotModel, classes, trainLabels, trainRep)
-    #
-    # semiPostProbabilitiesQDA = DA_Classifiers.scoreModelQDA_ClassificationUnsupervised(
-    #     trainFeatures, fewShotModel, classes, trainLabels, trainRep)
-    #
-    # semi_adaptationPostProbabilitiesLDA = DA_Classifiers.scoreModelLDA_ClassificationUnsupervised(
-    #     trainFeatures, adaptedModel, classes, trainLabels, trainRep)
-    #
-    # semi_adaptationPostProbabilitiesQDA = DA_Classifiers.scoreModelQDA_ClassificationUnsupervised(
-    #     trainFeatures, adaptedModel, classes, trainLabels, trainRep)
-    #
-    # semiSupervisedLearningModelLDA, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     fewShotModel, semiPostProbabilitiesLDA, classes, allFeatures, fewShotFeatures, fewShotLabels,
-    #     fewShotModel, step, 'LDA', typeDatabase)
-    #
-    # semiSupervisedLearningModelQDA, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     fewShotModel, semiPostProbabilitiesQDA, classes, allFeatures, fewShotFeatures, fewShotLabels,
-    #     fewShotModel, step, 'QDA', typeDatabase)
-    #
-    # semiSupervisedLearning_adaptationModelLDA, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     adaptedModel, semi_adaptationPostProbabilitiesLDA, classes, allFeatures, fewShotFeatures, fewShotLabels,
-    #     adaptedModel, step, 'LDA', typeDatabase)
-    #
-    # semiSupervisedLearning_adaptationModelQDA, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     adaptedModel, semi_adaptationPostProbabilitiesQDA, classes, allFeatures, fewShotFeatures, fewShotLabels,
-    #     adaptedModel, step, 'QDA', typeDatabase)
-    #
-    # # shot
-    #
-    # semiPostProbabilitiesLDA_shot = DA_Classifiers.scoreModelLDA_ClassificationUnsupervised(
-    #     trainFeatures_shot, semiSupervisedLearningModelLDA_shot, classes, trainLabels_shot, trainRep_shot)
-    #
-    # semiPostProbabilitiesQDA_shot = DA_Classifiers.scoreModelQDA_ClassificationUnsupervised(
-    #     trainFeatures_shot, semiSupervisedLearningModelQDA_shot, classes, trainLabels_shot, trainRep_shot)
-    #
-    # semi_adaptationPostProbabilitiesLDA_shot = DA_Classifiers.scoreModelLDA_ClassificationUnsupervised(
-    #     trainFeatures_shot, semiSupervisedLearning_adaptationModelLDA_shot, classes, trainLabels_shot, trainRep_shot)
-    #
-    # semi_adaptationPostProbabilitiesQDA_shot = DA_Classifiers.scoreModelQDA_ClassificationUnsupervised(
-    #     trainFeatures_shot, semiSupervisedLearning_adaptationModelQDA_shot, classes, trainLabels_shot, trainRep_shot)
-    #
-    # semiSupervisedLearningModelLDA_shot, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     semiSupervisedLearningModelLDA_shot, semiPostProbabilitiesLDA_shot, classes, allFeatures, fewShotFeatures,
-    #     fewShotLabels, fewShotModel, step, 'LDA', typeDatabase)
-    #
-    # semiSupervisedLearningModelQDA_shot, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     semiSupervisedLearningModelQDA_shot, semiPostProbabilitiesQDA_shot, classes, allFeatures, fewShotFeatures,
-    #     fewShotLabels, fewShotModel, step, 'QDA', typeDatabase)
-    #
-    # semiSupervisedLearning_adaptationModelLDA_shot, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     semiSupervisedLearning_adaptationModelLDA_shot, semi_adaptationPostProbabilitiesLDA_shot, classes, allFeatures,
-    #     fewShotFeatures, fewShotLabels, adaptedModel, step, 'LDA', typeDatabase)
-    #
-    # semiSupervisedLearning_adaptationModelQDA_shot, _, _, _, _, _ = adaptive.OurModelUnsupervisedAllProb(
-    #     semiSupervisedLearning_adaptationModelQDA_shot, semi_adaptationPostProbabilitiesQDA_shot, classes, allFeatures,
-    #     fewShotFeatures, fewShotLabels, adaptedModel, step, 'QDA', typeDatabase)
-
-    # accumulative
 
     type_DA_set = ['LDA', 'QDA']
     for type_DA in type_DA_set:
@@ -391,6 +334,53 @@ def resultsDataframeUnsupervised(
             print('AccLDAadapted')
             results.at[idx, 'AccLDAadapted'], _ = DA_Classifiers.accuracyModelLDA(
                 testFeatures, testLabels, adaptedModel, classes)
+
+            semiSupervisedLearningModelLDA_accumulative, results = adaptPrint(
+                semiSupervisedLearningModelLDA_accumulative, trainFeatures, trainLabels, trainRep, classes, allFeatures,
+                type_DA, 1, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels,
+                'accumulative', shotStart)
+
+            semiSupervisedLearning_adaptationModelLDA_accumulative, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelLDA_accumulative, trainFeatures, trainLabels, trainRep, classes,
+                allFeatures, type_DA, 1, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_accumulative', shotStart)
+
+            semiSupervisedLearningModelLDA_accumulative_noRQ1, results = adaptPrint(
+                semiSupervisedLearningModelLDA_accumulative_noRQ1, trainFeatures, trainLabels, trainRep, classes,
+                allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
+                testLabels, 'accumulative_noRQ1', shotStart)
+
+            semiSupervisedLearning_adaptationModelLDA_accumulative_noRQ1, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelLDA_accumulative_noRQ1, trainFeatures, trainLabels, trainRep,
+                classes,
+                allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_accumulative_noRQ1', shotStart)
+
+            ### SHOT
+
+            semiSupervisedLearningModelLDA_shot, results = adaptPrint(
+                semiSupervisedLearningModelLDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
+                allFeatures,
+                type_DA, 3, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels,
+                'shot', shotStart)
+
+            semiSupervisedLearning_adaptationModelLDA_shot, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelLDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot,
+                classes,
+                allFeatures, type_DA, 3, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_shot', shotStart)
+
+            semiSupervisedLearningModelLDA_shot_noRQ1, results = adaptPrint(
+                semiSupervisedLearningModelLDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
+                allFeatures, type_DA, 4, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
+                testLabels, 'shot_noRQ1', shotStart)
+
+            semiSupervisedLearning_adaptationModelLDA_shot_noRQ1, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelLDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot,
+                trainRep_shot, classes,
+                allFeatures, type_DA, 4, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_shot_noRQ1', shotStart)
+
         elif type_DA == 'QDA':
             # QDA
 
@@ -402,67 +392,51 @@ def resultsDataframeUnsupervised(
             results.at[idx, 'AccQDAadapted'], _ = DA_Classifiers.accuracyModelQDA(
                 testFeatures, testLabels, adaptedModel, classes)
 
-        semiSupervisedLearningModelLDA_accumulative, results = adaptPrint(
-            semiSupervisedLearningModelLDA_accumulative, trainFeatures, trainLabels, trainRep, classes, allFeatures,
-            type_DA, 1, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels,
-            'accumulative')
+            semiSupervisedLearningModelQDA_accumulative, results = adaptPrint(
+                semiSupervisedLearningModelQDA_accumulative, trainFeatures, trainLabels, trainRep, classes, allFeatures,
+                type_DA, 1, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels,
+                'accumulative',shotStart)
 
-        semiSupervisedLearning_adaptationModelLDA_accumulative, results = adaptPrint(
-            semiSupervisedLearning_adaptationModelLDA_accumulative, trainFeatures, trainLabels, trainRep, classes,
-            allFeatures, type_DA, 1, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_accumulative')
+            semiSupervisedLearning_adaptationModelQDA_accumulative, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelQDA_accumulative, trainFeatures, trainLabels, trainRep, classes,
+                allFeatures, type_DA, 1, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_accumulative',shotStart)
 
-        semiSupervisedLearningModelLDA_accumulative_noRQ1, results = adaptPrint(
-            semiSupervisedLearningModelLDA_accumulative_noRQ1, trainFeatures, trainLabels, trainRep, classes,
-            allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
-            testLabels, 'accumulative_noRQ1')
+            semiSupervisedLearningModelQDA_accumulative_noRQ1, results = adaptPrint(
+                semiSupervisedLearningModelQDA_accumulative_noRQ1, trainFeatures, trainLabels, trainRep, classes,
+                allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
+                testLabels, 'accumulative_noRQ1',shotStart)
 
-        semiSupervisedLearning_adaptationModelLDA_accumulative_noRQ1, results = adaptPrint(
-            semiSupervisedLearning_adaptationModelLDA_accumulative_noRQ1, trainFeatures, trainLabels, trainRep, classes,
-            allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_accumulative_noRQ1')
+            semiSupervisedLearning_adaptationModelQDA_accumulative_noRQ1, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelQDA_accumulative_noRQ1, trainFeatures, trainLabels, trainRep, classes,
+                allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_accumulative_noRQ1',shotStart)
 
-        semiSupervisedLearningModelLDA_accumulative_onlyRQ1, results = adaptPrint(
-            semiSupervisedLearningModelLDA_accumulative_onlyRQ1, trainFeatures, trainLabels, trainRep, classes,
-            allFeatures, type_DA, 3, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
-            testLabels, 'accumulative_onlyRQ1')
 
-        semiSupervisedLearning_adaptationModelLDA_accumulative_onlyRQ1, results = adaptPrint(
-            semiSupervisedLearning_adaptationModelLDA_accumulative_onlyRQ1, trainFeatures, trainLabels, trainRep,
-            classes, allFeatures, type_DA, 3, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_accumulative_onlyRQ1')
 
-        ### SHOT
+            ### SHOT
 
-        semiSupervisedLearningModelLDA_shot, results = adaptPrint(
-            semiSupervisedLearningModelLDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes, allFeatures,
-            type_DA, 1, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels,
-            'shot')
+            semiSupervisedLearningModelQDA_shot, results = adaptPrint(
+                semiSupervisedLearningModelQDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes, allFeatures,
+                type_DA, 3, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels,
+                'shot',shotStart)
 
-        semiSupervisedLearning_adaptationModelLDA_shot, results = adaptPrint(
-            semiSupervisedLearning_adaptationModelLDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
-            allFeatures, type_DA, 1, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_shot')
+            semiSupervisedLearning_adaptationModelQDA_shot, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelQDA_shot, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
+                allFeatures, type_DA, 3, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_shot',shotStart)
 
-        semiSupervisedLearningModelLDA_shot_noRQ1, results = adaptPrint(
-            semiSupervisedLearningModelLDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
-            allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
-            testLabels, 'shot_noRQ1')
+            semiSupervisedLearningModelQDA_shot_noRQ1, results = adaptPrint(
+                semiSupervisedLearningModelQDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
+                allFeatures, type_DA, 4, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
+                testLabels, 'shot_noRQ1',shotStart)
 
-        semiSupervisedLearning_adaptationModelLDA_shot_noRQ1, results = adaptPrint(
-            semiSupervisedLearning_adaptationModelLDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
-            allFeatures, type_DA, 2, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_shot_noRQ1')
+            semiSupervisedLearning_adaptationModelQDA_shot_noRQ1, results = adaptPrint(
+                semiSupervisedLearning_adaptationModelQDA_shot_noRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
+                allFeatures, type_DA, 4, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
+                testLabels, 'adapt_shot_noRQ1',shotStart)
 
-        semiSupervisedLearningModelLDA_shot_onlyRQ1, results = adaptPrint(
-            semiSupervisedLearningModelLDA_shot_onlyRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot, classes,
-            allFeatures, type_DA, 3, fewShotFeatures, fewShotLabels, fewShotModel, results, idx, testFeatures,
-            testLabels, 'shot_onlyRQ1')
 
-        semiSupervisedLearning_adaptationModelLDA_shot_onlyRQ1, results = adaptPrint(
-            semiSupervisedLearning_adaptationModelLDA_shot_onlyRQ1, trainFeatures_shot, trainLabels_shot, trainRep_shot,
-            classes, allFeatures, type_DA, 3, fewShotFeatures, fewShotLabels, adaptedModel, results, idx, testFeatures,
-            testLabels, 'adapt_shot_onlyRQ1')
 
     results.at[idx, 'person'] = person
     results.at[idx, 'subset'] = subset
@@ -678,8 +652,8 @@ def resultsDataframeUnsupervised(
 # Auxiliar functions of the evaluation
 
 
-def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures):
-    currentValues = pd.DataFrame(columns=['cov', 'mean', 'class'])
+def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures,shotStart):
+    currentValues = pd.DataFrame(columns=['cov', 'mean', 'class', 'weight_mean', 'weight_cov'])
     trainLabelsAux = trainLabels[np.newaxis]
     Matrix = np.hstack((trainFeatures, trainLabelsAux.T))
     for cla in range(classes):
@@ -688,6 +662,8 @@ def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures):
         currentValues.at[cla, 'mean'] = np.mean(Matrix[np.where((Matrix[:, allFeatures] == cla + 1)), 0:allFeatures][0],
                                                 axis=0)
         currentValues.at[cla, 'class'] = cla + 1
+        currentValues.at[cla, 'weight_mean'] = shotStart
+        currentValues.at[cla, 'weight_cov'] = shotStart
 
     return currentValues
 
