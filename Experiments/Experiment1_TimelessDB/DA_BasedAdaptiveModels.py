@@ -321,6 +321,9 @@ def JSDdivergence(mean0, mean1, k, cov0, cov1):
 def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures, trainLabels,
                                 oneShotModel, typeModel, shotStart):
     t = time.time()
+
+    trainFeatures, trainLabels = reduce_dataset(trainFeatures, trainLabels, classes)
+
     typeModelWeights = 'QDA'
     peopleClass = len(preTrainedDataMatrix.index)
     # if typeDatabase == 'Nina5':
@@ -397,9 +400,20 @@ def OurModelUnsupervisedAllProb(currentValues, preTrainedDataMatrix, classes, al
     return adaptiveModel, time.time() - t
 
 
+def reduce_dataset(x, y, classes):
+    reduce_X = []
+    reduce_Y = []
+    for cl in range(1,classes+1):
+        reduce_X.append(np.mean(x[y == cl],axis=0))
+        reduce_Y.append(cl)
+    return np.array(reduce_X), np.array(reduce_Y)
+
+
 def OurModelUnsupervisedAllProb_shot(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFeatures,
                                      trainLabels, oneShotModel, typeModel, shotStart):
     t = time.time()
+    trainFeatures, trainLabels = reduce_dataset(trainFeatures, trainLabels, classes)
+
     typeModelWeights = 'QDA'
     peopleClass = len(preTrainedDataMatrix.index)
 
