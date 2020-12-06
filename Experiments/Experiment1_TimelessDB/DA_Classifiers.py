@@ -162,9 +162,7 @@ def accuracyModelQDA(testFeatures, testLabels, model, classes):
 
 
 ######## CLASSIFICATION ( ALREADY KNOW THERE IS A GESTURE)
-def scoreModel_ClassificationUnsupervised(testFeatures, model, classes, testLabels, testRepetitions,type_DA):
-
-
+def scoreModel_ClassificationUnsupervised(testFeatures, model, classes, testLabels, testRepetitions, type_DA):
     auxLabel = testLabels[0]
     auxRep = testRepetitions[0]
     actualPredictor = np.zeros(classes)
@@ -211,6 +209,7 @@ def scoreModel_ClassificationUnsupervised(testFeatures, model, classes, testLabe
             actualFeatures.append(testFeatures[i, :])
 
     return preTrainedDataMatrix
+
 
 def scoreModelLDA_ClassificationUnsupervised(testFeatures, model, classes, testLabels, testRepetitions):
     LDACov = LDA_Cov(model, classes)
@@ -273,72 +272,40 @@ def scoreModelQDA_ClassificationUnsupervised(testFeatures, model, classes, testL
     return preTrainedDataMatrix
 
 
-######## RECOGNITION
-def scoreModelLDA_ClassificationUnsupervised_recog(testFeatures, model, classes, testLabels, testRepetitions):
-    LDACov = LDA_Cov(model, classes)
-    auxLabel = testLabels[0]
-    auxRep = testRepetitions[0]
+######## DA classifiers (probabilities)
 
-    actualPredictor = np.zeros(classes)
 
-    actualFeatures = []
-    idx = 0
-    preTrainedDataMatrix = pd.DataFrame(columns=['mean', 'cov', 'class', 'prob', 'samples'])
-
-    relabels=[]
-
-    for i in range(np.size(testRepetitions)):
-        if auxLabel != testLabels[i] or auxRep != testRepetitions[i] or i == np.size(testRepetitions) - 1:
-            auxLabel = testLabels[i]
-            auxRep = testRepetitions[i]
-
-            actualFeatures = np.array(actualFeatures)
-            preTrainedDataMatrix.at[idx, 'mean'] = np.mean(actualFeatures, axis=0)
-            preTrainedDataMatrix.at[idx, 'cov'] = np.cov(actualFeatures, rowvar=False)
-            preTrainedDataMatrix.at[idx, 'class'] = actualPredictor.argmax() + 1
-            preTrainedDataMatrix.at[idx, 'prob'] = actualPredictor / actualPredictor.sum()
-            preTrainedDataMatrix.at[idx, 'samples'] = len(actualFeatures)
-            idx += 1
-            actualPredictor = np.zeros(classes)
-            actualFeatures = []
-
-        relabels.append(predictedModelLDA(testFeatures[i, :], model, classes, LDACov)-1)
-
+def predictedModelLDAProb(sample, model, classes, LDACov):
+    d = np.zeros([classes])
     for cl in range(classes):
-        auxData=testFeatures[relabels==cl,:]
-        preTrainedDataMatrix.at[cl, 'mean'] = np.mean(auxData, axis=0)
-        preTrainedDataMatrix.at[cl, 'cov'] = np.cov(auxData, rowvar=False)
-        preTrainedDataMatrix.at[cl, 'class'] = cl + 1
-        preTrainedDataMatrix.at[cl, 'prob'] = actualPredictor / actualPredictor.sum()
-        preTrainedDataMatrix.at[cl, 'samples'] = len(auxData)
-
-    return preTrainedDataMatrix
+        d[cl] = LDA_Discriminant(sample, LDACov, model['mean'].loc[cl])
+        if math.isnan(d[cl]):
+            return predictedModelLDA_pseudoProb(sample, model, classes, LDACov)
+    d = d - d[np.argmin(d)]
+    return d/ d.sum()
 
 
-def scoreModelQDA_ClassificationUnsupervised_recog(testFeatures, model, classes, testLabels, testRepetitions):
-    auxLabel = testLabels[0]
-    auxRep = testRepetitions[0]
+def predictedModelLDA_pseudoProb(sample, model, classes, LDACov):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = LDA_Discriminant_pseudo(sample, LDACov, model['mean'].loc[cl])
+    d = d - d[np.argmin(d)]
+    return d/ d.sum()
 
-    actualPredictor = np.zeros(classes)
-    actualFeatures = []
-    idx = 0
-    preTrainedDataMatrix = pd.DataFrame(columns=['mean', 'cov', 'class', 'prob', 'samples'])
 
-    for i in range(np.size(testRepetitions)):
-        if auxLabel != testLabels[i] or auxRep != testRepetitions[i] or i == np.size(testRepetitions) - 1:
-            auxLabel = testLabels[i]
-            auxRep = testRepetitions[i]
+def predictedModelQDAProb(sample, model, classes):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = QDA_Discriminant(sample, model['cov'].loc[cl], model['mean'].loc[cl])
+        if math.isnan(d[cl]):
+            return predictedModelQDA_pseudoProb(sample, model, classes)
+    d = d - d[np.argmin(d)]
+    return d / d.sum()
 
-            actualFeatures = np.array(actualFeatures)
-            preTrainedDataMatrix.at[idx, 'mean'] = np.mean(actualFeatures, axis=0)
-            preTrainedDataMatrix.at[idx, 'cov'] = np.cov(actualFeatures, rowvar=False)
-            preTrainedDataMatrix.at[idx, 'class'] = actualPredictor.argmax() + 1
-            preTrainedDataMatrix.at[idx, 'prob'] = actualPredictor / actualPredictor.sum()
-            preTrainedDataMatrix.at[idx, 'samples'] = len(actualFeatures)
-            idx += 1
-            actualPredictor = np.zeros(classes)
-            actualFeatures = []
 
-        actualPredictor[predictedModelQDA(testFeatures[i, :], model, classes) - 1] += 1
-        actualFeatures.append(testFeatures[i, :])
-    return preTrainedDataMatrix
+def predictedModelQDA_pseudoProb(sample, model, classes):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = QDA_Discriminant_pseudo(sample, model['cov'].loc[cl], model['mean'].loc[cl])
+    d = d - d[np.argmin(d)]
+    return d / d.sum()
