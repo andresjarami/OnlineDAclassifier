@@ -17,16 +17,15 @@ import sys
 # for shotStart in range(1,3):
 
 featureSet = 1
-startPerson = 32  # Cote 20-36,EPN 31-60, Nina5 1-10
-endPerson = 32  # Cote 20-36,EPN 31-60, Nina5 1-10
-place = 'resultsExample/exampleN'
-typeDatabase = 'Cote'
+startPerson = 31  # Cote 20-36,EPN 31-60, Nina5 1-10
+endPerson = 60  # Cote 20-36,EPN 31-60, Nina5 1-10
+place = 'resultsExample/exampleE'
+typeDatabase = 'EPN'
 printR = 1
 shotStart = 1
+k = 1
 nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
-    startPerson) + '_endPerson_' + str(endPerson) + 'shotStart' + str(shotStart) + '.csv'
-
-
+    startPerson) + '_endPerson_' + str(endPerson) + 'shotStart' + str(shotStart) + 'memmory' + str(k) + '.csv'
 
 # Upload Data
 dataMatrix, _, _, classes, peoplePriorK, _, numberShots, _, allFeatures, _ = functionsExp1.uploadDatabases(
@@ -34,4 +33,4 @@ dataMatrix, _, _, classes, peoplePriorK, _, numberShots, _, allFeatures, _ = fun
 
 # Evaluation
 functionsExp1.evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameFile, startPerson,
-                         endPerson, allFeatures, typeDatabase, printR, shotStart)
+                         endPerson, allFeatures, typeDatabase, printR, k, shotStart)

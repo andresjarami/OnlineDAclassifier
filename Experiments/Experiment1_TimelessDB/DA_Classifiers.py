@@ -293,6 +293,7 @@ def predictedModelLDA_pseudoProb(sample, model, classes, LDACov):
     return d/ d.sum()
 
 
+
 def predictedModelQDAProb(sample, model, classes):
     d = np.zeros([classes])
     for cl in range(classes):
@@ -300,7 +301,7 @@ def predictedModelQDAProb(sample, model, classes):
         if math.isnan(d[cl]):
             return predictedModelQDA_pseudoProb(sample, model, classes)
     d = d - d[np.argmin(d)]
-    return d / d.sum()
+    return d / d.sum(), np.argmax(d) + 1
 
 
 def predictedModelQDA_pseudoProb(sample, model, classes):
@@ -308,4 +309,5 @@ def predictedModelQDA_pseudoProb(sample, model, classes):
     for cl in range(classes):
         d[cl] = QDA_Discriminant_pseudo(sample, model['cov'].loc[cl], model['mean'].loc[cl])
     d = d - d[np.argmin(d)]
-    return d / d.sum()
+    return d / d.sum(), np.argmax(d) + 1
+
