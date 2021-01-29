@@ -17,8 +17,8 @@ import sys
 # for shotStart in range(1,3):
 
 featureSet = 1
-startPerson = 31  # Cote 20-36,EPN 31-60, Nina5 1-10
-endPerson = 60  # Cote 20-36,EPN 31-60, Nina5 1-10
+startPerson = 33  # Cote 20-36,EPN 31-60, Nina5 1-10
+endPerson = 36  # Cote 20-36,EPN 31-60, Nina5 1-10
 place = 'resultsExample/exampleE'
 typeDatabase = 'EPN'
 printR = 1
