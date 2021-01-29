@@ -1,0 +1,12 @@
+# ignore these folders:
+**/.ipynb_checkpoints
+**/.idea
+**/__pycache__
+**/results/**
+**/data/**
+**/detectedData/**
+**/ExtractedDataCollectedData/**
+**/ExtractedDataCoteAllard/**
+**/ExtractedDataNinaDB5/**
+**.log
+**.pt
