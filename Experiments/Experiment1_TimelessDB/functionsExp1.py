@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn import preprocessing
 
-import DA_BasedAdaptiveModels as adaptive
 import DA_Classifiers as DA_Classifiers
 import SemiSupervised as SemiSupervised
+import DA_BasedAdaptiveModels as adaptive
 
 
 # Upload Databases
@@ -121,21 +121,33 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
         testLabels = dataMatrix[
             (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 1), allFeatures + 2].T
 
-        fewShotFeatures = dataMatrix[
-                          (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) & (
-                                  dataMatrix[:, allFeatures + 3] <= shotStart), 0:allFeatures]
-        fewShotLabels = dataMatrix[
+        labeledGesturesFeatures = dataMatrix[
+                                  (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) & (
+                                          dataMatrix[:, allFeatures + 3] <= shotStart), 0:allFeatures]
+        labeledGesturesLabels = dataMatrix[
             (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) & (
                     dataMatrix[:, allFeatures + 3] <= shotStart), allFeatures + 2].T
 
-        fewShotFeatures = scaler.fit_transform(fewShotFeatures)
+        labeledGesturesFeatures = scaler.fit_transform(labeledGesturesFeatures)
         testFeatures = scaler.transform(testFeatures)
-        fewShotModel = currentDistributionValues(fewShotFeatures, fewShotLabels, classes, allFeatures, shotStart)
+        fewShotModel = currentDistributionValues(labeledGesturesFeatures, labeledGesturesLabels, classes, allFeatures,
+                                                 shotStart)
 
-        fewShotFeatures, fewShotLabels = adaptive.subsetTraining(fewShotFeatures, fewShotLabels, 50, classes)
+        labeledGesturesFeatures, labeledGesturesLabels = adaptive.subsetTraining(
+            labeledGesturesFeatures, labeledGesturesLabels, 50, classes)
 
-        unlabeledGesturesLDA = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
-        unlabeledGesturesQDA = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesLDA_PostProb_MSDA = pd.DataFrame(
+            columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesQDA_PostProb_MSDA = pd.DataFrame(
+            columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+
+        unlabeledGesturesLDA_PostProb = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesQDA_PostProb = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesLDA_MSDA = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesQDA_MSDA = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesLDA_Baseline = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+        unlabeledGesturesQDA_Baseline = pd.DataFrame(columns=['mean', 'cov', 'postProb', 'wMean', 'wCov', 'features'])
+
         '''              
         # adaptive model
         
@@ -145,12 +157,19 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
         k = 1 - (np.log(shotStart) / np.log(numberShots + 1))
         step = 1
         adaptedModel, _, _, _, _, _ = adaptive.OurModel(
-            fewShotModel, preTrainedDataMatrix, classes, allFeatures, fewShotFeatures, fewShotLabels, step, 'QDA', k)
+            fewShotModel, preTrainedDataMatrix, classes, allFeatures, labeledGesturesFeatures, labeledGesturesLabels, step, 'QDA', k)
         '''
         adaptedModel = np.zeros(5)
 
-        proposedModelLDA = fewShotModel.copy()
-        proposedModelQDA = fewShotModel.copy()
+        proposedModelLDA_PostProb_MSDA = fewShotModel.copy()
+        proposedModelQDA_PostProb_MSDA = fewShotModel.copy()
+        proposedModelLDA_PostProb = fewShotModel.copy()
+        proposedModelQDA_PostProb = fewShotModel.copy()
+        proposedModelLDA_MSDA = fewShotModel.copy()
+        proposedModelQDA_MSDA = fewShotModel.copy()
+        proposedModelLDA_Baseline = fewShotModel.copy()
+        proposedModelQDA_Baseline = fewShotModel.copy()
+
         nShots = 0
         for shot in range(shotStart + 1, numberShots + 1):
             for cl in range(1, classes + 1):
@@ -158,16 +177,31 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                                 (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) &
                                 (dataMatrix[:, allFeatures + 3] == shot) & (dataMatrix[:, allFeatures + 2] == cl),
                                 0:allFeatures]
+                trainLabels = dataMatrix[
+                    (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) &
+                    (dataMatrix[:, allFeatures + 3] == shot) & (dataMatrix[:, allFeatures + 2] == cl), allFeatures + 2]
 
                 nShots += 1
 
                 trainFeatures = scaler.transform(trainFeatures)
 
-                results, idx, proposedModelLDA, proposedModelQDA, unlabeledGesturesLDA, unlabeledGesturesQDA = \
-                    resultsDataframeUnsupervised(trainFeatures, classes, results, testFeatures, testLabels, idx, person,
-                                                 nShots, featureSet, nameFile, printR, fewShotFeatures, fewShotLabels,
-                                                 proposedModelLDA, proposedModelQDA, fewShotModel, unlabeledGesturesLDA,
-                                                 unlabeledGesturesQDA, k, shotStart)
+                results, idx, proposedModelLDA_PostProb, proposedModelQDA_PostProb, proposedModelLDA_MSDA, \
+                proposedModelQDA_MSDA, proposedModelLDA_Baseline, proposedModelQDA_Baseline, \
+                unlabeledGesturesLDA_PostProb_MSDA, unlabeledGesturesQDA_PostProb_MSDA, unlabeledGesturesLDA_PostProb, \
+                unlabeledGesturesQDA_PostProb, unlabeledGesturesLDA_MSDA, unlabeledGesturesQDA_MSDA, \
+                unlabeledGesturesLDA_Baseline, unlabeledGesturesQDA_Baseline = \
+                    resultsDataframeUnsupervised(trainFeatures, trainLabels, classes, results, testFeatures, testLabels,
+                                                 idx, person, nShots, featureSet, nameFile, printR,
+                                                 labeledGesturesFeatures, labeledGesturesLabels,
+                                                 proposedModelLDA_PostProb_MSDA, proposedModelQDA_PostProb_MSDA,
+                                                 proposedModelLDA_PostProb, proposedModelQDA_PostProb,
+                                                 proposedModelLDA_MSDA, proposedModelQDA_MSDA,
+                                                 proposedModelLDA_Baseline, proposedModelQDA_Baseline, fewShotModel,
+                                                 unlabeledGesturesLDA_PostProb_MSDA, unlabeledGesturesQDA_PostProb_MSDA,
+                                                 unlabeledGesturesLDA_PostProb, unlabeledGesturesQDA_PostProb,
+                                                 unlabeledGesturesLDA_MSDA, unlabeledGesturesQDA_MSDA,
+                                                 unlabeledGesturesLDA_Baseline, unlabeledGesturesQDA_Baseline, k,
+                                                 shotStart)
 
     return results
 
@@ -194,8 +228,8 @@ def PKModels(dataMatrix, classes, peoplePriorK, evaluatedPerson, allFeatures):
 
 # Unsupervised
 
-def adaptPrint(currentModel, unlabeledGestures, type_DA, trainFeatures, classes, fewShotFeatures, fewShotLabels,
-               fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel):
+def adaptPrint(currentModel, unlabeledGestures, type_DA, trainFeatures, trainLabels, classes, labeledGesturesFeatures,
+               labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel):
     name = type_DA + '_ACC_' + typeModel
     print(name)
 
@@ -206,17 +240,22 @@ def adaptPrint(currentModel, unlabeledGestures, type_DA, trainFeatures, classes,
             adaptedModel, results.at[
                 idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_PostProb_MSDA(
                 currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewShotModel,
-                fewShotFeatures, fewShotLabels, type_DA, k, N)
+                labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
         elif typeModel == 'PostProb':
             adaptedModel, results.at[
                 idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_PostProb(
                 currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewShotModel,
-                fewShotFeatures, fewShotLabels, type_DA, k, N)
+                labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
         elif typeModel == 'MSDA':
             adaptedModel, results.at[
                 idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_MSDA(
                 currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewShotModel,
-                fewShotFeatures, fewShotLabels, type_DA, k, N)
+                labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
+        elif typeModel == 'Baseline':
+            adaptedModel, results.at[
+                idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_Baseline(
+                currentModel, unlabeledGestures, classes, trainFeatures, trainLabels, postProb_trainFeatures,
+                fewShotModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
 
         results.at[idx, name], _ = DA_Classifiers.accuracyModelLDA(testFeatures, testLabels, adaptedModel, classes)
 
@@ -225,17 +264,22 @@ def adaptPrint(currentModel, unlabeledGestures, type_DA, trainFeatures, classes,
             adaptedModel, results.at[
                 idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_PostProb_MSDA(
                 currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewShotModel,
-                fewShotFeatures, fewShotLabels, type_DA, k, N)
+                labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
         elif typeModel == 'PostProb':
             adaptedModel, results.at[
                 idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_PostProb(
                 currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewShotModel,
-                fewShotFeatures, fewShotLabels, type_DA, k, N)
+                labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
         elif typeModel == 'MSDA':
             adaptedModel, results.at[
                 idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_MSDA(
                 currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewShotModel,
-                fewShotFeatures, fewShotLabels, type_DA, k, N)
+                labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
+        elif typeModel == 'Baseline':
+            adaptedModel, results.at[
+                idx, 'time_' + name], unlabeledGestures = SemiSupervised.model_Baseline(
+                currentModel, unlabeledGestures, classes, trainFeatures, trainLabels, postProb_trainFeatures,
+                fewShotModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N)
 
         results.at[idx, name], _ = DA_Classifiers.accuracyModelQDA(testFeatures, testLabels, adaptedModel, classes)
 
@@ -243,13 +287,13 @@ def adaptPrint(currentModel, unlabeledGestures, type_DA, trainFeatures, classes,
 
 
 def resultsDataframeUnsupervised(
-        trainFeatures, classes, results, testFeatures, testLabels, idx, person, nShots, featureSet, nameFile, printR,
-        fewShotFeatures, fewShotLabels, proposedModelLDA, proposedModelQDA, fewShotModel, unlabeledGesturesLDA,
-        unlabeledGesturesQDA, k, N):
-    # step = 1
-    # numSamples = 50
-    # fewShotFeatures, fewShotLabels = adaptive.subsetTraining(fewShotFeatures, fewShotLabels, numSamples, classes)
-
+        trainFeatures, trainLabels, classes, results, testFeatures, testLabels, idx, person, nShots, featureSet,
+        nameFile, printR, labeledGesturesFeatures, labeledGesturesLabels, proposedModelLDA_PostProb_MSDA,
+        proposedModelQDA_PostProb_MSDA, proposedModelLDA_PostProb, proposedModelQDA_PostProb,
+        proposedModelLDA_MSDA, proposedModelQDA_MSDA, proposedModelLDA_Baseline, proposedModelQDA_Baseline,
+        fewShotModel, unlabeledGesturesLDA_PostProb_MSDA, unlabeledGesturesQDA_PostProb_MSDA,
+        unlabeledGesturesLDA_PostProb, unlabeledGesturesQDA_PostProb, unlabeledGesturesLDA_MSDA,
+        unlabeledGesturesQDA_MSDA, unlabeledGesturesLDA_Baseline, unlabeledGesturesQDA_Baseline, k, N):
     type_DA_set = ['LDA', 'QDA']
     for type_DA in type_DA_set:
         if type_DA == 'LDA':
@@ -260,16 +304,23 @@ def resultsDataframeUnsupervised(
 
             # print(unlabeledGesturesLDA[['postProb']])
 
-            proposedModelLDA, results, unlabeledGesturesLDA = adaptPrint(
-                proposedModelLDA, unlabeledGesturesLDA, type_DA, trainFeatures, classes, fewShotFeatures,
-                fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N,typeModel='PostProb_MSDA')
-            proposedModelLDA, results, unlabeledGesturesLDA = adaptPrint(
-                proposedModelLDA, unlabeledGesturesLDA, type_DA, trainFeatures, classes, fewShotFeatures,
-                fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='PostProb')
-            proposedModelLDA, results, unlabeledGesturesLDA = adaptPrint(
-                proposedModelLDA, unlabeledGesturesLDA, type_DA, trainFeatures, classes, fewShotFeatures,
-                fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='MSDA')
-
+            proposedModelLDA_PostProb_MSDA, results, unlabeledGesturesLDA_PostProb_MSDA = adaptPrint(
+                proposedModelLDA_PostProb_MSDA, unlabeledGesturesLDA_PostProb_MSDA, type_DA, trainFeatures, trainLabels,
+                classes, labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N,
+                typeModel='PostProb_MSDA')
+            proposedModelLDA_PostProb, results, unlabeledGesturesLDA_PostProb = adaptPrint(
+                proposedModelLDA_PostProb, unlabeledGesturesLDA_PostProb, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='PostProb')
+            proposedModelLDA_MSDA, results, unlabeledGesturesLDA_MSDA = adaptPrint(
+                proposedModelLDA_MSDA, unlabeledGesturesLDA_MSDA, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='MSDA')
+            proposedModelLDA_Baseline, results, unlabeledGesturesLDA_Baseline = adaptPrint(
+                proposedModelLDA_Baseline, unlabeledGesturesLDA_Baseline, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='Baseline')
 
         elif type_DA == 'QDA':
 
@@ -277,15 +328,23 @@ def resultsDataframeUnsupervised(
             results.at[idx, 'AccQDAfew'], _ = DA_Classifiers.accuracyModelQDA(
                 testFeatures, testLabels, fewShotModel, classes)
 
-            proposedModelQDA, results, unlabeledGesturesQDA = adaptPrint(
-                proposedModelQDA, unlabeledGesturesQDA, type_DA, trainFeatures, classes, fewShotFeatures,
-                fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N,typeModel='PostProb_MSDA')
-            proposedModelQDA, results, unlabeledGesturesQDA = adaptPrint(
-                proposedModelQDA, unlabeledGesturesQDA, type_DA, trainFeatures, classes, fewShotFeatures,
-                fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='PostProb')
-            proposedModelQDA, results, unlabeledGesturesQDA = adaptPrint(
-                proposedModelQDA, unlabeledGesturesQDA, type_DA, trainFeatures, classes, fewShotFeatures,
-                fewShotLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='MSDA')
+            proposedModelQDA_PostProb_MSDA, results, unlabeledGesturesQDA_PostProb_MSDA = adaptPrint(
+                proposedModelQDA_PostProb_MSDA, unlabeledGesturesQDA_PostProb_MSDA, type_DA, trainFeatures, trainLabels,
+                classes, labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N,
+                typeModel='PostProb_MSDA')
+            proposedModelQDA_PostProb, results, unlabeledGesturesQDA_PostProb = adaptPrint(
+                proposedModelQDA_PostProb, unlabeledGesturesQDA_PostProb, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='PostProb')
+            proposedModelQDA_MSDA, results, unlabeledGesturesQDA_MSDA = adaptPrint(
+                proposedModelQDA_MSDA, unlabeledGesturesQDA_MSDA, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='MSDA')
+            proposedModelQDA_Baseline, results, unlabeledGesturesQDA_Baseline = adaptPrint(
+                proposedModelQDA_Baseline, unlabeledGesturesQDA_Baseline, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures,
+                labeledGesturesLabels, fewShotModel, results, idx, testFeatures, testLabels, k, N, typeModel='Baseline')
 
     results.at[idx, 'person'] = person
     # results.at[idx, 'subset'] = subset
@@ -301,7 +360,11 @@ def resultsDataframeUnsupervised(
 
     idx += 1
 
-    return results, idx, proposedModelLDA, proposedModelQDA, unlabeledGesturesLDA, unlabeledGesturesQDA
+    return results, idx, proposedModelLDA_PostProb, proposedModelQDA_PostProb, proposedModelLDA_MSDA, \
+           proposedModelQDA_MSDA, proposedModelLDA_Baseline, proposedModelQDA_Baseline, \
+           unlabeledGesturesLDA_PostProb_MSDA, unlabeledGesturesQDA_PostProb_MSDA, unlabeledGesturesLDA_PostProb, \
+           unlabeledGesturesQDA_PostProb, unlabeledGesturesLDA_MSDA, unlabeledGesturesQDA_MSDA, \
+           unlabeledGesturesLDA_Baseline, unlabeledGesturesQDA_Baseline
 
 
 # Auxiliar functions of the evaluation
