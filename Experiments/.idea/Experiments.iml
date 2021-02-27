@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Experiment1_TimelessDB" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ExtractedData" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ResultsExp1_RQ1" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
