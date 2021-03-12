@@ -261,8 +261,9 @@ def vectors_calculation(results, rows):
             # QDA_MSDA_KL.append(results['QDA_ACC_MSDA_KL'].loc[results['# shots'] == i].mean()*100)
     return LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_PostProb, LDA_MSDA, LDA_PostProb_MSDA_KL, \
            LDA_MSDA_KL, QDA_NoAdaptive, QDA_Baseline, QDA_PostProb_MSDA, QDA_PostProb, QDA_MSDA, QDA_PostProb_MSDA_KL, \
-           QDA_MSDA_KL,results['time_LDA_ACC_PostProb_MSDA_KL'].mean(),results['time_QDA_ACC_PostProb_MSDA_KL'].mean(),\
-           results['time_LDA_ACC_PostProb_MSDA_KL'].std(),results['time_QDA_ACC_PostProb_MSDA_KL'].std()
+           QDA_MSDA_KL, results['time_LDA_ACC_PostProb_MSDA_KL'].mean(), results[
+               'time_QDA_ACC_PostProb_MSDA_KL'].mean(), \
+           results['time_LDA_ACC_PostProb_MSDA_KL'].std(), results['time_QDA_ACC_PostProb_MSDA_KL'].std()
 
 
 def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_PostProb, LDA_MSDA, LDA_PostProb_MSDA_KL,
@@ -274,20 +275,16 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_Pos
     plt.plot(x_Old, yLDA_V, label='Vidovic', color='tab:red')
     plt.plot(x_Old, yLDA_O, label='Our_RQ1', color='tab:blue')
 
-
     # plt.plot(x, LDA_Baseline, label='LDA_Optimal')
     # plt.plot(x, LDA_PostProb_MSDA, label='LDA_PostProb_MSDA')
     # plt.plot(x, LDA_PostProb, label='LDA_PostProb')
     # plt.plot(x, LDA_MSDA, label='LDA_MSDA')
-    plt.plot(x, LDA_PostProb_MSDA_KL, label='Our_RQ2',color='tab:purple',alpha=0)
+    plt.plot(x, LDA_PostProb_MSDA_KL, label='Our_RQ2', color='tab:purple')
     # plt.plot(x, LDA_MSDA_KL, label='LDA_MSDA_KL')
 
     # plt.plot(x, LDA_PostProb_MSDA_KL, label='LDA_Propose')
 
-    plt.plot(x_Old, yLDA, label='Ideal',color='black',linestyle='--',alpha=0)
-
-
-
+    plt.plot(x_Old, yLDA, label='Ideal', color='black', linestyle='--')
 
     plt.xlabel('number of unlabeled gestures\n (over time)')
     plt.ylabel('accuracy [%]')
@@ -298,7 +295,7 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_Pos
     plt.show()
 
     x = [*range(rows + 1)]
-    plt.plot(x, QDA_NoAdaptive, label='Baseline',color='tab:orange')
+    plt.plot(x, QDA_NoAdaptive, label='Baseline', color='tab:orange')
     plt.plot(x_Old, yQDA_L, label='Liu', color='tab:green')
     plt.plot(x_Old, yQDA_V, label='Vidovic', color='tab:red')
     plt.plot(x_Old, yQDA_O, label='Our_RQ1', color='tab:blue')
@@ -306,23 +303,22 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_Pos
     # plt.plot(x, QDA_PostProb_MSDA, label='QDA_PostProb_MSDA')
     # plt.plot(x, QDA_PostProb, label='QDA_PostProb')
     # plt.plot(x, QDA_MSDA, label='QDA_MSDA')
-    if len(x)>100:
-        x=[0]+[*range(10,rows + 1)]
-        z=np.array(QDA_PostProb_MSDA_KL)
-        plt.plot(x, z[x], label='Our_RQ2',color='tab:purple')
+    if len(x) > 100:
+        x = [0] + [*range(10, rows + 1)]
+        z = np.array(QDA_PostProb_MSDA_KL)
+        plt.plot(x, z[x], label='Our_RQ2', color='tab:purple')
     else:
         plt.plot(x, QDA_PostProb_MSDA_KL, label='Our_RQ2', color='tab:purple')
     # plt.plot(x, QDA_MSDA_KL, label='QDA_MSDA_KL')
 
     # plt.plot(x, QDA_PostProb_MSDA_KL, label='QDA_Propose')
 
-    plt.plot(x_Old, yQDA, label='Ideal',color='black',linestyle='--')
-
+    plt.plot(x_Old, yQDA, label='Ideal', color='black', linestyle='--')
 
     plt.xlabel('number of unlabeled gestures\n (over time)')
     plt.ylabel('accuracy [%]')
     plt.title(title + ' (QDA)')
-    plt.legend(loc='lower center', bbox_to_anchor=(1.5, -1), ncol=1)
+    # plt.legend(loc='lower center', bbox_to_anchor=(1.5, -1), ncol=1)
     # plt.ylim(0.5, 1)
     plt.grid(color='gainsboro', linewidth=1)
     plt.show()
@@ -333,9 +329,9 @@ def analysis(folder, database):
     results_Old, x_Old = uploadResultsDatabasesVF1('../ResultsExp1_RQ1/', database, windowSize='295')
     LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_PostProb, LDA_MSDA, LDA_PostProb_MSDA_KL, \
     LDA_MSDA_KL, QDA_NoAdaptive, QDA_Baseline, QDA_PostProb_MSDA, QDA_PostProb, QDA_MSDA, QDA_PostProb_MSDA_KL, \
-    QDA_MSDA_KL,time_LDA,time_QDA,time_LDA_std,time_QDA_std = vectors_calculation(results, rows)
+    QDA_MSDA_KL, time_LDA, time_QDA, time_LDA_std, time_QDA_std = vectors_calculation(results, rows)
     print(database)
-    print('timeLDA',time_LDA)
+    print('timeLDA', time_LDA)
     print('std', time_LDA_std)
     print('timeQDA', time_QDA)
     print('std', time_QDA_std)

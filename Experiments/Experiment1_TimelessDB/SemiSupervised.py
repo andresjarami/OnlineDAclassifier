@@ -214,21 +214,21 @@ def subsetTraining_One(trainFeatures, numSamples):
 # %% Models
 
 def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewModel,
-                        labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N):
+                        labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart):
     t = time.time()
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'mean_J', 'wMean_J', 'cov_J', 'wCov_J', '# gestures'])
 
     numberUnlabeledGestures = len(unlabeledGestures.index)
     if numberUnlabeledGestures == 0:
-        currentModel.at[0, '# gestures'] = N
-    elif k > numberUnlabeledGestures > 0:
+        currentModel.at[0, '# gestures']= shotStart
+    elif samplesInMemory > numberUnlabeledGestures > 0:
         unlabeledGestures = postProbabilities_weights_Calculation(unlabeledGestures, currentModel, classes, type_DA,
                                                                   numberUnlabeledGestures, labeledGesturesFeatures,
                                                                   labeledGesturesLabels, weights=True, post=True)
     else:
-        unlabeledGestures = unlabeledGestures.tail(k - 1).reset_index(drop=True)
+        unlabeledGestures = unlabeledGestures.tail(samplesInMemory - 1).reset_index(drop=True)
         unlabeledGestures = postProbabilities_weights_Calculation(unlabeledGestures, currentModel, classes, type_DA,
-                                                                  k - 1, labeledGesturesFeatures, labeledGesturesLabels,
+                                                                  samplesInMemory - 1, labeledGesturesFeatures, labeledGesturesLabels,
                                                                   weights=True,
                                                                   post=True)
 
@@ -256,9 +256,9 @@ def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures,
     # print('after RQ1')
     # print(unlabeledGestures[['postProb', 'wMean', 'wCov']])
 
-    if k > currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    if samplesInMemory > currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values * unlabeledGestures['wMean'].values
         sumMean = w_labeledGestures_Mean + np.sum(weightsMean, axis=0)
@@ -291,9 +291,9 @@ def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures,
 
 
 
-    elif k == currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    elif samplesInMemory == currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values * unlabeledGestures['wMean'].values
         # if type_DA == 'QDA':
@@ -317,14 +317,14 @@ def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures,
         # print(weightsMean)
         # print('mean equal')
         # print(w_labeledGestures_Mean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = w_labeledGestures_Cov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         w_labeledGestures_Cov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -338,7 +338,7 @@ def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures,
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + fewModel['cov'].loc[cla] * w_labeledGestures_Cov[cla]
 
 
-    elif k < currentModel['# gestures'].loc[0] - N + 1:
+    elif samplesInMemory < currentModel['# gestures'].loc[0] -shotStart + 1:
         wJMean = np.zeros(classes)
         JMean = np.zeros((classes, np.size(trainFeatures, axis=1)))
         weightsMean = unlabeledGestures['postProb'].values * unlabeledGestures['wMean'].values
@@ -368,14 +368,14 @@ def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures,
         # print(weightsMean)
         # print('mean wJ')
         # print(wJMean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = wJCov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         wJCov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -391,21 +391,21 @@ def model_PostProb_MSDA(currentModel, unlabeledGestures, classes, trainFeatures,
 
 
 def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewModel,
-               labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N):
+               labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart):
     t = time.time()
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'mean_J', 'wMean_J', 'cov_J', 'wCov_J', '# gestures'])
 
     numberUnlabeledGestures = len(unlabeledGestures.index)
     if numberUnlabeledGestures == 0:
-        currentModel.at[0, '# gestures'] = N
-    elif k > numberUnlabeledGestures > 0:
+        currentModel.at[0, '# gestures']= shotStart
+    elif samplesInMemory > numberUnlabeledGestures > 0:
         unlabeledGestures = postProbabilities_weights_Calculation(unlabeledGestures, currentModel, classes, type_DA,
                                                                   numberUnlabeledGestures, labeledGesturesFeatures,
                                                                   labeledGesturesLabels, weights=True, post=False)
     else:
-        unlabeledGestures = unlabeledGestures.tail(k - 1).reset_index(drop=True)
+        unlabeledGestures = unlabeledGestures.tail(samplesInMemory - 1).reset_index(drop=True)
         unlabeledGestures = postProbabilities_weights_Calculation(unlabeledGestures, currentModel, classes, type_DA,
-                                                                  k - 1, labeledGesturesFeatures, labeledGesturesLabels,
+                                                                  samplesInMemory - 1, labeledGesturesFeatures, labeledGesturesLabels,
                                                                   weights=True,
                                                                   post=False)
 
@@ -433,9 +433,9 @@ def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb
     # print('after RQ1')
     # print(unlabeledGestures[['postProb', 'wMean', 'wCov']])
 
-    if k > currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    if samplesInMemory > currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['wMean'].values
         sumMean = w_labeledGestures_Mean + np.sum(weightsMean, axis=0)
@@ -467,9 +467,9 @@ def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb
 
 
 
-    elif k == currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    elif samplesInMemory == currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['wMean'].values
         # if type_DA == 'QDA':
@@ -493,14 +493,14 @@ def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb
         # print(weightsMean)
         # print('mean equal')
         # print(w_labeledGestures_Mean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = w_labeledGestures_Cov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         w_labeledGestures_Cov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -514,7 +514,7 @@ def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + fewModel['cov'].loc[cla] * w_labeledGestures_Cov[cla]
 
 
-    elif k < currentModel['# gestures'].loc[0] - N + 1:
+    elif samplesInMemory < currentModel['# gestures'].loc[0] -shotStart + 1:
         wJMean = np.zeros(classes)
         JMean = np.zeros((classes, np.size(trainFeatures, axis=1)))
 
@@ -544,14 +544,14 @@ def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb
         # print(weightsMean)
         # print('mean wJ')
         # print(wJMean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = wJCov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         wJCov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -567,21 +567,21 @@ def model_MSDA(currentModel, unlabeledGestures, classes, trainFeatures, postProb
 
 
 def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewModel,
-                   labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N):
+                   labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart):
     t = time.time()
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'mean_J', 'wMean_J', 'cov_J', 'wCov_J', '# gestures'])
 
     numberUnlabeledGestures = len(unlabeledGestures.index)
     if numberUnlabeledGestures == 0:
-        currentModel.at[0, '# gestures'] = N
-    elif k > numberUnlabeledGestures > 0:
+        currentModel.at[0, '# gestures']= shotStart
+    elif samplesInMemory > numberUnlabeledGestures > 0:
         unlabeledGestures = postProbabilities_weights_Calculation(unlabeledGestures, currentModel, classes, type_DA,
                                                                   numberUnlabeledGestures, labeledGesturesFeatures,
                                                                   labeledGesturesLabels, weights=False, post=True)
     else:
-        unlabeledGestures = unlabeledGestures.tail(k - 1).reset_index(drop=True)
+        unlabeledGestures = unlabeledGestures.tail(samplesInMemory - 1).reset_index(drop=True)
         unlabeledGestures = postProbabilities_weights_Calculation(unlabeledGestures, currentModel, classes, type_DA,
-                                                                  k - 1, labeledGesturesFeatures, labeledGesturesLabels,
+                                                                  samplesInMemory - 1, labeledGesturesFeatures, labeledGesturesLabels,
                                                                   weights=False, post=True)
 
     gestureMean = np.mean(trainFeatures, axis=0)
@@ -605,9 +605,9 @@ def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, post
     # print('after RQ1')
     # print(unlabeledGestures[['postProb', 'wMean', 'wCov']])
 
-    if k > currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    if samplesInMemory > currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values
         sumMean = w_labeledGestures_Mean + np.sum(weightsMean, axis=0)
@@ -639,9 +639,9 @@ def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, post
 
 
 
-    elif k == currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    elif samplesInMemory == currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values
         # if type_DA == 'QDA':
@@ -665,14 +665,14 @@ def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, post
         # print(weightsMean)
         # print('mean equal')
         # print(w_labeledGestures_Mean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = w_labeledGestures_Cov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         w_labeledGestures_Cov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -686,7 +686,7 @@ def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, post
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + fewModel['cov'].loc[cla] * w_labeledGestures_Cov[cla]
 
 
-    elif k < currentModel['# gestures'].loc[0] - N + 1:
+    elif samplesInMemory < currentModel['# gestures'].loc[0] -shotStart + 1:
         wJMean = np.zeros(classes)
         JMean = np.zeros((classes, np.size(trainFeatures, axis=1)))
 
@@ -716,14 +716,14 @@ def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, post
         # print(weightsMean)
         # print('mean wJ')
         # print(wJMean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = wJCov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         wJCov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -739,7 +739,7 @@ def model_PostProb(currentModel, unlabeledGestures, classes, trainFeatures, post
 
 
 def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trainLabels, postProb_trainFeatures,
-                   fewModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N):
+                   fewModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart):
     t = time.time()
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'mean_J', 'wMean_J', 'cov_J', 'wCov_J', '# gestures'])
 
@@ -748,9 +748,9 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
     postProb_trainFeatures = np.zeros(classes)
     postProb_trainFeatures[int(np.mean(trainLabels)) - 1] = 1
     if numberUnlabeledGestures == 0:
-        currentModel.at[0, '# gestures'] = N
+        currentModel.at[0, '# gestures']= shotStart
     else:
-        unlabeledGestures = unlabeledGestures.tail(k - 1).reset_index(drop=True)
+        unlabeledGestures = unlabeledGestures.tail(samplesInMemory - 1).reset_index(drop=True)
 
     gestureMean = np.mean(trainFeatures, axis=0)
     gestureCov = np.cov(trainFeatures, rowvar=False)
@@ -773,9 +773,9 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
     # print('after RQ1')
     # print(unlabeledGestures[['postProb', 'wMean', 'wCov']])
 
-    if k > currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    if samplesInMemory > currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values
         sumMean = w_labeledGestures_Mean + np.sum(weightsMean, axis=0)
@@ -807,9 +807,9 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
 
 
 
-    elif k == currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    elif samplesInMemory == currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values
         # if type_DA == 'QDA':
@@ -833,14 +833,14 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
         # print(weightsMean)
         # print('mean equal')
         # print(w_labeledGestures_Mean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = w_labeledGestures_Cov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         w_labeledGestures_Cov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -854,7 +854,7 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + fewModel['cov'].loc[cla] * w_labeledGestures_Cov[cla]
 
 
-    elif k < currentModel['# gestures'].loc[0] - N + 1:
+    elif samplesInMemory < currentModel['# gestures'].loc[0] -shotStart + 1:
         wJMean = np.zeros(classes)
         JMean = np.zeros((classes, np.size(trainFeatures, axis=1)))
 
@@ -884,14 +884,14 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
         # print(weightsMean)
         # print('mean wJ')
         # print(wJMean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = wJCov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         wJCov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -907,21 +907,21 @@ def model_Baseline(currentModel, unlabeledGestures, classes, trainFeatures, trai
 
 
 def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewModel,
-                  labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N):
+                  labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart):
     t = time.time()
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'mean_J', 'wMean_J', 'cov_J', 'wCov_J', '# gestures'])
 
     numberUnlabeledGestures = len(unlabeledGestures.index)
     if numberUnlabeledGestures == 0:
-        currentModel.at[0, '# gestures'] = N
-    elif k > numberUnlabeledGestures > 0:
+        currentModel.at[0, '# gestures'] = shotStart
+    elif samplesInMemory > numberUnlabeledGestures > 0:
         unlabeledGestures = postProbabilities_weights_Calculation_KL(unlabeledGestures, currentModel, classes, type_DA,
                                                                      numberUnlabeledGestures, labeledGesturesFeatures,
                                                                      labeledGesturesLabels, weights=True, post=False)
     else:
-        unlabeledGestures = unlabeledGestures.tail(k - 1).reset_index(drop=True)
+        unlabeledGestures = unlabeledGestures.tail(samplesInMemory - 1).reset_index(drop=True)
         unlabeledGestures = postProbabilities_weights_Calculation_KL(unlabeledGestures, currentModel, classes, type_DA,
-                                                                     k - 1, labeledGesturesFeatures,
+                                                                     samplesInMemory - 1, labeledGesturesFeatures,
                                                                      labeledGesturesLabels, weights=True, post=False)
 
     gestureMean = np.mean(trainFeatures, axis=0)
@@ -939,9 +939,9 @@ def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postP
     # print('after RQ1')
     # print(unlabeledGestures[['postProb', 'wMean', 'wCov']])
 
-    if k > currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    if samplesInMemory > currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['wMean'].values
         sumMean = w_labeledGestures_Mean + np.sum(weightsMean, axis=0)
@@ -973,9 +973,9 @@ def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postP
 
 
 
-    elif k == currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    elif samplesInMemory == currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['wMean'].values
         # if type_DA == 'QDA':
@@ -999,14 +999,14 @@ def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postP
         # print(weightsMean)
         # print('mean equal')
         # print(w_labeledGestures_Mean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = w_labeledGestures_Cov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         w_labeledGestures_Cov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -1020,7 +1020,7 @@ def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postP
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + fewModel['cov'].loc[cla] * w_labeledGestures_Cov[cla]
 
 
-    elif k < currentModel['# gestures'].loc[0] - N + 1:
+    elif samplesInMemory < currentModel['# gestures'].loc[0] -shotStart + 1:
         wJMean = np.zeros(classes)
         JMean = np.zeros((classes, np.size(trainFeatures, axis=1)))
 
@@ -1050,14 +1050,14 @@ def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postP
         # print(weightsMean)
         # print('mean wJ')
         # print(wJMean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = wJCov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         wJCov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -1073,21 +1073,21 @@ def model_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postP
 
 
 def model_PostProb_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatures, postProb_trainFeatures, fewModel,
-                           labeledGesturesFeatures, labeledGesturesLabels, type_DA, k, N):
+                           labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart):
     t = time.time()
     adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'mean_J', 'wMean_J', 'cov_J', 'wCov_J', '# gestures'])
 
     numberUnlabeledGestures = len(unlabeledGestures.index)
     if numberUnlabeledGestures == 0:
-        currentModel.at[0, '# gestures'] = N
-    elif k > numberUnlabeledGestures > 0:
+        currentModel.at[0, '# gestures']= shotStart
+    elif samplesInMemory > numberUnlabeledGestures > 0:
         unlabeledGestures = postProbabilities_weights_Calculation_KL(unlabeledGestures, currentModel, classes, type_DA,
                                                                      numberUnlabeledGestures, labeledGesturesFeatures,
                                                                      labeledGesturesLabels, weights=True, post=True)
     else:
-        unlabeledGestures = unlabeledGestures.tail(k - 1).reset_index(drop=True)
+        unlabeledGestures = unlabeledGestures.tail(samplesInMemory - 1).reset_index(drop=True)
         unlabeledGestures = postProbabilities_weights_Calculation_KL(unlabeledGestures, currentModel, classes, type_DA,
-                                                                     k - 1, labeledGesturesFeatures,
+                                                                     samplesInMemory - 1, labeledGesturesFeatures,
                                                                      labeledGesturesLabels,
                                                                      weights=True,
                                                                      post=True)
@@ -1121,9 +1121,9 @@ def model_PostProb_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatur
     # print('after RQ1')
     # print(unlabeledGestures[['postProb', 'wMean', 'wCov']])
 
-    if k > currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    if samplesInMemory > currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values * unlabeledGestures['wMean'].values
         sumMean = w_labeledGestures_Mean + np.sum(weightsMean, axis=0)
@@ -1155,9 +1155,9 @@ def model_PostProb_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatur
 
 
 
-    elif k == currentModel['# gestures'].loc[0] - N + 1:
-        w_labeledGestures_Mean = np.ones(classes) * N
-        w_labeledGestures_Cov = np.ones(classes) * N
+    elif samplesInMemory == currentModel['# gestures'].loc[0] -shotStart + 1:
+        w_labeledGestures_Mean = np.ones(classes) * shotStart
+        w_labeledGestures_Cov = np.ones(classes) * shotStart
 
         weightsMean = unlabeledGestures['postProb'].values * unlabeledGestures['wMean'].values
         # if type_DA == 'QDA':
@@ -1181,14 +1181,14 @@ def model_PostProb_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatur
         # print(weightsMean)
         # print('mean equal')
         # print(w_labeledGestures_Mean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = w_labeledGestures_Cov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         w_labeledGestures_Cov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1
@@ -1202,7 +1202,7 @@ def model_PostProb_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatur
             adaptiveModel.at[cla, 'cov'] = covs[:, cla].sum() + fewModel['cov'].loc[cla] * w_labeledGestures_Cov[cla]
 
 
-    elif k < currentModel['# gestures'].loc[0] - N + 1:
+    elif samplesInMemory < currentModel['# gestures'].loc[0] -shotStart + 1:
         wJMean = np.zeros(classes)
         JMean = np.zeros((classes, np.size(trainFeatures, axis=1)))
         weightsMean = unlabeledGestures['postProb'].values * unlabeledGestures['wMean'].values
@@ -1232,14 +1232,14 @@ def model_PostProb_MSDA_KL(currentModel, unlabeledGestures, classes, trainFeatur
         # print(weightsMean)
         # print('mean wJ')
         # print(wJMean)
-        means = np.resize(unlabeledGestures['mean'], (classes, k)).T * weightsMean
+        means = np.resize(unlabeledGestures['mean'], (classes, samplesInMemory)).T * weightsMean
 
         # if type_DA == 'QDA':
         sumCov = wJCov + np.sum(weightsCov, axis=0)
         weightsCov = list(weightsCov) / sumCov
         wJCov /= sumCov
         # weightsCov = np.nan_to_num(weightsCov)
-        covs = np.resize(unlabeledGestures['cov'], (classes, k)).T * weightsCov
+        covs = np.resize(unlabeledGestures['cov'], (classes, samplesInMemory)).T * weightsCov
 
         for cla in range(classes):
             adaptiveModel.at[cla, 'class'] = cla + 1

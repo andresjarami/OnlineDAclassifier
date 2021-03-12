@@ -11,11 +11,11 @@ import sys
 # typeDatabase = str(sys.argv[5])
 # printR = bool(int(sys.argv[6]))
 # shotStart = int(sys.argv[7])
-# k = int(sys.argv[8])
+# samplesInMemory = int(sys.argv[8])
 # nameFile = place + '_FeatureSet_' + sys.argv[1] + '_startPerson_' + sys.argv[2] + '_endPerson_' + sys.argv[
 #     3] + 'shotStart' + sys.argv[7]+ 'memmory' + sys.argv[8] + '.csv'
 # randomSeed = 1
-# expTimes = 50
+# expTimes = 20
 
 # for shotStart in range(1,3):
 
@@ -26,9 +26,9 @@ place = 'resultsExample/exampleE'
 typeDatabase = 'EPN'
 printR = 1
 shotStart = 1
-k = 1
+samplesInMemory = 1
 randomSeed = 1
-expTimes = 50
+expTimes = 20
 
 nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
     startPerson) + '_endPerson_' + str(endPerson) + 'shotStart' + str(shotStart) + 'memmory' + str(k) + '.csv'
@@ -39,4 +39,4 @@ dataMatrix, _, _, classes, peoplePriorK, _, numberShots, _, allFeatures, _ = fun
 
 # Evaluation
 functionsExp1.evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameFile, startPerson,
-                         endPerson, allFeatures, typeDatabase, printR, k, shotStart, randomSeed, expTimes)
+                         endPerson, allFeatures, typeDatabase, printR, samplesInMemory, shotStart, randomSeed, expTimes)
