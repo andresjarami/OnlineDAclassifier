@@ -275,7 +275,7 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_Pos
     plt.plot(x_Old, yLDA_V, label='Vidovic', color='tab:red')
     plt.plot(x_Old, yLDA_O, label='Our_RQ1', color='tab:blue')
 
-    # plt.plot(x, LDA_Baseline, label='LDA_Optimal')
+    plt.plot(x, LDA_Baseline, label='LDA_Optimal')
     # plt.plot(x, LDA_PostProb_MSDA, label='LDA_PostProb_MSDA')
     # plt.plot(x, LDA_PostProb, label='LDA_PostProb')
     # plt.plot(x, LDA_MSDA, label='LDA_MSDA')
@@ -299,7 +299,7 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_Pos
     plt.plot(x_Old, yQDA_L, label='Liu', color='tab:green')
     plt.plot(x_Old, yQDA_V, label='Vidovic', color='tab:red')
     plt.plot(x_Old, yQDA_O, label='Our_RQ1', color='tab:blue')
-    # plt.plot(x, QDA_Baseline, label='QDA_Optimal')
+    plt.plot(x, QDA_Baseline, label='QDA_Optimal')
     # plt.plot(x, QDA_PostProb_MSDA, label='QDA_PostProb_MSDA')
     # plt.plot(x, QDA_PostProb, label='QDA_PostProb')
     # plt.plot(x, QDA_MSDA, label='QDA_MSDA')
@@ -324,8 +324,8 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_Pos
     plt.show()
 
 
-def analysis(folder, database):
-    results, rows = uploadResultsDatabase(folder, database)
+def analysis(place, database):
+    results, rows = uploadResultsDatabase(place, database)
     results_Old, x_Old = uploadResultsDatabasesVF1('../ResultsExp1_RQ1/', database, windowSize='295')
     LDA_NoAdaptive, LDA_Baseline, LDA_PostProb_MSDA, LDA_PostProb, LDA_MSDA, LDA_PostProb_MSDA_KL, \
     LDA_MSDA_KL, QDA_NoAdaptive, QDA_Baseline, QDA_PostProb_MSDA, QDA_PostProb, QDA_MSDA, QDA_PostProb_MSDA_KL, \
@@ -370,25 +370,16 @@ def vectors_calculation_Old(results_Old):
 # %% Analysis
 # place = 'resultsPBS/'
 
-place = 'resultsPBS_2/Cote_'
-database = 'Cote'
-analysis(place, database)
-
-place = 'resultsPBS_2/EPN_'
-database = 'EPN'
-analysis(place, database)
-
-place = 'resultsPBS_2/Nina5_'
-database = 'Nina5'
-analysis(place, database)
-
-# # Nina Pro 5 database
-# database='NinaPro5'
-# resultsNina5=uploadResultsDatabase(place, database)
+# place = 'resultsPBS_2/Cote_'
+# database = 'Cote'
+# analysis(place, database)
 #
-# # EPN database
-# database='EPN'
-# resultsEPN=uploadResultsDatabase(place, database)
+# place = 'resultsPBS_2/EPN_'
+# database = 'EPN'
+# analysis(place, database)
+#
+# place = 'resultsPBS_2/Nina5_'
+# database = 'Nina5'
+# analysis(place, database)
 
 
-# %%

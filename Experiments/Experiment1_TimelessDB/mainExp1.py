@@ -4,34 +4,36 @@ import sys
 ## Input Variables
 
 
-# featureSet = int(sys.argv[1])
-# startPerson = int(sys.argv[2])
-# endPerson = int(sys.argv[3])
-# place = str(sys.argv[4])
-# typeDatabase = str(sys.argv[5])
-# printR = bool(int(sys.argv[6]))
-# shotStart = int(sys.argv[7])
-# samplesInMemory = int(sys.argv[8])
-# nameFile = place + '_FeatureSet_' + sys.argv[1] + '_startPerson_' + sys.argv[2] + '_endPerson_' + sys.argv[
-#     3] + 'shotStart' + sys.argv[7]+ 'memmory' + sys.argv[8] + '.csv'
-# randomSeed = 1
-# expTimes = 20
+featureSet = int(sys.argv[1])
+startPerson = int(sys.argv[2])
+endPerson = int(sys.argv[3])
+place = str(sys.argv[4])
+typeDatabase = str(sys.argv[5])
+printR = bool(int(sys.argv[6]))
+shotStart = int(sys.argv[7])
+samplesInMemory = int(sys.argv[8])
+randomSeed = int(sys.argv[9])
+expTimes = int(sys.argv[10])
+nameFile = place + '_' + typeDatabase + '_FeatureSet_' + sys.argv[1] + '_startPerson_' + sys.argv[2] + '_endPerson_' + sys.argv[
+    3] + '_shotStart_' + sys.argv[7]+ '_memmory_' + sys.argv[8] + '.csv'
+
 
 # for shotStart in range(1,3):
 
-featureSet = 1
-startPerson = 36  # Cote 20-36,EPN 31-60, Nina5 1-10
-endPerson = 37  # Cote 20-36,EPN 31-60, Nina5 1-10
-place = 'resultsExample/exampleE'
-typeDatabase = 'EPN'
-printR = 1
-shotStart = 1
-samplesInMemory = 1
-randomSeed = 1
-expTimes = 20
+# featureSet = 1
+# startPerson = 23  # Cote 20-36,EPN 31-60, Nina5 1-10
+# endPerson = 23  # Cote 20-36,EPN 31-60, Nina5 1-10
+# place = 'resultsExample/exampleE'
+# typeDatabase = 'Cote'
+# printR = 1
+# shotStart = 1
+# samplesInMemory = 0
+# randomSeed = 1
+# expTimes = 2
+# nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
+#     startPerson) + '_endPerson_' + str(endPerson) + '_shotStart_' + str(shotStart) + '_memmory_' + str(samplesInMemory) + '.csv'
 
-nameFile = place + '_' + typeDatabase + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
-    startPerson) + '_endPerson_' + str(endPerson) + 'shotStart' + str(shotStart) + 'memmory' + str(k) + '.csv'
+
 
 # Upload Data
 dataMatrix, _, _, classes, peoplePriorK, _, numberShots, _, allFeatures, _ = functionsExp1.uploadDatabases(
