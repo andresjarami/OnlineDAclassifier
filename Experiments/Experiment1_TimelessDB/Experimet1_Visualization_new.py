@@ -169,25 +169,28 @@ def uploadResultsDatabase(place, database, shotStart, samplesInMemory, featureSe
         classes = 5
         rows = classes * (repetitions - shotStart)
         times = 2
-    try:
-        auxFrame = pd.read_csv(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
-            peoplei_i) + '_endPerson_' + str(peoplei_i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
-            samplesInMemory) + '.csv')
-        resultsTest = auxFrame[:times * rows]
-    except:
-        print('file not found')
-        print(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
-            peoplei_i) + '_endPerson_' + str(peoplei_i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
-            samplesInMemory) + '.csv')
+    # try:
+    #     auxFrame = pd.read_csv(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
+    #         peoplei_i) + '_endPerson_' + str(peoplei_i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
+    #         samplesInMemory) + '.csv')
+    #     resultsTest = auxFrame[:times * rows]
+    # except:
+    #     print('file not found')
+    #     print(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
+    #         peoplei_i) + '_endPerson_' + str(peoplei_i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
+    #         samplesInMemory) + '.csv')
 
-        resultsTest = pd.DataFrame()
+    resultsTest = pd.DataFrame()
 
-    for i in range(peoplei_i + 1, peoplei_f + 1):
+    for i in range(peoplei_i, peoplei_f + 1):
         try:
             auxFrame = pd.read_csv(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
                 i) + '_endPerson_' + str(i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
                 samplesInMemory) + '.csv')
-            resultsTest = pd.concat([resultsTest, auxFrame[:times * rows]], ignore_index=True)
+            resultsTest = pd.concat([resultsTest, auxFrame], ignore_index=True)
+            if len(auxFrame) != rows * times:
+                print('error_person' + ' ' + str(i))
+                print(len(auxFrame))
 
         except:
             print('file not found')
@@ -289,31 +292,33 @@ def vectors_calculation(results, rows):
            results['time_LDA_ACC_PostProb_MSDA_JS_adapt'].std(), results['time_QDA_ACC_PostProb_MSDA_JS_adapt'].std()
 
 
-def graphs(rows, title, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_Baseline,
+def graphs(rows, database, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_Baseline,
            LDA_NoAdaptive_SemiSuperv_PostProb, LDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS,
            LDA_MSDA_JS_SemiSuperv_Baseline, LDA_MSDA_JS_SemiSuperv_PostProb, LDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS,
            QDA_NoAdaptive, QDA_MSDA_JS, QDA_NoAdaptive_SemiSuperv_Baseline, QDA_NoAdaptive_SemiSuperv_PostProb,
            QDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, QDA_MSDA_JS_SemiSuperv_Baseline, QDA_MSDA_JS_SemiSuperv_PostProb,
-           QDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, x_Old, yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O):
+           QDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, x_Old, yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O,
+           shotStart, samplesInMemory, featureSet):
     x = [*range(rows + 1)]
     plt.plot(x, LDA_NoAdaptive, label='Baseline')
     plt.plot(x, LDA_MSDA_JS, label='Baseline_adapt')
-    plt.plot(x_Old, yLDA_L, label='Liu')
-    plt.plot(x_Old, yLDA_V, label='Vidovic')
+    # plt.plot(x_Old, yLDA_L, label='Liu')
+    # plt.plot(x_Old, yLDA_V, label='Vidovic')
     plt.plot(x_Old, yLDA_O, label='Our_RQ1')
 
     plt.plot(x, LDA_NoAdaptive_SemiSuperv_Baseline, label='LDA_Optimal', color='black', linestyle='--')
     plt.plot(x, LDA_MSDA_JS_SemiSuperv_Baseline, label='LDA_Optimal_adapt', linestyle='--')
     plt.plot(x, LDA_NoAdaptive_SemiSuperv_PostProb, label='Our_RQ2_onlypost')
     plt.plot(x, LDA_MSDA_JS_SemiSuperv_PostProb, label='Our_RQ2_onlypost_adapt')
-    plt.plot(x, LDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, label='Our_RQ2', color='tab:purple')
+    plt.plot(x, LDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, label='Our_RQ2')
     plt.plot(x, LDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, label='Our_RQ2_adapt')
 
-    # plt.plot(x_Old, yLDA, label='Ideal', color='black', linestyle='--')
+    plt.plot(x_Old, yLDA, label='Ideal', linestyle='--')
 
     plt.xlabel('number of unlabeled gestures\n (over time)')
     plt.ylabel('accuracy [%]')
-    plt.title(title + ' (LDA)')
+    plt.title(database + ' (LDA)' + ' shotStart' + str(shotStart) + ' smapMem' + str(
+        samplesInMemory) + ' featureSet' + str(featureSet))
     plt.legend()
     # plt.legend(loc='lower center', bbox_to_anchor=(2, -0.7), ncol=1)
     # plt.ylim(0.5, 1)
@@ -323,18 +328,18 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_B
     x = [*range(rows + 1)]
     plt.plot(x, QDA_NoAdaptive, label='Baseline')
     plt.plot(x, QDA_MSDA_JS, label='Baseline_adapt')
-    plt.plot(x_Old, yQDA_L, label='Liu')
-    plt.plot(x_Old, yQDA_V, label='Vidovic')
+    # plt.plot(x_Old, yQDA_L, label='Liu')
+    # plt.plot(x_Old, yQDA_V, label='Vidovic')
     plt.plot(x_Old, yQDA_O, label='Our_RQ1')
 
     plt.plot(x, QDA_NoAdaptive_SemiSuperv_Baseline, label='QDA_Optimal', color='black', linestyle='--')
     plt.plot(x, QDA_MSDA_JS_SemiSuperv_Baseline, label='QDA_Optimal_adapt', linestyle='--')
     plt.plot(x, QDA_NoAdaptive_SemiSuperv_PostProb, label='Our_RQ2_onlypost')
     plt.plot(x, QDA_MSDA_JS_SemiSuperv_PostProb, label='Our_RQ2_onlypost_adapt')
-    plt.plot(x, QDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, label='Our_RQ2', color='tab:purple')
+    plt.plot(x, QDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, label='Our_RQ2')
     plt.plot(x, QDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, label='Our_RQ2_adapt')
 
-    # plt.plot(x_Old, yQDA, label='Ideal', color='black', linestyle='--')
+    plt.plot(x_Old, yQDA, label='Ideal', linestyle='--')
 
     # if len(x) > 100:
     #     x = [0] + [*range(10, rows + 1)]
@@ -345,7 +350,9 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_B
 
     plt.xlabel('number of unlabeled gestures\n (over time)')
     plt.ylabel('accuracy [%]')
-    plt.title(title + ' (QDA)')
+    plt.title(
+        database + ' (QDA)' + ' shotStart' + str(shotStart) + ' smapMem' + str(samplesInMemory) + ' featureSet' + str(
+            featureSet))
     plt.legend()
     # plt.legend(loc='lower center', bbox_to_anchor=(1.5, -1), ncol=1)
     # plt.ylim(0.5, 1)
@@ -355,6 +362,9 @@ def graphs(rows, title, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_B
 
 def analysis(place, database, shotStart, samplesInMemory, featureSet):
     results, rows = uploadResultsDatabase(place, database, shotStart, samplesInMemory, featureSet)
+    print(results['AccLDAProp_JS'].loc[(results['exp_time']==0)&(results['# shots']==1)])
+    print(results['AccLDAfew'].loc[(results['exp_time'] == 0) & (results['# shots'] == 1)])
+
     results_Old, x_Old = uploadResultsDatabasesVF1('../ResultsExp1_RQ1/', database, windowSize='295')
     LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_Baseline, LDA_NoAdaptive_SemiSuperv_PostProb, \
     LDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, LDA_MSDA_JS_SemiSuperv_Baseline, LDA_MSDA_JS_SemiSuperv_PostProb, \
@@ -363,15 +373,15 @@ def analysis(place, database, shotStart, samplesInMemory, featureSet):
     QDA_MSDA_JS_SemiSuperv_Baseline, QDA_MSDA_JS_SemiSuperv_PostProb, QDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, \
     time_LDA, time_QDA, time_LDA_std, time_QDA_std, time_LDA_adapt, time_QDA_adapt, time_LDA_std_adapt, time_QDA_std_adapt \
         = vectors_calculation(results, rows)
-    print(database)
-    print('timeLDA', time_LDA)
-    print('std', time_LDA_std)
-    print('timeQDA', time_QDA)
-    print('std', time_QDA_std)
-    print('timeLDA_adapt', time_LDA_adapt)
-    print('std_adapt', time_LDA_std_adapt)
-    print('timeQDA_adapt', time_QDA_adapt)
-    print('std_adapt', time_QDA_std_adapt)
+    # print(database)
+    # print('timeLDA', time_LDA)
+    # print('std', time_LDA_std)
+    # print('timeQDA', time_QDA)
+    # print('std', time_QDA_std)
+    # print('timeLDA_adapt', time_LDA_adapt)
+    # print('std_adapt', time_LDA_std_adapt)
+    # print('timeQDA_adapt', time_QDA_adapt)
+    # print('std_adapt', time_QDA_std_adapt)
     yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O = vectors_calculation_Old(results_Old, shotStart,
                                                                                          featureSet)
     graphs(rows, database, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuperv_Baseline,
@@ -379,7 +389,8 @@ def analysis(place, database, shotStart, samplesInMemory, featureSet):
            LDA_MSDA_JS_SemiSuperv_Baseline, LDA_MSDA_JS_SemiSuperv_PostProb, LDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS,
            QDA_NoAdaptive, QDA_MSDA_JS, QDA_NoAdaptive_SemiSuperv_Baseline, QDA_NoAdaptive_SemiSuperv_PostProb,
            QDA_NoAdaptive_SemiSuperv_PostProb_MSDA_JS, QDA_MSDA_JS_SemiSuperv_Baseline, QDA_MSDA_JS_SemiSuperv_PostProb,
-           QDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, x_Old, yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O)
+           QDA_MSDA_JS_SemiSuperv_PostProb_MSDA_JS, x_Old, yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O,
+           shotStart, samplesInMemory, featureSet)
 
 
 # shots
@@ -417,24 +428,26 @@ def vectors_calculation_Old(results_Old, shotStart, featureSet):
 # %% Analysis
 import Experimet1_Visualization as EV
 
-######### Cote
-analysis(place='results_JS/', database='Cote', shotStart=1, samplesInMemory=1, featureSet=1)
+# ######### Cote
+# EV.analysis(place='resultsPBS_2/Cote_', database='Cote')
+# analysis(place='results_JS/', database='Cote', shotStart=1, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='Cote', shotStart=1, samplesInMemory=1, featureSet=1)
+# analysis(place='results_RQ1/', database='Cote', shotStart=1, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='Cote', shotStart=2, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='Cote', shotStart=2, samplesInMemory=1, featureSet=1)
 
-analysis(place='results_JS/', database='Cote', shotStart=2, samplesInMemory=1, featureSet=1)
-
-EV.analysis(place='resultsPBS_2/Cote_', database='Cote')
-
-####### Nina5
-# analysis(place='results_JS/', database = 'Nina5', shotStart=1, samplesInMemory=1, featureSet=1)
-
-# analysis(place='results_JS/', database = 'Nina5', shotStart=2, samplesInMemory=1, featureSet=1)
+# ###### Nina5
+# EV.analysis(place='resultsPBS_2/Nina5_', database='Nina5')
+# analysis(place='results_JS/', database='Nina5', shotStart=1, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='Nina5', shotStart=1, samplesInMemory=1, featureSet=1)
+# analysis(place='results_RQ1/', database='Nina5', shotStart=1, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='Nina5', shotStart=2, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='Nina5', shotStart=2, samplesInMemory=1, featureSet=1)
 #
-# EV.analysis(place = 'resultsPBS_2/Nina5_', database = 'Nina5')
-
-
 ########## EPN
-# analysis(place='results_JS/', database = 'EPN', shotStart=1, samplesInMemory=1, featureSet=1)
-
-# analysis(place='results_JS/', database = 'EPN', shotStart=1, samplesInMemory=1, featureSet=1)
-
-# EV.analysis(place = 'resultsPBS_2/EPN_', database = 'EPN')
+EV.analysis(place='resultsPBS_2/EPN_', database='EPN')
+analysis(place='results_JS/', database='EPN', shotStart=1, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='EPN', shotStart=1, samplesInMemory=1, featureSet=1)
+analysis(place='results_RQ1/', database='EPN', shotStart=1, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='EPN', shotStart=2, samplesInMemory=0, featureSet=1)
+# analysis(place='results_JS/', database='EPN', shotStart=2, samplesInMemory=1, featureSet=1)

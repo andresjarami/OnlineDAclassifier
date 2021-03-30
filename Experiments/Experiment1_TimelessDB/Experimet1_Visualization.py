@@ -153,19 +153,22 @@ def uploadResultsDatabase(folder, database):
         peoplei_i = 1
         peoplei_f = 10
         rows = 18 * samples
-        times = 8
+        times = 2
+        # times = 8
     elif database == 'Cote':
         samples = 3
         peoplei_i = 20
         peoplei_f = 36
         rows = 7 * samples
-        times = 18
+        times = 2
+        # times = 18
     elif database == 'EPN':
         samples = 24
         peoplei_i = 31
         peoplei_f = 60
         rows = 5 * samples
-        times = 4
+        times = 2
+        # times = 4
     place = folder + database
     shotStart = 1
     k = 1

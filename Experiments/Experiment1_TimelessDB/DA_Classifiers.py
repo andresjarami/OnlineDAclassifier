@@ -47,17 +47,24 @@ def accuracyModelLDA(testFeatures, testLabels, model, classes):
     true = 0
     count = 0
     LDACov = LDA_Cov(model, classes)
-    for i in range(0, np.size(testLabels)):
+    precision = np.zeros((2, classes))
+    recall = np.zeros((2, classes))
+    for i in range(np.size(testLabels)):
         auxt = time.time()
         currentPredictor = predictedModelLDA(testFeatures[i, :], model, classes, LDACov)
         t += (time.time() - auxt)
         if currentPredictor == testLabels[i]:
             true += 1
             count += 1
+            recall[0, int(testLabels[i] - 1)] += 1
+            precision[0, int(currentPredictor - 1)] += 1
         else:
             count += 1
+            recall[1, int(testLabels[i] - 1)] += 1
+            precision[1, int(currentPredictor - 1)] += 1
 
-    return true / count, t / np.size(testLabels)
+    return true / count, precision[0, :] / precision.sum(axis=0), recall[0, :] / recall.sum(axis=0), t / np.size(
+        testLabels)
 
 
 # QDA Classifier
@@ -94,16 +101,23 @@ def accuracyModelQDA(testFeatures, testLabels, model, classes):
     t = 0
     true = 0
     count = 0
+    precision = np.zeros((2, classes))
+    recall = np.zeros((2, classes))
     for i in range(0, np.size(testLabels)):
         auxt = time.time()
-        actualPredictor = predictedModelQDA(testFeatures[i, :], model, classes)
+        currentPredictor = predictedModelQDA(testFeatures[i, :], model, classes)
         t += (time.time() - auxt)
-        if actualPredictor == testLabels[i]:
+        if currentPredictor == testLabels[i]:
             true += 1
             count += 1
+            recall[0, int(testLabels[i] - 1)] += 1
+            precision[0, int(currentPredictor - 1)] += 1
         else:
             count += 1
-    return true / count, t / np.size(testLabels)
+            recall[1, int(testLabels[i] - 1)] += 1
+            precision[1, int(currentPredictor - 1)] += 1
+    return true / count, precision[0, :] / precision.sum(axis=0), recall[0, :] / recall.sum(axis=0), t / np.size(
+        testLabels)
 
 
 ######
@@ -282,7 +296,7 @@ def predictedModelLDAProb(sample, model, classes, LDACov):
         if math.isnan(d[cl]):
             return predictedModelLDA_pseudoProb(sample, model, classes, LDACov)
     d = d - d[np.argmin(d)]
-    return d/ d.sum()
+    return d / d.sum()
 
 
 def predictedModelLDA_pseudoProb(sample, model, classes, LDACov):
@@ -290,8 +304,7 @@ def predictedModelLDA_pseudoProb(sample, model, classes, LDACov):
     for cl in range(classes):
         d[cl] = LDA_Discriminant_pseudo(sample, LDACov, model['mean'].loc[cl])
     d = d - d[np.argmin(d)]
-    return d/ d.sum()
-
+    return d / d.sum()
 
 
 def predictedModelQDAProb(sample, model, classes):
@@ -310,4 +323,3 @@ def predictedModelQDA_pseudoProb(sample, model, classes):
         d[cl] = QDA_Discriminant_pseudo(sample, model['cov'].loc[cl], model['mean'].loc[cl])
     d = d - d[np.argmin(d)]
     return d / d.sum(), np.argmax(d) + 1
-
