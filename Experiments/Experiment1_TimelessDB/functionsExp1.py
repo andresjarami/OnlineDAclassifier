@@ -109,26 +109,37 @@ def uploadDatabases(Database, featureSet=1):
 
 
 def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameFile, startPerson, endPerson,
-               allFeatures, printR, samplesInMemory, shotStart, initialTime, finalTime):
+               allFeatures, printR, samplesInMemory, shotStart, initialTime, finalTime, typeDatabase):
     scaler = preprocessing.MinMaxScaler()
 
     results = pd.DataFrame(
-        columns=['Feature Set', 'person', 'exp_time', '# shots', 'shot_class', 'time_AccLDA_PostProb',
-                 'time_AccLDA_PostProb_Adapted', 'time_AccLDA_PostProb_MSDA', 'time_AccLDA_PostProb_MSDA_Adapted',
-                 'time_AccQDA_PostProb', 'time_AccQDA_PostProb_Adapted', 'time_AccQDA_PostProb_MSDA',
-                 'time_AccQDA_PostProb_MSDA_Adapted', 'precision_LDA_Ideal', 'precision_LDA_NoAdapted',
-                 'precision_LDA_PostProb', 'precision_LDA_PostProb_MSDA', 'precision_LDA_Adapted',
-                 'precision_LDA_PostProb_Adapted', 'precision_LDA_PostProb_MSDA_Adapted', 'precision_QDA_Ideal',
-                 'precision_QDA_NoAdapted', 'precision_QDA_PostProb', 'precision_QDA_PostProb_MSDA',
-                 'precision_QDA_Adapted', 'precision_QDA_PostProb_Adapted', 'precision_QDA_PostProb_MSDA_Adapted',
-                 'recall_LDA_Ideal', 'recall_LDA_NoAdapted', 'recall_LDA_PostProb', 'recall_LDA_PostProb_MSDA',
-                 'recall_LDA_Adapted', 'recall_LDA_PostProb_Adapted', 'recall_LDA_PostProb_MSDA_Adapted',
-                 'recall_QDA_Ideal', 'recall_QDA_NoAdapted', 'recall_QDA_PostProb', 'recall_QDA_PostProb_MSDA',
-                 'recall_QDA_Adapted', 'recall_QDA_PostProb_Adapted', 'recall_QDA_PostProb_MSDA_Adapted',
-                 'AccLDA_Ideal', 'AccLDA_NoAdapted', 'AccLDA_PostProb', 'AccLDA_PostProb_MSDA', 'AccLDA_Adapted',
-                 'AccLDA_PostProb_Adapted', 'AccLDA_PostProb_MSDA_Adapted', 'AccQDA_Ideal', 'AccQDA_NoAdapted',
-                 'AccQDA_PostProb', 'AccQDA_PostProb_MSDA', 'AccQDA_Adapted', 'AccQDA_PostProb_Adapted',
-                 'AccQDA_PostProb_MSDA_Adapted'])
+        columns=['Feature Set', 'person', 'exp_time', '# shots', 'shot_class', 'precision_LDA_Ideal',
+                 'precision_LDA_NoAdapted', 'precision_LDA_PostProb', 'precision_LDA_Labels',
+                 'precision_LDA_PostProb_MSDA', 'precision_LDA_Adapted', 'precision_LDA_PostProb_Adapted',
+                 'precision_LDA_Labels_Adapted', 'precision_LDA_PostProb_MSDA_Adapted', 'precision_QDA_Ideal',
+                 'precision_QDA_NoAdapted', 'precision_QDA_PostProb', 'precision_QDA_Labels',
+                 'precision_QDA_PostProb_MSDA', 'precision_QDA_Adapted', 'precision_QDA_PostProb_Adapted',
+                 'precision_QDA_Labels_Adapted', 'precision_QDA_PostProb_MSDA_Adapted', 'recall_LDA_Ideal',
+                 'recall_LDA_NoAdapted', 'recall_LDA_PostProb', 'recall_LDA_Labels', 'recall_LDA_PostProb_MSDA',
+                 'recall_LDA_Adapted', 'recall_LDA_PostProb_Adapted', 'recall_LDA_Labels_Adapted',
+                 'recall_LDA_PostProb_MSDA_Adapted', 'recall_QDA_Ideal', 'recall_QDA_NoAdapted', 'recall_QDA_PostProb',
+                 'recall_QDA_Labels', 'recall_QDA_PostProb_MSDA', 'recall_QDA_Adapted', 'recall_QDA_PostProb_Adapted',
+                 'recall_QDA_Labels_Adapted', 'recall_QDA_PostProb_MSDA_Adapted', 'AccLDA_Ideal', 'AccLDA_NoAdapted',
+                 'AccLDA_PostProb', 'AccLDA_Labels', 'AccLDA_PostProb_MSDA', 'AccLDA_Adapted',
+                 'AccLDA_PostProb_Adapted', 'AccLDA_Labels_Adapted', 'AccLDA_PostProb_MSDA_Adapted', 'AccQDA_Ideal',
+                 'AccQDA_NoAdapted', 'AccQDA_PostProb', 'AccQDA_Labels', 'AccQDA_PostProb_MSDA', 'AccQDA_Adapted',
+                 'AccQDA_PostProb_Adapted', 'AccQDA_Labels_Adapted', 'AccQDA_PostProb_MSDA_Adapted'])
+
+    # results = pd.DataFrame(
+    #     columns=['Feature Set', 'person', 'exp_time', '# shots', 'shot_class', 'precision_LDA_Ideal',
+    #              'precision_LDA_NoAdapted', 'precision_LDA_PostProb', 'precision_LDA_Labels',
+    #              'precision_LDA_PostProb_MSDA', 'precision_QDA_Ideal', 'precision_QDA_NoAdapted',
+    #              'precision_QDA_PostProb', 'precision_QDA_Labels', 'precision_QDA_PostProb_MSDA', 'recall_LDA_Ideal',
+    #              'recall_LDA_NoAdapted', 'recall_LDA_PostProb', 'recall_LDA_Labels', 'recall_LDA_PostProb_MSDA',
+    #              'recall_QDA_Ideal', 'recall_QDA_NoAdapted', 'recall_QDA_PostProb', 'recall_QDA_Labels',
+    #              'recall_QDA_PostProb_MSDA', 'AccLDA_Ideal', 'AccLDA_NoAdapted', 'AccLDA_PostProb', 'AccLDA_Labels',
+    #              'AccLDA_PostProb_MSDA', 'AccQDA_Ideal', 'AccQDA_NoAdapted', 'AccQDA_PostProb', 'AccQDA_Labels',
+    #              'AccQDA_PostProb_MSDA'])
 
     idx = 0
     unlabeledGestures = [[shot, cl] for shot in range(shotStart + 1, numberShots + 1) for cl in range(1, classes + 1)]
@@ -148,12 +159,12 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
         labeledGesturesFeatures = scaler.fit_transform(labeledGesturesFeatures)
         testFeatures = scaler.transform(testFeatures)
 
-        if initialTime == 1:
+        if initialTime == -1:
 
             weakModel = currentDistributionValues(labeledGesturesFeatures, labeledGesturesLabels, classes, allFeatures,
                                                   shotStart)
             weakModel.to_pickle(
-                'pretrainedModels/weakModel_featureSet_' + str(featureSet) + '_person_' + str(
+                'pretrainedModels/weakModel_' + typeDatabase + '_featureSet_' + str(featureSet) + '_person_' + str(
                     person) + '_shotStart_' + str(shotStart) + '.pkl')
 
             # adaptive model
@@ -170,11 +181,11 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                                                                labeledGesturesFeatures, labeledGesturesLabels,
                                                                step, 'QDA', k, shotStart)
             adaptedModelLDA.to_pickle(
-                'pretrainedModels/adaptedModelLDA_featureSet_' + str(featureSet) + '_person_' + str(
-                    person) + '_shotStart_' + str(shotStart) + '.pkl')
+                'pretrainedModels/adaptedModelLDA_' + typeDatabase + '_featureSet_' + str(
+                    featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '.pkl')
             adaptedModelQDA.to_pickle(
-                'pretrainedModels/adaptedModelQDA_featureSet_' + str(featureSet) + '_person_' + str(
-                    person) + '_shotStart_' + str(shotStart) + '.pkl')
+                'pretrainedModels/adaptedModelQDA_' + typeDatabase + '_featureSet_' + str(
+                    featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '.pkl')
 
             results.at[idx, 'AccLDA_NoAdapted'], results.at[idx, 'precision_LDA_NoAdapted'], results.at[
                 idx, 'recall_LDA_NoAdapted'], _ = DA_Classifiers.accuracyModelLDA(
@@ -194,15 +205,31 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
 
         else:
             adaptedModelLDA = pd.read_pickle(
-                'pretrainedModels/adaptedModelLDA_featureSet_' + str(featureSet) + '_person_' + str(
-                    person) + '_shotStart_' + str(shotStart) + '.pkl')
+                'pretrainedModels/adaptedModelLDA_' + typeDatabase + '_featureSet_' + str(
+                    featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '.pkl')
             adaptedModelQDA = pd.read_pickle(
-                'pretrainedModels/adaptedModelQDA_featureSet_' + str(featureSet) + '_person_' + str(
-                    person) + '_shotStart_' + str(shotStart) + '.pkl')
+                'pretrainedModels/adaptedModelQDA_' + typeDatabase + '_featureSet_' + str(
+                    featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '.pkl')
 
             weakModel = pd.read_pickle(
-                'pretrainedModels/weakModel_featureSet_' + str(featureSet) + '_person_' + str(
+                'pretrainedModels/weakModel_' + typeDatabase + '_featureSet_' + str(featureSet) + '_person_' + str(
                     person) + '_shotStart_' + str(shotStart) + '.pkl')
+
+            results.at[idx, 'AccLDA_NoAdapted'], results.at[idx, 'precision_LDA_NoAdapted'], results.at[
+                idx, 'recall_LDA_NoAdapted'], _ = DA_Classifiers.accuracyModelLDA(
+                testFeatures, testLabels, weakModel, classes)
+
+            results.at[idx, 'AccQDA_NoAdapted'], results.at[idx, 'precision_QDA_NoAdapted'], results.at[
+                idx, 'recall_QDA_NoAdapted'], _ = DA_Classifiers.accuracyModelQDA(
+                testFeatures, testLabels, weakModel, classes)
+
+            results.at[idx, 'AccLDA_Adapted'], results.at[idx, 'precision_LDA_Adapted'], results.at[
+                idx, 'recall_LDA_Adapted'], _ = DA_Classifiers.accuracyModelLDA(
+                testFeatures, testLabels, adaptedModelLDA, classes)
+
+            results.at[idx, 'AccQDA_Adapted'], results.at[idx, 'precision_QDA_Adapted'], results.at[
+                idx, 'recall_QDA_Adapted'], _ = DA_Classifiers.accuracyModelQDA(
+                testFeatures, testLabels, adaptedModelQDA, classes)
 
         for randomExperiments in range(initialTime, finalTime + 1):
             nShots = 0
@@ -213,10 +240,14 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
             proposedModelQDA_PostProb_MSDA = weakModel.copy()
             proposedModelLDA_PostProb = weakModel.copy()
             proposedModelQDA_PostProb = weakModel.copy()
+            proposedModelLDA_Labels = weakModel.copy()
+            proposedModelQDA_Labels = weakModel.copy()
             proposedModelLDA_PostProb_adap = adaptedModelLDA.copy()
             proposedModelQDA_PostProb_adap = adaptedModelQDA.copy()
             proposedModelLDA_PostProb_MSDA_adap = adaptedModelLDA.copy()
             proposedModelQDA_PostProb_MSDA_adap = adaptedModelQDA.copy()
+            proposedModelLDA_Labels_adap = adaptedModelLDA.copy()
+            proposedModelQDA_Labels_adap = adaptedModelLDA.copy()
 
             np.random.seed(randomExperiments)
             for rand in list(np.random.permutation(unlabeledGestures)):
@@ -245,17 +276,25 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                     idx, 'recall_QDA_Ideal'], _ = DA_Classifiers.accuracyModelQDA(
                     testFeatures, testLabels, idealModel, classes)
 
+                # results.at[idx, 'AccLDA_Ideal'], _, _, _ = DA_Classifiers.accuracyModelLDA(
+                #     testFeatures, testLabels, idealModel, classes)
+                #
+                # results.at[idx, 'AccQDA_Ideal'], _, _, _ = DA_Classifiers.accuracyModelQDA(
+                #     testFeatures, testLabels, idealModel, classes)
+
                 results, idx, proposedModelLDA_PostProb_MSDA, proposedModelQDA_PostProb_MSDA, \
                 proposedModelLDA_PostProb_MSDA_adap, proposedModelQDA_PostProb_MSDA_adap, proposedModelLDA_PostProb, \
-                proposedModelQDA_PostProb, proposedModelLDA_PostProb_adap, proposedModelQDA_PostProb_adap = \
+                proposedModelQDA_PostProb, proposedModelLDA_PostProb_adap, proposedModelQDA_PostProb_adap, \
+                proposedModelLDA_Labels, proposedModelQDA_Labels, proposedModelLDA_Labels_adap, proposedModelQDA_Labels_adap = \
                     resultsDataframe(
                         trainFeatures, trainLabels, classes, results, testFeatures, testLabels, idx, person,
                         randomExperiments, nShots, rand, featureSet, nameFile, printR, labeledGesturesFeatures,
                         labeledGesturesLabels, proposedModelLDA_PostProb_MSDA, proposedModelQDA_PostProb_MSDA,
-                        proposedModelLDA_PostProb, proposedModelQDA_PostProb, weakModel, samplesInMemory, shotStart,
+                        proposedModelLDA_PostProb, proposedModelQDA_PostProb, proposedModelLDA_Labels,
+                        proposedModelQDA_Labels, weakModel, samplesInMemory, shotStart,
                         adaptedModelLDA, adaptedModelQDA, proposedModelLDA_PostProb_adap,
                         proposedModelQDA_PostProb_adap, proposedModelLDA_PostProb_MSDA_adap,
-                        proposedModelQDA_PostProb_MSDA_adap)
+                        proposedModelQDA_PostProb_MSDA_adap, proposedModelLDA_Labels_adap, proposedModelQDA_Labels_adap)
 
     return results
 
@@ -283,9 +322,10 @@ def PKModels(dataMatrix, classes, peoplePriorK, evaluatedPerson, allFeatures):
 def resultsDataframe(
         trainFeatures, trainLabels, classes, results, testFeatures, testLabels, idx, person, exp_time, nShots, rand,
         featureSet, nameFile, printR, labeledGesturesFeatures, labeledGesturesLabels, proposedModelLDA_PostProb_MSDA,
-        proposedModelQDA_PostProb_MSDA, proposedModelLDA_PostProb, proposedModelQDA_PostProb, weakModel,
-        samplesInMemory, shotStart, adaptedModelLDA, adaptedModelQDA, proposedModelLDA_PostProb_adap,
-        proposedModelQDA_PostProb_adap, proposedModelLDA_PostProb_MSDA_adap, proposedModelQDA_PostProb_MSDA_adap):
+        proposedModelQDA_PostProb_MSDA, proposedModelLDA_PostProb, proposedModelQDA_PostProb, proposedModelLDA_Labels,
+        proposedModelQDA_Labels, weakModel, samplesInMemory, shotStart, adaptedModelLDA, adaptedModelQDA,
+        proposedModelLDA_PostProb_adap, proposedModelQDA_PostProb_adap, proposedModelLDA_PostProb_MSDA_adap,
+        proposedModelQDA_PostProb_MSDA_adap, proposedModelLDA_Labels_adap, proposedModelQDA_Labels_adap):
     type_DA_set = ['LDA', 'QDA']
     for type_DA in type_DA_set:
         if type_DA == 'LDA':
@@ -293,12 +333,15 @@ def resultsDataframe(
             proposedModelLDA_PostProb_MSDA, results, = SemiSupervisedModels(
                 proposedModelLDA_PostProb_MSDA, type_DA, trainFeatures, trainLabels,
                 classes, labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures,
-                testLabels, samplesInMemory, shotStart, typeModel='PostProb_MSDA')
-
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='PostProb_MSDA')
+            proposedModelLDA_Labels, results = SemiSupervisedModels(
+                proposedModelLDA_Labels, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels,
+                samplesInMemory, shotStart, nShots, typeModel='Labels')
             proposedModelLDA_PostProb, results = SemiSupervisedModels(
                 proposedModelLDA_PostProb, type_DA, trainFeatures, trainLabels, classes,
                 labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels,
-                samplesInMemory, shotStart, typeModel='PostProb')
+                samplesInMemory, shotStart, nShots, typeModel='PostProb')
             # proposedModelLDA_MSDA, results, unlabeledGesturesLDA_MSDA = SemiSupervisedModels(
             #     proposedModelLDA_MSDA, unlabeledGesturesLDA_MSDA, type_DA, trainFeatures, trainLabels, classes,
             #     labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels,
@@ -321,11 +364,15 @@ def resultsDataframe(
                 proposedModelLDA_PostProb_MSDA_adap, type_DA, trainFeatures,
                 trainLabels,
                 classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelLDA, results, idx, testFeatures,
-                testLabels, samplesInMemory, shotStart, typeModel='PostProb_MSDA', adaptation='_Adapted')
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='PostProb_MSDA', adaptation='_Adapted')
+            proposedModelLDA_Labels_adap, results = SemiSupervisedModels(
+                proposedModelLDA_Labels_adap, type_DA, trainFeatures, trainLabels,
+                classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelLDA, results, idx, testFeatures,
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='Labels', adaptation='_Adapted')
             proposedModelLDA_PostProb_adap, results = SemiSupervisedModels(
                 proposedModelLDA_PostProb_adap, type_DA, trainFeatures, trainLabels,
                 classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelLDA, results, idx, testFeatures,
-                testLabels, samplesInMemory, shotStart, typeModel='PostProb', adaptation='_Adapted')
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='PostProb', adaptation='_Adapted')
             # # proposedModelLDA_Baseline_adap, results, unlabeledGesturesLDA_Baseline_adap = SemiSupervisedModels(
             # #     proposedModelLDA_Baseline_adap, unlabeledGesturesLDA_Baseline_adap, type_DA, trainFeatures, trainLabels,
             # #     classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelLDA, results, idx, testFeatures,
@@ -337,15 +384,19 @@ def resultsDataframe(
             #     adaptation='_Adapted')
 
         elif type_DA == 'QDA':
-            print(type_DA)
+
             proposedModelQDA_PostProb_MSDA, results = SemiSupervisedModels(
                 proposedModelQDA_PostProb_MSDA, type_DA, trainFeatures, trainLabels,
                 classes, labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures,
-                testLabels, samplesInMemory, shotStart, typeModel='PostProb_MSDA')
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='PostProb_MSDA')
+            proposedModelQDA_Labels, results = SemiSupervisedModels(
+                proposedModelQDA_Labels, type_DA, trainFeatures, trainLabels, classes,
+                labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels,
+                samplesInMemory, shotStart, nShots, typeModel='Labels')
             proposedModelQDA_PostProb, results = SemiSupervisedModels(
                 proposedModelQDA_PostProb, type_DA, trainFeatures, trainLabels, classes,
                 labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels,
-                samplesInMemory, shotStart, typeModel='PostProb')
+                samplesInMemory, shotStart, nShots, typeModel='PostProb')
             # proposedModelQDA_MSDA, results, unlabeledGesturesQDA_MSDA = SemiSupervisedModels(
             #     proposedModelQDA_MSDA, unlabeledGesturesQDA_MSDA, type_DA, trainFeatures, trainLabels, classes,
             #     labeledGesturesFeatures, labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels,
@@ -368,11 +419,15 @@ def resultsDataframe(
                 proposedModelQDA_PostProb_MSDA_adap, type_DA, trainFeatures,
                 trainLabels,
                 classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelQDA, results, idx, testFeatures,
-                testLabels, samplesInMemory, shotStart, typeModel='PostProb_MSDA', adaptation='_Adapted')
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='PostProb_MSDA', adaptation='_Adapted')
+            proposedModelQDA_Labels_adap, results = SemiSupervisedModels(
+                proposedModelQDA_Labels_adap, type_DA, trainFeatures, trainLabels,
+                classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelQDA, results, idx, testFeatures,
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='Labels', adaptation='_Adapted')
             proposedModelQDA_PostProb_adap, results = SemiSupervisedModels(
                 proposedModelQDA_PostProb_adap, type_DA, trainFeatures, trainLabels,
                 classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelQDA, results, idx, testFeatures,
-                testLabels, samplesInMemory, shotStart, typeModel='PostProb', adaptation='_Adapted')
+                testLabels, samplesInMemory, shotStart, nShots, typeModel='PostProb', adaptation='_Adapted')
             # # proposedModelQDA_Baseline_adap, results, unlabeledGesturesQDA_Baseline_adap = SemiSupervisedModels(
             # #     proposedModelQDA_Baseline_adap, unlabeledGesturesQDA_Baseline_adap, type_DA, trainFeatures, trainLabels,
             # #     classes, labeledGesturesFeatures, labeledGesturesLabels, adaptedModelQDA, results, idx, testFeatures,
@@ -400,25 +455,39 @@ def resultsDataframe(
 
     return results, idx, proposedModelLDA_PostProb_MSDA, proposedModelQDA_PostProb_MSDA, \
            proposedModelLDA_PostProb_MSDA_adap, proposedModelQDA_PostProb_MSDA_adap, proposedModelLDA_PostProb, \
-           proposedModelQDA_PostProb, proposedModelLDA_PostProb_adap, proposedModelQDA_PostProb_adap
+           proposedModelQDA_PostProb, proposedModelLDA_PostProb_adap, proposedModelQDA_PostProb_adap, \
+           proposedModelLDA_Labels, proposedModelQDA_Labels, proposedModelLDA_Labels_adap, proposedModelQDA_Labels_adap
 
 
 def SemiSupervisedModels(currentModel, type_DA, trainFeatures, trainLabels, classes, labeledGesturesFeatures,
                          labeledGesturesLabels, weakModel, results, idx, testFeatures, testLabels, samplesInMemory,
-                         shotStart, typeModel, adaptation=''):
+                         shotStart, nShots, typeModel, adaptation=''):
     name = 'Acc' + type_DA + '_' + typeModel + adaptation
 
     postProb_trainFeatures = SemiSupervised.post_probabilities_Calculation(trainFeatures, currentModel, classes,
                                                                            type_DA)
     if typeModel == 'PostProb_MSDA':
-        name = 'Acc' + type_DA + '_' + typeModel + adaptation
-        updatedModel, results.at[idx, 'time_' + name] = SemiSupervised.model_PostProb_MSDA(
+        updatedModel, results.at[
+            idx, 'time_' + name], predictedWeight = SemiSupervised.model_MSDAlabels(
             currentModel, classes, trainFeatures, postProb_trainFeatures, weakModel,
             labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart)
+        # updatedModel, _, predictedWeight = SemiSupervised.model_MSDAlabels(
+        #     currentModel, classes, trainFeatures, postProb_trainFeatures, weakModel,
+        #     labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart)
+    elif typeModel == 'Labels':
+        updatedModel, results.at[idx, 'time_' + name], predictedWeight = SemiSupervised.model_Labels(
+            currentModel, classes, trainFeatures, postProb_trainFeatures, weakModel,
+            labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart)
+        # updatedModel, _, predictedWeight = SemiSupervised.model_Labels(
+        #     currentModel, classes, trainFeatures, postProb_trainFeatures, weakModel,
+        #     labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart)
     elif typeModel == 'PostProb':
-        updatedModel, results.at[idx, 'time_' + name] = SemiSupervised.model_PostProb(
+        updatedModel, results.at[idx, 'time_' + name], predictedWeight = SemiSupervised.model_PostProb(
             currentModel, classes, trainFeatures, postProb_trainFeatures, weakModel,
             labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart)
+        # updatedModel, _, predictedWeight = SemiSupervised.model_PostProb(
+        #     currentModel, classes, trainFeatures, postProb_trainFeatures, weakModel,
+        #     labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart)
     # elif typeModel == 'MSDA':
     #     typeModel = 'PostProb_MSDA_2w_sum_Nonorm'
     #     name = 'Acc' + type_DA + '_' + typeModel + adaptation
@@ -445,6 +514,7 @@ def SemiSupervisedModels(currentModel, type_DA, trainFeatures, trainLabels, clas
         results.at[idx, name], results.at[idx, 'precision_' + type_DA + '_' + typeModel + adaptation], results.at[
             idx, 'recall_' + type_DA + '_' + typeModel + adaptation], _ = DA_Classifiers.accuracyModelLDA(
             testFeatures, testLabels, updatedModel, classes)
+
     elif type_DA == 'QDA':
         results.at[idx, name], results.at[idx, 'precision_' + type_DA + '_' + typeModel + adaptation], results.at[
             idx, 'recall_' + type_DA + '_' + typeModel + adaptation], _ = DA_Classifiers.accuracyModelQDA(
@@ -456,6 +526,22 @@ def SemiSupervisedModels(currentModel, type_DA, trainFeatures, trainLabels, clas
     # elif type_DA == 'QDA':
     #     results.at[idx, name], _, _, _ = DA_Classifiers.accuracyModelQDA(
     #         testFeatures, testLabels, updatedModel, classes)
+
+    observedWeight = np.zeros(classes)
+    observedWeight[int(trainLabels[0] - 1)] = 1
+    name = 'Error' + type_DA + '_' + typeModel + adaptation
+    if nShots != 1:
+        results.at[idx, 'MAE_' + name] = (results.at[idx - 1, 'MAE_' + name] * (
+                nShots - 1) + SemiSupervised.MAE(predictedWeight, observedWeight)) / nShots
+        results.at[idx, '1_' + name] = (results.at[idx - 1, '1_' + name] * (
+                nShots - 1) + SemiSupervised.errorWeights_type1(predictedWeight, observedWeight)) / nShots
+        results.at[idx, '2_' + name] = (results.at[idx - 1, '2_' + name] * (
+                nShots - 1) + SemiSupervised.errorWeights_type2(predictedWeight, observedWeight)) / nShots
+
+    else:
+        results.at[idx, 'MAE_' + name] = SemiSupervised.MAE(predictedWeight, observedWeight)
+        results.at[idx, '1_' + name] = SemiSupervised.errorWeights_type1(predictedWeight, observedWeight)
+        results.at[idx, '2_' + name] = SemiSupervised.errorWeights_type2(predictedWeight, observedWeight)
 
     return updatedModel, results
 

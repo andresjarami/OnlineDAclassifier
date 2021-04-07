@@ -154,21 +154,21 @@ def uploadResultsDatabase(place, database, shotStart, samplesInMemory, featureSe
         peoplei_f = 10
         classes = 18
         rows = classes * (repetitions - shotStart)
-        times = 2
+        times = 1
     elif database == 'Cote':
         repetitions = 4
         peoplei_i = 20
         peoplei_f = 36
         classes = 7
         rows = classes * (repetitions - shotStart)
-        times = 2
+        times = 1
     elif database == 'EPN':
         repetitions = 25
         peoplei_i = 31
         peoplei_f = 60
         classes = 5
         rows = classes * (repetitions - shotStart)
-        times = 2
+        times = 1
     # try:
     #     auxFrame = pd.read_csv(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
     #         peoplei_i) + '_endPerson_' + str(peoplei_i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
@@ -187,11 +187,10 @@ def uploadResultsDatabase(place, database, shotStart, samplesInMemory, featureSe
             auxFrame = pd.read_csv(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
                 i) + '_endPerson_' + str(i) + '_shotStart_' + str(shotStart) + '_memmory_' + str(
                 samplesInMemory) + '.csv')
-            resultsTest = pd.concat([resultsTest, auxFrame], ignore_index=True)
-            if len(auxFrame) != rows * times:
-                print('error_person' + ' ' + str(i))
-                print(len(auxFrame))
-
+            resultsTest = pd.concat([resultsTest, auxFrame[:rows]], ignore_index=True)
+            if len(auxFrame[:rows]) != rows * times:
+                print('error_person' + ' ' + str(i) + ' correct: ' + str(rows * times))
+                print('current error: ' + len(auxFrame[:rows]))
         except:
             print('file not found')
             print(place + '_' + database + '_FeatureSet_' + str(featureSet) + '_startPerson_' + str(
@@ -362,7 +361,7 @@ def graphs(rows, database, LDA_NoAdaptive, LDA_MSDA_JS, LDA_NoAdaptive_SemiSuper
 
 def analysis(place, database, shotStart, samplesInMemory, featureSet):
     results, rows = uploadResultsDatabase(place, database, shotStart, samplesInMemory, featureSet)
-    print(results['AccLDAProp_JS'].loc[(results['exp_time']==0)&(results['# shots']==1)])
+    print(results['AccLDAProp_JS'].loc[(results['exp_time'] == 0) & (results['# shots'] == 1)])
     print(results['AccLDAfew'].loc[(results['exp_time'] == 0) & (results['# shots'] == 1)])
 
     results_Old, x_Old = uploadResultsDatabasesVF1('../ResultsExp1_RQ1/', database, windowSize='295')
@@ -432,7 +431,7 @@ import Experimet1_Visualization as EV
 # EV.analysis(place='resultsPBS_2/Cote_', database='Cote')
 # analysis(place='results_JS/', database='Cote', shotStart=1, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='Cote', shotStart=1, samplesInMemory=1, featureSet=1)
-# analysis(place='results_RQ1/', database='Cote', shotStart=1, samplesInMemory=0, featureSet=1)
+analysis(place='results_RQ1/', database='Cote', shotStart=1, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='Cote', shotStart=2, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='Cote', shotStart=2, samplesInMemory=1, featureSet=1)
 
@@ -440,13 +439,13 @@ import Experimet1_Visualization as EV
 # EV.analysis(place='resultsPBS_2/Nina5_', database='Nina5')
 # analysis(place='results_JS/', database='Nina5', shotStart=1, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='Nina5', shotStart=1, samplesInMemory=1, featureSet=1)
-# analysis(place='results_RQ1/', database='Nina5', shotStart=1, samplesInMemory=0, featureSet=1)
+analysis(place='results_RQ1/', database='Nina5', shotStart=1, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='Nina5', shotStart=2, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='Nina5', shotStart=2, samplesInMemory=1, featureSet=1)
 #
 ########## EPN
-EV.analysis(place='resultsPBS_2/EPN_', database='EPN')
-analysis(place='results_JS/', database='EPN', shotStart=1, samplesInMemory=0, featureSet=1)
+# EV.analysis(place='resultsPBS_2/EPN_', database='EPN')
+# analysis(place='results_JS/', database='EPN', shotStart=1, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='EPN', shotStart=1, samplesInMemory=1, featureSet=1)
 analysis(place='results_RQ1/', database='EPN', shotStart=1, samplesInMemory=0, featureSet=1)
 # analysis(place='results_JS/', database='EPN', shotStart=2, samplesInMemory=0, featureSet=1)
