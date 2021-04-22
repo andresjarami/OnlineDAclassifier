@@ -42,6 +42,26 @@ def predictedModelLDA_pseudo(sample, model, classes, LDACov):
     return np.argmax(d) + 1
 
 
+def predictedModelLDA_Prob(sample, model, classes, LDACov):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = LDA_Discriminant(sample, LDACov, model['mean'].loc[cl])
+        if math.isnan(d[cl]):
+            return predictedModelLDA_pseudo_Prob(sample, model, classes, LDACov)
+    if np.any(d < 0):
+        d = d - d.min()
+    return d / d.sum()
+
+
+def predictedModelLDA_pseudo_Prob(sample, model, classes, LDACov):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = LDA_Discriminant_pseudo(sample, LDACov, model['mean'].loc[cl])
+    if np.any(d < 0):
+        d = d - d.min()
+    return d / d.sum()
+
+
 def accuracyModelLDA(testFeatures, testLabels, model, classes):
     t = 0
     true = 0
@@ -63,8 +83,8 @@ def accuracyModelLDA(testFeatures, testLabels, model, classes):
             recall[1, int(testLabels[i] - 1)] += 1
             precision[1, int(currentPredictor - 1)] += 1
 
-    return true / count, precision[0, :] / precision.sum(axis=0), recall[0, :] / recall.sum(axis=0), t / np.size(
-        testLabels)
+    return true / count, np.nan_to_num(precision[0, :] / precision.sum(axis=0)), np.nan_to_num(
+        recall[0, :] / recall.sum(axis=0)), t / np.size(testLabels)
 
 
 # QDA Classifier
@@ -97,6 +117,26 @@ def predictedModelQDA_pseudo(sample, model, classes):
     return np.argmax(d) + 1
 
 
+def predictedModelQDA_Prob(sample, model, classes):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = QDA_Discriminant(sample, model['cov'].loc[cl], model['mean'].loc[cl])
+        if math.isnan(d[cl]):
+            return predictedModelQDA_pseudo_Prob(sample, model, classes)
+    if np.any(d < 0):
+        d = d - d.min()
+    return d / d.sum()
+
+
+def predictedModelQDA_pseudo_Prob(sample, model, classes):
+    d = np.zeros([classes])
+    for cl in range(classes):
+        d[cl] = QDA_Discriminant_pseudo(sample, model['cov'].loc[cl], model['mean'].loc[cl])
+    if np.any(d < 0):
+        d = d - d.min()
+    return d / d.sum()
+
+
 def accuracyModelQDA(testFeatures, testLabels, model, classes):
     t = 0
     true = 0
@@ -116,8 +156,8 @@ def accuracyModelQDA(testFeatures, testLabels, model, classes):
             count += 1
             recall[1, int(testLabels[i] - 1)] += 1
             precision[1, int(currentPredictor - 1)] += 1
-    return true / count, precision[0, :] / precision.sum(axis=0), recall[0, :] / recall.sum(axis=0), t / np.size(
-        testLabels)
+    return true / count, np.nan_to_num(precision[0, :] / precision.sum(axis=0)), np.nan_to_num(
+        recall[0, :] / recall.sum(axis=0)), t / np.size(testLabels)
 
 
 ######

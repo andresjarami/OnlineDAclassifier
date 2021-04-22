@@ -471,12 +471,16 @@ def subsetTraining(trainFeatures, trainLabels, numSamples, classes):
     idx = []
     for cla in range(classes):
         aux = np.where(trainLabels == cla + 1)[0]
-        modNumber = np.ceil(len(aux) / numSamples)
-        idxAux = []
-        [idxAux.append(a) for a in aux if a % modNumber == 1 and len(idxAux) < numSamples]
-        if len(idxAux) < numSamples:
-            [idxAux.append(a) for a in aux if a % modNumber == 2 and len(idxAux) < numSamples]
-        idx.extend(idxAux)
+
+        if len(aux) > numSamples:
+            modNumber = np.ceil(len(aux) / numSamples)
+            idxAux = []
+            [idxAux.append(a) for a in aux if a % modNumber == 1 and len(idxAux) < numSamples]
+            if len(idxAux) < numSamples:
+                [idxAux.append(a) for a in aux if a % modNumber == 2 and len(idxAux) < numSamples]
+            idx.extend(idxAux)
+        else:
+            idx.extend(list(aux))
     return trainFeatures[idx], trainLabels[idx]
 
 # def KLdivergence(mean0, mean1, k, cov0, cov1):
