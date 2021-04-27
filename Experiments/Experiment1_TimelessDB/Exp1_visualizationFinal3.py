@@ -263,7 +263,7 @@ def uploadResultsDatabase2(folder, database, samplesInMemory, featureSet, times,
 
                 resultsTest = pd.concat([resultsTest, auxFrame], ignore_index=True)
                 if len(auxFrame) != rows:
-                    print('error_person' + ' ' + str(i) + ' correct: ' + str(rows))
+                    print('exp. Time' + ' ' + str(expTime) + 'error_person' + ' ' + str(i) + ' correct: ' + str(rows))
                     print('current error: ' + str(len(auxFrame)))
 
             except:
@@ -352,136 +352,221 @@ def vectors_calculation(results, rows):
 def vectors_calculation2(results, rows):
     LDA_Ideal = []
     LDA_NoAdapted = []
-    LDA_PostProb = []
-    LDA_Labels = []
-    LDA_PostProb_MSDA = []
-    LDA_Adapted = []
-    LDA_PostProb_Adapted = []
-    LDA_Labels_Adapted = []
-    LDA_PostProb_MSDA_Adapted = []
+    LDA_incre_gestures_labels = []
+    LDA_incre_gestures_weight = []
+    LDA_incre_gestures_weight_MSDA = []
+    LDA_incre_samples_labels = []
+    LDA_incre_samples_prob = []
+    LDA_semi_gestures_labels = []
+    LDA_semi_gestures_weight = []
+    LDA_semi_gestures_weight_MSDA = []
+    LDA_semi_samples_labels = []
+    LDA_semi_samples_prob = []
+
+    LDA_incre_gestures_weight_MSDA_Adapted = []
 
     QDA_Ideal = []
     QDA_NoAdapted = []
-    QDA_PostProb = []
-    QDA_Labels = []
-    QDA_PostProb_MSDA = []
-    QDA_Adapted = []
-    QDA_PostProb_Adapted = []
-    QDA_Labels_Adapted = []
-    QDA_PostProb_MSDA_Adapted = []
+    QDA_incre_gestures_labels = []
+    QDA_incre_gestures_weight = []
+    QDA_incre_gestures_weight_MSDA = []
+    QDA_incre_samples_labels = []
+    QDA_incre_samples_prob = []
+    QDA_semi_gestures_labels = []
+    QDA_semi_gestures_weight = []
+    QDA_semi_gestures_weight_MSDA = []
+    QDA_semi_samples_labels = []
+    QDA_semi_samples_prob = []
 
-    LDA_PostProb_e1 = []
-    LDA_Labels_e1 = []
-    LDA_PostProb_MSDA_e1 = []
-    QDA_PostProb_e1 = []
-    QDA_Labels_e1 = []
-    QDA_PostProb_MSDA_e1 = []
+    QDA_incre_gestures_weight_MSDA_Adapted = []
 
-    LDA_PostProb_e2 = []
-    LDA_Labels_e2 = []
-    LDA_PostProb_MSDA_e2 = []
-    QDA_PostProb_e2 = []
-    QDA_Labels_e2 = []
-    QDA_PostProb_MSDA_e2 = []
+    E1_LDA_incre_gestures_labels = []
+    E1_LDA_incre_gestures_weight = []
+    E1_LDA_incre_gestures_weight_MSDA = []
+    E1_QDA_incre_gestures_labels = []
+    E1_QDA_incre_gestures_weight = []
+    E1_QDA_incre_gestures_weight_MSDA = []
+
+    E2_LDA_incre_gestures_labels = []
+    E2_LDA_incre_gestures_weight = []
+    E2_LDA_incre_gestures_weight_MSDA = []
+    E2_QDA_incre_gestures_labels = []
+    E2_QDA_incre_gestures_weight = []
+    E2_QDA_incre_gestures_weight_MSDA = []
 
     for i in range(rows + 1):
         LDA_NoAdapted.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-        LDA_Adapted.append(results['AccLDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
         QDA_NoAdapted.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-        QDA_Adapted.append(results['AccQDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
 
         if i == 0:
 
             LDA_Ideal.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            LDA_PostProb.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            LDA_Labels.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            LDA_PostProb_MSDA.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            LDA_PostProb_Adapted.append(results['AccLDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
-            LDA_Labels_Adapted.append(results['AccLDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
-            LDA_PostProb_MSDA_Adapted.append(results['AccLDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_incre_gestures_labels.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_incre_gestures_weight.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_incre_gestures_weight_MSDA.append(
+                results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_incre_samples_labels.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_incre_samples_prob.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_semi_gestures_labels.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_semi_gestures_weight.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_semi_gestures_weight_MSDA.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_semi_samples_labels.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            LDA_semi_samples_prob.append(results['AccLDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+
+            LDA_incre_gestures_weight_MSDA_Adapted.append(
+                results['AccLDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
 
             QDA_Ideal.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            QDA_PostProb.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            QDA_Labels.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            QDA_PostProb_MSDA.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
-            QDA_PostProb_Adapted.append(results['AccQDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
-            QDA_Labels_Adapted.append(results['AccQDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
-            QDA_PostProb_MSDA_Adapted.append(results['AccQDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_incre_gestures_labels.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_incre_gestures_weight.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_incre_gestures_weight_MSDA.append(
+                results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_incre_samples_labels.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_incre_samples_prob.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_semi_gestures_labels.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_semi_gestures_weight.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_semi_gestures_weight_MSDA.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_semi_samples_labels.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+            QDA_semi_samples_prob.append(results['AccQDA_NoAdapted'].loc[results['# shots'] == 1].mean() * 100)
+
+            QDA_incre_gestures_weight_MSDA_Adapted.append(
+                results['AccQDA_Adapted'].loc[results['# shots'] == 1].mean() * 100)
 
         else:
             LDA_Ideal.append(results['AccLDA_Ideal'].loc[results['# shots'] == i].mean() * 100)
-            LDA_PostProb.append(results['AccLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean() * 100)
-            LDA_Labels.append(results['AccLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean() * 100)
-            LDA_PostProb_MSDA.append(results['AccLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean() * 100)
-            LDA_PostProb_Adapted.append(results['AccLDA_incre_gestures_weight_Adapted'].loc[results['# shots'] == i].mean() * 100)
-            LDA_Labels_Adapted.append(results['AccLDA_incre_gestures_labels_Adapted'].loc[results['# shots'] == i].mean() * 100)
-            LDA_PostProb_MSDA_Adapted.append(
+            LDA_incre_gestures_labels.append(
+                results['AccLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean() * 100)
+            LDA_incre_gestures_weight.append(
+                results['AccLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean() * 100)
+            LDA_incre_gestures_weight_MSDA.append(
+                results['AccLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean() * 100)
+            LDA_incre_samples_labels.append(
+                results['AccLDA_incre_samples_labels'].loc[results['# shots'] == i].mean() * 100)
+            LDA_incre_samples_prob.append(
+                results['AccLDA_incre_samples_prob'].loc[results['# shots'] == i].mean() * 100)
+            LDA_semi_gestures_labels.append(
+                results['AccLDA_semi_gestures_labels'].loc[results['# shots'] == i].mean() * 100)
+            LDA_semi_gestures_weight.append(
+                results['AccLDA_semi_gestures_weight'].loc[results['# shots'] == i].mean() * 100)
+            LDA_semi_gestures_weight_MSDA.append(
+                results['AccLDA_semi_gestures_weight_MSDA'].loc[results['# shots'] == i].mean() * 100)
+            LDA_semi_samples_labels.append(
+                results['AccLDA_semi_samples_labels'].loc[results['# shots'] == i].mean() * 100)
+            LDA_semi_samples_prob.append(results['AccLDA_semi_samples_prob'].loc[results['# shots'] == i].mean() * 100)
+
+            LDA_incre_gestures_weight_MSDA_Adapted.append(
                 results['AccLDA_incre_gestures_weight_MSDA_Adapted'].loc[results['# shots'] == i].mean() * 100)
 
             QDA_Ideal.append(results['AccQDA_Ideal'].loc[results['# shots'] == i].mean() * 100)
-            QDA_PostProb.append(results['AccQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean() * 100)
-            QDA_Labels.append(results['AccQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean() * 100)
-            QDA_PostProb_MSDA.append(results['AccQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean() * 100)
-            QDA_PostProb_Adapted.append(results['AccQDA_incre_gestures_weight_Adapted'].loc[results['# shots'] == i].mean() * 100)
-            QDA_Labels_Adapted.append(results['AccLDA_incre_gestures_labels_Adapted'].loc[results['# shots'] == i].mean() * 100)
-            QDA_PostProb_MSDA_Adapted.append(
+            QDA_incre_gestures_labels.append(
+                results['AccQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean() * 100)
+            QDA_incre_gestures_weight.append(
+                results['AccQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean() * 100)
+            QDA_incre_gestures_weight_MSDA.append(
+                results['AccQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean() * 100)
+            QDA_incre_samples_labels.append(
+                results['AccQDA_incre_samples_labels'].loc[results['# shots'] == i].mean() * 100)
+            QDA_incre_samples_prob.append(
+                results['AccQDA_incre_samples_prob'].loc[results['# shots'] == i].mean() * 100)
+            QDA_semi_gestures_labels.append(
+                results['AccQDA_semi_gestures_labels'].loc[results['# shots'] == i].mean() * 100)
+            QDA_semi_gestures_weight.append(
+                results['AccQDA_semi_gestures_weight'].loc[results['# shots'] == i].mean() * 100)
+            QDA_semi_gestures_weight_MSDA.append(
+                results['AccQDA_semi_gestures_weight_MSDA'].loc[results['# shots'] == i].mean() * 100)
+            QDA_semi_samples_labels.append(
+                results['AccQDA_semi_samples_labels'].loc[results['# shots'] == i].mean() * 100)
+            QDA_semi_samples_prob.append(results['AccQDA_semi_samples_prob'].loc[results['# shots'] == i].mean() * 100)
+
+            QDA_incre_gestures_weight_MSDA_Adapted.append(
                 results['AccQDA_incre_gestures_weight_MSDA_Adapted'].loc[results['# shots'] == i].mean() * 100)
 
             ### error
+            E1_LDA_incre_gestures_weight.append(
+                results['1_ErrorLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
+            E1_LDA_incre_gestures_labels.append(
+                results['1_ErrorLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
+            E1_LDA_incre_gestures_weight_MSDA.append(
+                results['1_ErrorLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
-            LDA_PostProb_e1.append(results['1_ErrorLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
-            LDA_Labels_e1.append(results['1_ErrorLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
-            LDA_PostProb_MSDA_e1.append(results['1_ErrorLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
+            E1_QDA_incre_gestures_weight.append(
+                results['1_ErrorQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
+            E1_QDA_incre_gestures_labels.append(
+                results['1_ErrorQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
+            E1_QDA_incre_gestures_weight_MSDA.append(
+                results['1_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
-            QDA_PostProb_e1.append(results['1_ErrorQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
-            QDA_Labels_e1.append(results['1_ErrorQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
-            QDA_PostProb_MSDA_e1.append(results['1_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
+            E2_LDA_incre_gestures_weight.append(
+                results['1_ErrorLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
+            E2_LDA_incre_gestures_labels.append(
+                results['1_ErrorLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
+            E2_LDA_incre_gestures_weight_MSDA.append(
+                results['1_ErrorLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
-            LDA_PostProb_e2.append(results['2_ErrorLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
-            LDA_Labels_e2.append(results['2_ErrorLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
-            LDA_PostProb_MSDA_e2.append(results['2_ErrorLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
+            E2_QDA_incre_gestures_weight.append(
+                results['1_ErrorQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
+            E2_QDA_incre_gestures_labels.append(
+                results['1_ErrorQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
+            E2_QDA_incre_gestures_weight_MSDA.append(
+                results['1_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
-            QDA_PostProb_e2.append(results['2_ErrorQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
-            QDA_Labels_e2.append(results['2_ErrorQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
-            QDA_PostProb_MSDA_e2.append(results['2_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
-
-    return LDA_Ideal, LDA_NoAdapted, LDA_PostProb, LDA_Labels, LDA_PostProb_MSDA, LDA_Adapted, LDA_PostProb_Adapted, \
-           QDA_Labels_Adapted, LDA_PostProb_MSDA_Adapted, QDA_Ideal, QDA_NoAdapted, QDA_PostProb, QDA_Labels, \
-           QDA_PostProb_MSDA, QDA_Adapted, QDA_PostProb_Adapted, QDA_Labels_Adapted, QDA_PostProb_MSDA_Adapted, \
-           LDA_PostProb_e1, LDA_Labels_e1, LDA_PostProb_MSDA_e1, QDA_PostProb_e1, QDA_Labels_e1, QDA_PostProb_MSDA_e1, \
-           LDA_PostProb_e2, LDA_Labels_e2, LDA_PostProb_MSDA_e2, QDA_PostProb_e2, QDA_Labels_e2, QDA_PostProb_MSDA_e2
-
-    # results['time_LDA_ACC_PostProb_MSDA_JS'].mean(), results['time_QDA_ACC_PostProb_MSDA_JS'].mean(), \
-    # results['time_LDA_ACC_PostProb_MSDA_JS'].std(), results['time_QDA_ACC_PostProb_MSDA_JS'].std(), \
-    # results['time_LDA_ACC_PostProb_MSDA_JS_adapt'].mean(), results['time_QDA_ACC_PostProb_MSDA_JS_adapt'].mean(), \
-    # results['time_LDA_ACC_PostProb_MSDA_JS_adapt'].std(), results['time_QDA_ACC_PostProb_MSDA_JS_adapt'].std()
+    return LDA_Ideal, LDA_NoAdapted, LDA_incre_gestures_labels, LDA_incre_gestures_weight, \
+           LDA_incre_gestures_weight_MSDA, LDA_incre_samples_labels, LDA_incre_samples_prob, LDA_semi_gestures_labels, \
+           LDA_semi_gestures_weight, LDA_semi_gestures_weight_MSDA, LDA_semi_samples_labels, LDA_semi_samples_prob, \
+           LDA_incre_gestures_weight_MSDA_Adapted, QDA_Ideal, QDA_NoAdapted, QDA_incre_gestures_labels, \
+           QDA_incre_gestures_weight, QDA_incre_gestures_weight_MSDA, QDA_incre_samples_labels, \
+           QDA_incre_samples_prob, QDA_semi_gestures_labels, QDA_semi_gestures_weight, QDA_semi_gestures_weight_MSDA, \
+           QDA_semi_samples_labels, QDA_semi_samples_prob, QDA_incre_gestures_weight_MSDA_Adapted, \
+           E1_LDA_incre_gestures_labels, E1_LDA_incre_gestures_weight, E1_LDA_incre_gestures_weight_MSDA, \
+           E1_QDA_incre_gestures_labels, E1_QDA_incre_gestures_weight, E1_QDA_incre_gestures_weight_MSDA, \
+           E2_LDA_incre_gestures_labels, E2_LDA_incre_gestures_weight, E2_LDA_incre_gestures_weight_MSDA, \
+           E2_QDA_incre_gestures_labels, E2_QDA_incre_gestures_weight, E2_QDA_incre_gestures_weight_MSDA
 
 
-def graphs(rows1, rows2, database, LDA_Ideal_1, LDA_NoAdapted_1, LDA_PostProb_1, LDA_Labels_1, LDA_PostProb_MSDA_1,
-           LDA_Adapted_1, LDA_PostProb_Adapted_1, LDA_Labels_Adapted_1, LDA_PostProb_MSDA_Adapted_1, QDA_Ideal_1,
-           QDA_NoAdapted_1, QDA_PostProb_1, QDA_Labels_1, QDA_PostProb_MSDA_1, QDA_Adapted_1, QDA_PostProb_Adapted_1,
-           QDA_Labels_Adapted_1, QDA_PostProb_MSDA_Adapted_1, LDA_Ideal_2,
-           LDA_NoAdapted_2, LDA_PostProb_2, LDA_PostProb_MSDA_2, LDA_Adapted_2, LDA_PostProb_Adapted_2,
-           LDA_PostProb_MSDA_Adapted_2, QDA_Ideal_2, QDA_NoAdapted_2, QDA_PostProb_2, QDA_PostProb_MSDA_2,
-           QDA_Adapted_2, QDA_PostProb_Adapted_2, QDA_PostProb_MSDA_Adapted_2, x_Old, yLDA, yQDA, yLDA_L, yQDA_L,
-           yLDA_V, yQDA_V, yLDA_O, yQDA_O, samplesInMemory, featureSet, LDA_PostProb_e1, LDA_Labels_e1,
-           LDA_PostProb_MSDA_e1, QDA_PostProb_e1,
-           QDA_Labels_e1, QDA_PostProb_MSDA_e1, LDA_PostProb_e2, LDA_Labels_e2, LDA_PostProb_MSDA_e2, QDA_PostProb_e2,
-           QDA_Labels_e2, QDA_PostProb_MSDA_e2):
+# results['time_LDA_ACC_PostProb_MSDA_JS'].mean(), results['time_QDA_ACC_PostProb_MSDA_JS'].mean(), \
+# results['time_LDA_ACC_PostProb_MSDA_JS'].std(), results['time_QDA_ACC_PostProb_MSDA_JS'].std(), \
+# results['time_LDA_ACC_PostProb_MSDA_JS_adapt'].mean(), results['time_QDA_ACC_PostProb_MSDA_JS_adapt'].mean(), \
+# results['time_LDA_ACC_PostProb_MSDA_JS_adapt'].std(), results['time_QDA_ACC_PostProb_MSDA_JS_adapt'].std()
+
+
+def graphs(rows1, rows2, database, LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2, LDA_PostProb_MSDA_2, LDA_Adapted_2,
+           LDA_PostProb_Adapted_2, LDA_PostProb_MSDA_Adapted_2, QDA_Ideal_2, QDA_NoAdapted_2, QDA_PostProb_2,
+           QDA_PostProb_MSDA_2, QDA_Adapted_2, QDA_PostProb_Adapted_2, QDA_PostProb_MSDA_Adapted_2, x_Old, yLDA, yQDA,
+           yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O, samplesInMemory, featureSet, LDA_Ideal_1, LDA_NoAdapted_1,
+           LDA_incre_gestures_labels_1, LDA_incre_gestures_weight_1, LDA_incre_gestures_weight_MSDA_1,
+           LDA_incre_samples_labels_1, LDA_incre_samples_prob_1, LDA_semi_gestures_labels_1,
+           LDA_semi_gestures_weight_1, LDA_semi_gestures_weight_MSDA_1, LDA_semi_samples_labels_1,
+           LDA_semi_samples_prob_1, LDA_incre_gestures_weight_MSDA_Adapted_1, QDA_Ideal_1, QDA_NoAdapted_1,
+           QDA_incre_gestures_labels_1, QDA_incre_gestures_weight_1, QDA_incre_gestures_weight_MSDA_1,
+           QDA_incre_samples_labels_1, QDA_incre_samples_prob_1, QDA_semi_gestures_labels_1,
+           QDA_semi_gestures_weight_1, QDA_semi_gestures_weight_MSDA_1, QDA_semi_samples_labels_1,
+           QDA_semi_samples_prob_1, QDA_incre_gestures_weight_MSDA_Adapted_1, E1_LDA_incre_gestures_labels_1,
+           E1_LDA_incre_gestures_weight_1, E1_LDA_incre_gestures_weight_MSDA_1, E1_QDA_incre_gestures_labels_1,
+           E1_QDA_incre_gestures_weight_1, E1_QDA_incre_gestures_weight_MSDA_1, E2_LDA_incre_gestures_labels_1,
+           E2_LDA_incre_gestures_weight_1, E2_LDA_incre_gestures_weight_MSDA_1, E2_QDA_incre_gestures_labels_1,
+           E2_QDA_incre_gestures_weight_1, E2_QDA_incre_gestures_weight_MSDA_1):
+    
     x1 = [*range(rows1 + 1)]
     x2 = [*range(rows2 + 1)]
 
     fig, ax = plt.subplots(nrows=2, ncols=2, sharey='row', sharex='col')
     # fig.suptitle('Accuracy vs. Unlabeled Gestures (over time)')
 
-    ax[0, 0].plot(x1, LDA_Ideal_1, label='LDA Ideal (using labeles)')
-    ax[0, 0].plot(x1, LDA_NoAdapted_1, label='LDA Baseline')
-    ax[0, 0].plot(x1, LDA_PostProb_1, label='LDA using PostProb')
-    ax[0, 0].plot(x1, LDA_Labels_1, label='LDA using Labels')
-    ax[0, 0].plot(x1, LDA_PostProb_MSDA_1, label='LDA Proposed')
-    # ax[0, 0].plot(x1, LDA_Adapted_1, label='LDA Baseline (MSDA)')
-    # ax[0, 0].plot(x1, LDA_PostProb_Adapted_1, label='LDA using PostProb (MSDA)')
-    ax[0, 0].plot(x1, LDA_PostProb_MSDA_Adapted_1, label='LDA Proposed (MSDA)')
+    ax[0, 0].plot(x1, LDA_Ideal_1, label='All labeled')
+    ax[0, 0].plot(x1, LDA_NoAdapted_1, label='Baseline')
+    ax[0, 0].plot(x1, LDA_incre_gestures_weight_1, label='incre_gestures_weights')
+    # ax[0, 0].plot(x1, LDA_incre_gestures_labels_1, label='incre_gestures_labels')
+    ax[0, 0].plot(x1, LDA_incre_gestures_weight_MSDA_1, label='incre_gestures_weights_MSDA')
+    # ax[0, 0].plot(x1, LDA_incre_samples_labels_1, label='incre_samples_labels')
+    # ax[0, 0].plot(x1, LDA_incre_samples_prob_1, label='incre_gestures_weights_MSDA')
+
+    ax[0, 0].plot(x1, LDA_semi_gestures_weight_1, label='semi_gestures_weights')
+    # ax[0, 0].plot(x1, LDA_semi_gestures_labels_1, label='semi_gestures_labels')
+    ax[0, 0].plot(x1, LDA_semi_gestures_weight_MSDA_1, label='semi_gestures_weights_MSDA')
+    # ax[0, 0].plot(x1, LDA_semi_samples_labels_1, label='semi_samples_labels')
+    # ax[0, 0].plot(x1, LDA_semi_samples_prob_1, label='semi_gestures_weights_MSDA')
+    
+    # ax[0, 0].plot(x1, LDA_incre_gestures_weight_MSDA_Adapted_1, label='incre_gestures_weights_MSDA_Adapted')
 
     # ax[0, 0].plot(x_Old, yLDA, label='Ideal', linestyle='--')
 
@@ -503,19 +588,24 @@ def graphs(rows1, rows2, database, LDA_Ideal_1, LDA_NoAdapted_1, LDA_PostProb_1,
     ax[0, 1].set_title(database + ' (LDA)' + ' labeled gestures' + str(2))
     ax[0, 1].grid(color='gainsboro', linewidth=1)
 
+    
+    ax[1, 0].plot(x1, QDA_Ideal_1, label='All labeled')
+    ax[1, 0].plot(x1, QDA_NoAdapted_1, label='Baseline')
+    ax[1, 0].plot(x1, QDA_incre_gestures_weight_1, label='incre_gestures_weights')
+    # ax[1, 0].plot(x1, QDA_incre_gestures_labels_1, label='incre_gestures_labels')
+    ax[1, 0].plot(x1, QDA_incre_gestures_weight_MSDA_1, label='incre_gestures_weights_MSDA')
+    # ax[1, 0].plot(x1, QDA_incre_samples_labels_1, label='incre_samples_labels')
+    # ax[1, 0].plot(x1, QDA_incre_samples_prob_1, label='incre_samples_prob')
 
-    ax[1, 0].plot(x1, QDA_Ideal_1, label='QDA Ideal (using labeles)')
-    ax[1, 0].plot(x1, QDA_NoAdapted_1, label='QDA Baseline')
-    ax[1, 0].plot(x1, QDA_PostProb_1, label='QDA using PostProb')
-    ax[1, 0].plot(x1, QDA_Labels_1, label='QDA using Labels')
-    ax[1, 0].plot(x1, QDA_PostProb_MSDA_1, label='QDA Proposed')
-    # ax[1, 0].plot(x1, QDA_Adapted_1, label='QDA Baseline (MSDA)')
-    # ax[1, 0].plot(x1, QDA_PostProb_Adapted_1, label='QDA using PostProb (MSDA)')
-    ax[1, 0].plot(x1, QDA_PostProb_MSDA_Adapted_1, label='QDA Proposed (MSDA)')
+    ax[1, 0].plot(x1, QDA_semi_gestures_weight_1, label='semi_gestures_weights')
+    # ax[1, 0].plot(x1, QDA_semi_gestures_labels_1, label='semi_gestures_labels')
+    ax[1, 0].plot(x1, QDA_semi_gestures_weight_MSDA_1, label='semi_gestures_weights_MSDA')
+    # ax[1, 0].plot(x1, QDA_semi_samples_labels_1, label='semi_samples_labels')
+    # ax[1, 0].plot(x1, QDA_semi_samples_prob_1, label='semi_samples_prob')
+    
+    # ax[1, 0].plot(x1, QDA_incre_gestures_weight_MSDA_Adapted_1, label='incre_gestures_weights_MSDA_Adapted')
 
-    # ax[1, 0].plot(x_Old, yQDA, label='Ideal', linestyle='--')
-
-    # ax[1, 0].legend()
+    ax[1, 0].legend()
 
     ax[1, 0].set_xlabel('number of unlabeled gestures\n (over time)')
     ax[1, 0].set_ylabel('accuracy [%]')
@@ -546,40 +636,35 @@ def graphs(rows1, rows2, database, LDA_Ideal_1, LDA_NoAdapted_1, LDA_PostProb_1,
     fig1, ax = plt.subplots(nrows=2, ncols=1, sharey='row', sharex='col')
     # fig.suptitle('Accuracy vs. Unlabeled Gestures (over time)')
 
-    ax[0].plot(x1, LDA_PostProb_e1, label='LDA_PostProb_e1')
-    ax[0].plot(x1, LDA_PostProb_MSDA_e1, label='LDA_PostProb_MSDA_e1')
-    ax[0].plot(x1, LDA_Labels_e1, label='LDA_Labels_e1')
+    ax[0].plot(x1, E1_LDA_incre_gestures_weight_1, label='LDA_PostProb_e1')
+    ax[0].plot(x1, E1_LDA_incre_gestures_weight_MSDA_1, label='LDA_PostProb_MSDA_e1')
+    ax[0].plot(x1, E1_LDA_incre_gestures_labels_1, label='LDA_Labels_e1')
 
-    ax[0].plot(x1, LDA_PostProb_e2, label='LDA_PostProb_e2')
-    ax[0].plot(x1, LDA_PostProb_MSDA_e2, label='LDA_PostProb_MSDA_e2')
-    ax[0].plot(x1, LDA_Labels_e2, label='LDA_Labels_e2')
-
+    ax[0].plot(x1, E2_LDA_incre_gestures_weight_1, label='LDA_PostProb_e2')
+    ax[0].plot(x1, E2_LDA_incre_gestures_weight_MSDA_1, label='LDA_PostProb_MSDA_e2')
+    ax[0].plot(x1, E2_LDA_incre_gestures_labels_1, label='LDA_Labels_e2')
 
     ax[0].set_ylabel('error')
     ax[0].set_title(database + ' (LDA)')
     ax[0].grid(color='gainsboro', linewidth=1)
 
-    ax[1].plot(x1, QDA_PostProb_e1, label='QDA_PostProb_e1')
-    ax[1].plot(x1, QDA_PostProb_MSDA_e1, label='QDA_PostProb_MSDA_e1')
-    ax[1].plot(x1, QDA_Labels_e1, label='QDA_Labels_e1')
+    ax[1].plot(x1, E1_QDA_incre_gestures_weight_1, label='QDA_PostProb_e1')
+    ax[1].plot(x1, E1_QDA_incre_gestures_weight_MSDA_1, label='QDA_PostProb_MSDA_e1')
+    ax[1].plot(x1, E1_QDA_incre_gestures_labels_1, label='QDA_Labels_e1')
 
-    ax[1].plot(x1, QDA_PostProb_e2, label='QDA_PostProb_e2')
-    ax[1].plot(x1, QDA_PostProb_MSDA_e2, label='QDA_PostProb_MSDA_e2')
-    ax[1].plot(x1, QDA_Labels_e2, label='QDA_Labels_e2')
+    ax[1].plot(x1, E2_QDA_incre_gestures_weight_1, label='QDA_PostProb_e2')
+    ax[1].plot(x1, E2_QDA_incre_gestures_weight_MSDA_1, label='QDA_PostProb_MSDA_e2')
+    ax[1].plot(x1, E2_QDA_incre_gestures_labels_1, label='QDA_Labels_e2')
 
     ax[1].set_ylabel('error')
     ax[1].set_title(database + ' (QDA)')
     ax[1].grid(color='gainsboro', linewidth=1)
-
-
-
 
     ax[1].legend()
     # plt.legend(loc='upper center', bbox_to_anchor=(2, -1.7), ncol=1)
     # plt.ylim(0.5, 1)
 
     plt.show()
-
 
 
 def analysis1(folder, database, samplesInMemory, featureSet, times):
@@ -589,12 +674,17 @@ def analysis1(folder, database, samplesInMemory, featureSet, times):
 
     results_Old, x_Old = uploadResultsDatabasesVF1('../ResultsExp1_RQ1/', database, windowSize='295')
 
-    LDA_Ideal_1, LDA_NoAdapted_1, LDA_PostProb_1, LDA_Labels_1, LDA_PostProb_MSDA_1, LDA_Adapted_1, LDA_PostProb_Adapted_1, \
-    LDA_Labels_Adapted_1, LDA_PostProb_MSDA_Adapted_1, QDA_Ideal_1, QDA_NoAdapted_1, QDA_PostProb_1, QDA_Labels_1, \
-    QDA_PostProb_MSDA_1, QDA_Adapted_1, \
-    QDA_PostProb_Adapted_1, QDA_Labels_Adapted_1, QDA_PostProb_MSDA_Adapted_1, \
-    LDA_PostProb_e1, LDA_Labels_e1, LDA_PostProb_MSDA_e1, QDA_PostProb_e1, QDA_Labels_e1, QDA_PostProb_MSDA_e1, \
-    LDA_PostProb_e2, LDA_Labels_e2, LDA_PostProb_MSDA_e2, QDA_PostProb_e2, QDA_Labels_e2, QDA_PostProb_MSDA_e2 \
+    LDA_Ideal_1, LDA_NoAdapted_1, LDA_incre_gestures_labels_1, LDA_incre_gestures_weight_1, \
+    LDA_incre_gestures_weight_MSDA_1, LDA_incre_samples_labels_1, LDA_incre_samples_prob_1, LDA_semi_gestures_labels_1, \
+    LDA_semi_gestures_weight_1, LDA_semi_gestures_weight_MSDA_1, LDA_semi_samples_labels_1, LDA_semi_samples_prob_1, \
+    LDA_incre_gestures_weight_MSDA_Adapted_1, QDA_Ideal_1, QDA_NoAdapted_1, QDA_incre_gestures_labels_1, \
+    QDA_incre_gestures_weight_1, QDA_incre_gestures_weight_MSDA_1, QDA_incre_samples_labels_1, \
+    QDA_incre_samples_prob_1, QDA_semi_gestures_labels_1, QDA_semi_gestures_weight_1, QDA_semi_gestures_weight_MSDA_1, \
+    QDA_semi_samples_labels_1, QDA_semi_samples_prob_1, QDA_incre_gestures_weight_MSDA_Adapted_1, \
+    E1_LDA_incre_gestures_labels_1, E1_LDA_incre_gestures_weight_1, E1_LDA_incre_gestures_weight_MSDA_1, \
+    E1_QDA_incre_gestures_labels_1, E1_QDA_incre_gestures_weight_1, E1_QDA_incre_gestures_weight_MSDA_1, \
+    E2_LDA_incre_gestures_labels_1, E2_LDA_incre_gestures_weight_1, E2_LDA_incre_gestures_weight_MSDA_1, \
+    E2_QDA_incre_gestures_labels_1, E2_QDA_incre_gestures_weight_1, E2_QDA_incre_gestures_weight_MSDA_1 \
         = vectors_calculation2(results1, rows1)
 
     LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2, LDA_PostProb_MSDA_2, LDA_Adapted_2, LDA_PostProb_Adapted_2, \
@@ -613,16 +703,25 @@ def analysis1(folder, database, samplesInMemory, featureSet, times):
     #
     yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O = vectors_calculation_Old(results_Old, 1,
                                                                                          featureSet)
-    graphs(rows1, rows2, database, LDA_Ideal_1, LDA_NoAdapted_1, LDA_PostProb_1, LDA_Labels_1, LDA_PostProb_MSDA_1,
-           LDA_Adapted_1, LDA_PostProb_Adapted_1, LDA_Labels_Adapted_1, LDA_PostProb_MSDA_Adapted_1, QDA_Ideal_1,
-           QDA_NoAdapted_1, QDA_PostProb_1, QDA_Labels_1, QDA_PostProb_MSDA_1, QDA_Adapted_1, QDA_PostProb_Adapted_1,
-           QDA_Labels_Adapted_1, QDA_PostProb_MSDA_Adapted_1, LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2,
+    graphs(rows1, rows2, database, LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2,
            LDA_PostProb_MSDA_2, LDA_Adapted_2, LDA_PostProb_Adapted_2, LDA_PostProb_MSDA_Adapted_2, QDA_Ideal_2,
            QDA_NoAdapted_2, QDA_PostProb_2, QDA_PostProb_MSDA_2, QDA_Adapted_2, QDA_PostProb_Adapted_2,
            QDA_PostProb_MSDA_Adapted_2, x_Old, yLDA, yQDA, yLDA_L, yQDA_L, yLDA_V, yQDA_V, yLDA_O, yQDA_O,
-           samplesInMemory, featureSet, LDA_PostProb_e1, LDA_Labels_e1, LDA_PostProb_MSDA_e1, QDA_PostProb_e1,
-           QDA_Labels_e1, QDA_PostProb_MSDA_e1, LDA_PostProb_e2, LDA_Labels_e2, LDA_PostProb_MSDA_e2, QDA_PostProb_e2,
-           QDA_Labels_e2, QDA_PostProb_MSDA_e2)
+           samplesInMemory, featureSet, LDA_Ideal_1, LDA_NoAdapted_1, LDA_incre_gestures_labels_1,
+           LDA_incre_gestures_weight_1,
+           LDA_incre_gestures_weight_MSDA_1, LDA_incre_samples_labels_1, LDA_incre_samples_prob_1,
+           LDA_semi_gestures_labels_1,
+           LDA_semi_gestures_weight_1, LDA_semi_gestures_weight_MSDA_1, LDA_semi_samples_labels_1,
+           LDA_semi_samples_prob_1,
+           LDA_incre_gestures_weight_MSDA_Adapted_1, QDA_Ideal_1, QDA_NoAdapted_1, QDA_incre_gestures_labels_1,
+           QDA_incre_gestures_weight_1, QDA_incre_gestures_weight_MSDA_1, QDA_incre_samples_labels_1,
+           QDA_incre_samples_prob_1, QDA_semi_gestures_labels_1, QDA_semi_gestures_weight_1,
+           QDA_semi_gestures_weight_MSDA_1,
+           QDA_semi_samples_labels_1, QDA_semi_samples_prob_1, QDA_incre_gestures_weight_MSDA_Adapted_1,
+           E1_LDA_incre_gestures_labels_1, E1_LDA_incre_gestures_weight_1, E1_LDA_incre_gestures_weight_MSDA_1,
+           E1_QDA_incre_gestures_labels_1, E1_QDA_incre_gestures_weight_1, E1_QDA_incre_gestures_weight_MSDA_1,
+           E2_LDA_incre_gestures_labels_1, E2_LDA_incre_gestures_weight_1, E2_LDA_incre_gestures_weight_MSDA_1,
+           E2_QDA_incre_gestures_labels_1, E2_QDA_incre_gestures_weight_1, E2_QDA_incre_gestures_weight_MSDA_1)
 
 
 # shots
