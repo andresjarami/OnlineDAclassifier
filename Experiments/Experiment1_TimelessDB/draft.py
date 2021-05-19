@@ -23,38 +23,105 @@
 
 # ###############COV
 # labeledGesturesFeatures_1 = labeledGesturesFeatures[labeledGesturesLabels == 1]
-# covNew = np.zeros((8, 8))
+# covsample = np.zeros((8, 8))
 # for i in range(len(labeledGesturesFeatures_1)):
-#     xNew = labeledGesturesFeatures_1[i, :]
-#     x_mean = np.resize(xNew - adaptiveModel['mean'].loc[cla], (len(xNew), 1))
-#     covNew += np.dot(x_mean, x_mean.T.conj())
+#     xsample = labeledGesturesFeatures_1[i, :]
+#     x_mean = np.resize(xsample - adaptiveModel['mean'].loc[cla], (len(xsample), 1))
+#     covsample += np.dot(x_mean, x_mean.T.conj())
 #
 # x_mean = np.resize(x - adaptiveModel['mean'].loc[cla], (len(x), 1))
-# covNew += p * np.dot(x_mean, x_mean.T.conj())
-# covNew = covNew / (N + p - 1)
+# covsample += p * np.dot(x_mean, x_mean.T.conj())
+# covsample = covsample / (N + p - 1)
+import numpy as np
+
+data = np.array([[1, 2, 3, 4], [2, 5, 6, 3], [2, 7, 8, 9], [12, 34, 5, 6], [2, 5, 6, 2], [34, 5, 2, 7], [3, 5, 6, 3]])
+cov_data = np.cov(data, rowvar=False)
+mean_data = np.mean(data, axis=0)
+N_data = 7
+
+##################sample
+data_sample = np.array(
+    [[1, 2, 3, 4], [2, 5, 6, 3], [2, 7, 8, 9], [12, 34, 5, 6], [2, 5, 6, 2], [34, 5, 2, 7], [3, 5, 6, 3],
+     [2, 3, 1, 78]])
+cov_data_sample = np.cov(data_sample, rowvar=False)
+mean_data_sample = np.mean(data_sample, axis=0)
+N_data_sample = 8
+
+sample = np.array([2, 3, 1, 78])
+
+mean_data_sample_andres = (N_data * mean_data + sample) / (N_data + 1)
+print('error mean sample', mean_data_sample - mean_data_sample_andres)
+
+x_mean = np.resize(sample - mean_data, (len(sample), 1))
+cov_data_sample_andres = ((N_data - 1) / N_data) * cov_data + (1 / (N_data + 1)) * np.dot(x_mean, x_mean.T.conj())
+print('error cov sample', cov_data_sample - cov_data_sample_andres)
+
+cov_data_sample_pang = cov_data + (N_data / (N_data + 1)) * np.dot(x_mean, x_mean.T.conj())
+print('error cov sample pang', cov_data_sample - cov_data_sample_pang)
+
+cov_data_sample_pang_n = (cov_data + (N_data / (N_data + 1)) * np.dot(x_mean, x_mean.T.conj())) / (N_data)
+print('error cov sample pang n', cov_data_sample - cov_data_sample_pang_n)
+
+cov_data_sample_pang_n1 = (cov_data + (N_data / (N_data + 1)) * np.dot(x_mean, x_mean.T.conj())) / (N_data - 1)
+print('error cov sample pang n-1', cov_data_sample - cov_data_sample_pang_n1)
+
+cov_data_sample_chen = (N_data / (N_data + 1)) * cov_data + (1 / (N_data + 1)) * (N_data / (N_data + 1)) * np.dot(
+    x_mean, x_mean.T.conj())
+print('error cov sample chen', cov_data_sample - cov_data_sample_chen)
+
+#################chunk
+chunk = np.array([[2, 3, 1, 78], [3, 4, 5, 6], [3, 5, 1, 8]])
+N_chunk = 3
+cov_chunk = np.cov(chunk, rowvar=False)
+mean_chunk = np.mean(chunk, axis=0)
+
+data_chunk = np.vstack((data, chunk))
+cov_data_chunk = np.cov(data_chunk, rowvar=False)
+mean_data_chunk = np.mean(data_chunk, axis=0)
+
+mean_data_chunk_andres = (N_data * mean_data + N_chunk * mean_chunk) / (N_data + N_chunk)
+print('error mean chunk', mean_data_chunk - mean_data_chunk_andres)
+
+x_mean = np.resize(mean_chunk - mean_data, (len(sample), 1))
+cov_data_chunk_andres = ((N_data - 1) / (N_data + N_chunk - 1)) * cov_data + \
+                        ((N_chunk - 1) / (N_data + N_chunk - 1)) * cov_chunk + \
+                        (N_chunk * N_data / ((N_data + N_chunk) * (N_data + N_chunk - 1))) * np.dot(x_mean,
+                                                                                                    x_mean.T.conj())
+print('error cov chunk', cov_data_chunk - cov_data_chunk_andres)
+
+prob = [1, 1, 1, 1, 1, 1, 1, 0.2, 0.2, 0.2]
+pr = 0.2
+mean_data_chunk_w = np.zeros(4)
+for i in range(10):
+    mean_data_chunk_w += data_chunk[i, :] * prob[i]
+mean_data_chunk_w /= np.sum(prob)
+
+mean_data_chunk_w_andres = (N_data * mean_data + N_chunk * mean_chunk * pr) / (N_data + N_chunk * pr)
+print('error mean chunk w', mean_data_chunk_w - mean_data_chunk_w_andres)
+
+cov_data_chunk_w = np.zeros((4, 4))
+for i in range(10):
+    x_mean = np.resize(data_chunk[i, :] - mean_data_chunk_w, (len(data_chunk[i, :]), 1))
+    cov_data_chunk_w += np.dot(x_mean, x_mean.T.conj()) * prob[i]
+cov_data_chunk_w /= (np.sum(prob) - 1)
+
+x_mean = np.resize(mean_chunk - mean_data, (len(sample), 1))
+cov_data_chunk_w_andres = ((N_data - 1) / (N_data + N_chunk * pr - 1)) * cov_data + \
+                          (pr * (N_chunk - 1) / (N_data + N_chunk * pr - 1)) * cov_chunk + \
+                          (N_chunk * N_data * pr / ((N_data + N_chunk * pr) * (N_data + N_chunk * pr - 1))) * \
+                          np.dot(x_mean, x_mean.T.conj())
+print('error cov chunk w', cov_data_chunk_w - cov_data_chunk_w_andres)
 
 
 
-def model_semi_gestures_labels(weakModel, classes, trainFeatures, postProb_trainFeatures, fewModel,
-                              labeledGesturesFeatures, labeledGesturesLabels, type_DA, samplesInMemory, shotStart,
-                              unlabeledGesturesTotal, dataTotal):
-    t = time.time()
+mean = mean_data
+cov = cov_data
+N = N_data
+w = 0.2
 
-    adaptiveModel = weakModel.copy()
-    for cla in range(classes):
-        adaptiveModel.at[cla, '# gestures'] = adaptiveModel.loc[0, '# gestures']
-
-    unlabeledGesturesTotal = np.array(unlabeledGesturesTotal)
-    numberFeatures = np.size(labeledGesturesFeatures, axis=1)
-    labelsList = list(labeledGesturesLabels)
-    featuresList = list(labeledGesturesFeatures)
-    for sample in range(len(unlabeledGesturesTotal[:, 0])):
-        x = unlabeledGesturesTotal[sample, :numberFeatures]
-        if type_DA == 'LDA':
-            cla = DA_Classifiers.predictedModelLDA(x, weakModel, classes,
-                                                   DA_Classifiers.LDA_Cov(weakModel, classes))
-        elif type_DA == 'QDA':
-            cla = DA_Classifiers.predictedModelQDA(x, weakModel, classes)
-        labelsList.append(cla)
-        featuresList.append(x)
-    return modelCalculation_labels(np.array(featuresList), np.array(labelsList), classes), time.time() - t, 0
+testA = (N * mean + N_chunk * w * mean_chunk) / \
+                        (N + N_chunk * w)
+aux = np.resize(mean_chunk - mean, (len(mean_chunk), 1))
+testC = (1 / (N + N_chunk * w - 1)) * \
+                       (cov * (N - 1) + cov_chunk * w * (N_chunk - 1) +
+                        np.dot(aux, aux.T.conj()) * (N * N_chunk * w) / (N + N_chunk * w))

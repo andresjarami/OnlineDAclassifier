@@ -302,16 +302,30 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
 def evaluation2(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameFile, startPerson, endPerson,
                 allFeatures, printR, samplesInMemory, shotStart, initialTime, finalTime, typeDatabase):
     scaler = preprocessing.MinMaxScaler()
-
+    # print(numberShots * classes - shotStart * classes)
     if typeDatabase == 'EPN':
-        evaluatedGestures = np.array([1, 5, 10, 20, 40, 60, 80, 100, 120])
+        evaluatedGestures = np.array([1, 5, 10, 20, 40, 60, 80, 100, 120, numberShots * classes - shotStart * classes])
     elif typeDatabase == 'Nina5':
-        evaluatedGestures = np.array([1, 5, 10, 20, 30, 40, 50, 54])
+        evaluatedGestures = np.array([1, 5, 10, 20, 30, 40, 50, 54, numberShots * classes - shotStart * classes])
     elif typeDatabase == 'Cote':
-        evaluatedGestures = np.array([1, 6, 11, 16, 21])
+        evaluatedGestures = np.array([1, 6, 11, 16, 21, numberShots * classes - shotStart * classes])
 
     results = pd.DataFrame(
         columns=['Feature Set', 'person', 'exp_time', '# shots', 'shot_class', 'unlabeled Gesture'])
+
+    for metric in ['precision', 'recall', 'w_predicted', 'time']:
+        for typeDA in ['LDA', 'QDA']:
+            if metric == 'precision' or metric == 'recall':
+                results[metric + '_' + typeDA + '_' + 'weak'] = ''
+                results[metric + '_' + typeDA + '_' + 'adapted'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_proposedMcc_adapt'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_proposedMcc'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_proposedLabel'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_sequential'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_supervised'] = ''
+            for l in [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]:
+                results[metric + '_' + typeDA + '_' + 'incre_Nigam_' + str(l)] = ''
+
     # results = pd.DataFrame(
     #     columns=['Feature Set', 'person', 'exp_time', '# shots', 'shot_class', 'precision_LDA_Ideal',
     #              'precision_LDA_NoAdapted', 'precision_LDA_incre_gestures_labels',
@@ -388,13 +402,13 @@ def evaluation2(dataMatrix, classes, peoplePriorK, featureSet, numberShots, name
     idx = 0
 
     for person in range(startPerson, endPerson + 1):
-        testFeatures = \
-            dataMatrix[(dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 1), :allFeatures]
-        testLabels = dataMatrix[
-            (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 1), allFeatures + 2].T
 
         for seed in range(initialTime, finalTime + 1):
-            nShots = 0
+            testFeatures = \
+                dataMatrix[(dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 1), :allFeatures]
+            testLabels = dataMatrix[
+                (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 1), allFeatures + 2].T
+
             np.random.seed(seed)
             unlabeledGestures = []
             labeledGestures = []
@@ -436,19 +450,19 @@ def evaluation2(dataMatrix, classes, peoplePriorK, featureSet, numberShots, name
 
             labeledGesturesFeatures = np.array(labeledGesturesFeatures)
             labeledGesturesLabels = np.array(labeledGesturesLabels)
-            numberLabeledGestureList = np.array(numberLabeledGestureList)
-            probLabeledGestures = np.array(probLabeledGestures)
+            # numberLabeledGestureList = np.array(numberLabeledGestureList)
+            # probLabeledGestures = np.array(probLabeledGestures)
 
             labeledGesturesFeatures = scaler.fit_transform(labeledGesturesFeatures)
             testFeatures = scaler.transform(testFeatures)
 
-            datasetIdeal = np.hstack(
-                (labeledGesturesFeatures, np.resize(labeledGesturesLabels, (len(labeledGesturesLabels), 1))))
+            # datasetIdeal = np.hstack(
+            #     (labeledGesturesFeatures, np.resize(labeledGesturesLabels, (len(labeledGesturesLabels), 1))))
 
-            dataTotal = np.hstack(
-                (labeledGesturesFeatures, np.resize(labeledGesturesLabels, (len(labeledGesturesLabels), 1)),
-                 np.resize(numberLabeledGestureList, (len(labeledGesturesLabels), 1)),
-                 np.resize(probLabeledGestures, (len(labeledGesturesLabels), classes))))
+            # dataTotal = np.hstack(
+            #     (labeledGesturesFeatures, np.resize(labeledGesturesLabels, (len(labeledGesturesLabels), 1)),
+            #      np.resize(numberLabeledGestureList, (len(labeledGesturesLabels), 1)),
+            #      np.resize(probLabeledGestures, (len(labeledGesturesLabels), classes))))
 
             try:
                 adaptedModelLDA = pd.read_pickle(
@@ -498,399 +512,335 @@ def evaluation2(dataMatrix, classes, peoplePriorK, featureSet, numberShots, name
                         featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
                         seed) + '.pkl')
 
-            # adaptedModelLDA=[]
-            # adaptedModelQDA = []
 
-            # results.at[idx, 'AccLDA_NoAdapted'], results.at[idx, 'precision_LDA_NoAdapted'], results.at[
-            #     idx, 'recall_LDA_NoAdapted'], _ = DA_Classifiers.accuracyModelLDA(
-            #     testFeatures, testLabels, weakModel, classes)
-            #
-            # results.at[idx, 'AccQDA_NoAdapted'], results.at[idx, 'precision_QDA_NoAdapted'], results.at[
-            #     idx, 'recall_QDA_NoAdapted'], _ = DA_Classifiers.accuracyModelQDA(
-            #     testFeatures, testLabels, weakModel, classes)
-            #
-            # results.at[idx, 'AccLDA_Adapted'], results.at[idx, 'precision_LDA_Adapted'], results.at[
-            #     idx, 'recall_LDA_Adapted'], _ = DA_Classifiers.accuracyModelLDA(
-            #     testFeatures, testLabels, adaptedModelLDA, classes)
-            #
-            # results.at[idx, 'AccQDA_Adapted'], results.at[idx, 'precision_QDA_Adapted'], results.at[
-            #     idx, 'recall_QDA_Adapted'], _ = DA_Classifiers.accuracyModelQDA(
-            #     testFeatures, testLabels, adaptedModelQDA, classes)
+            numberUnlabeledGestures = 0
 
-            results.at[idx, 'AccLDA_NoAdapted'], _, _, _ = DA_Classifiers.accuracyModelLDA(
-                testFeatures, testLabels, weakModel, classes)
-
-            results.at[idx, 'AccQDA_NoAdapted'], _, _, _ = DA_Classifiers.accuracyModelQDA(
-                testFeatures, testLabels, weakModel, classes)
-
-            results.at[idx, 'AccLDA_Adapted'], _, _, _ = DA_Classifiers.accuracyModelLDA(
-                testFeatures, testLabels, adaptedModelLDA, classes)
-
-            results.at[idx, 'AccQDA_Adapted'], _, _, _ = DA_Classifiers.accuracyModelQDA(
-                testFeatures, testLabels, adaptedModelQDA, classes)
-
-            # LDA_incre_gestures_labels = weakModel.copy()
-            # LDA_incre_gestures_weight = weakModel.copy()
-            # LDA_incre_gestures_weight_MSDA = weakModel.copy()
-            # LDA_incre_samples_labels = weakModel.copy()
-            # LDA_incre_samples_prob = weakModel.copy()
-            # LDA_incre_gestures_labels_adapt = adaptedModelLDA.copy()
-            # LDA_incre_gestures_weight_adapt = adaptedModelLDA.copy()
-            # LDA_incre_gestures_weight_MSDA_adapt = adaptedModelLDA.copy()
-            # LDA_incre_samples_labels_adapt = adaptedModelLDA.copy()
-            # LDA_incre_samples_prob_adapt = adaptedModelLDA.copy()
-            # QDA_incre_gestures_labels = weakModel.copy()
-            # QDA_incre_gestures_weight = weakModel.copy()
-            # QDA_incre_gestures_weight_MSDA = weakModel.copy()
-            # QDA_incre_samples_labels = weakModel.copy()
-            # QDA_incre_samples_prob = weakModel.copy()
-            # QDA_incre_gestures_labels_adapt = adaptedModelQDA.copy()
-            # QDA_incre_gestures_weight_adapt = adaptedModelQDA.copy()
-            # QDA_incre_gestures_weight_MSDA_adapt = adaptedModelQDA.copy()
-            # QDA_incre_samples_labels_adapt = adaptedModelQDA.copy()
-            # QDA_incre_samples_prob_adapt = adaptedModelQDA.copy()
-
-            numberUnlabeledGestureList = []
-            numberUnlabeledGestures = 1
-
-            resultsACC, _, _, _ = DA_Classifiers.accuracyModelLDA(testFeatures, testLabels, weakModel, classes)
             name = 'LDA' + '_' + 'weak'
-            print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC)
-            results.at[idx, name] = resultsACC
+            results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                testFeatures, testLabels, weakModel, classes)
+            # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-            resultsACC, _, _, _ = DA_Classifiers.accuracyModelQDA(testFeatures, testLabels, weakModel, classes)
             name = 'QDA' + '_' + 'weak'
-            print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC)
-            results.at[idx, name] = resultsACC
+            results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                testFeatures, testLabels, weakModel, classes)
+            # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-            LDA_incre_Proposed = weakModel.copy()
-            LDA_incre_weight = weakModel.copy()
-            LDA_incre_selTraining = weakModel.copy()
+            name = 'LDA' + '_' + 'adapted'
+            results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                testFeatures, testLabels, adaptedModelLDA, classes)
+            # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+            name = 'QDA' + '_' + 'adapted'
+            results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                testFeatures, testLabels, adaptedModelQDA, classes)
+            # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+            numSamples = 50
+            labeledGesturesFeatures, labeledGesturesLabels = adaptive.subsetTraining(
+                labeledGesturesFeatures, labeledGesturesLabels, numSamples, classes)
+
+            LDA_incre_proposedMcc = weakModel.copy()
+            LDA_incre_proposedLabel = weakModel.copy()
+            LDA_incre_sequential = weakModel.copy()
+            LDA_incre_supervised = weakModel.copy()
+            LDA_incre_Nigam_01 = weakModel.copy()
             LDA_incre_Nigam_02 = weakModel.copy()
             LDA_incre_Nigam_04 = weakModel.copy()
             LDA_incre_Nigam_06 = weakModel.copy()
             LDA_incre_Nigam_08 = weakModel.copy()
             LDA_incre_Nigam_10 = weakModel.copy()
 
-            QDA_incre_Proposed = weakModel.copy()
-            QDA_incre_weight = weakModel.copy()
-            QDA_incre_selTraining = weakModel.copy()
+            QDA_incre_proposedMcc = weakModel.copy()
+            QDA_incre_proposedLabel = weakModel.copy()
+            QDA_incre_sequential = weakModel.copy()
+            QDA_incre_supervised = weakModel.copy()
+            QDA_incre_Nigam_01 = weakModel.copy()
             QDA_incre_Nigam_02 = weakModel.copy()
             QDA_incre_Nigam_04 = weakModel.copy()
             QDA_incre_Nigam_06 = weakModel.copy()
             QDA_incre_Nigam_08 = weakModel.copy()
             QDA_incre_Nigam_10 = weakModel.copy()
 
-            LDA_incre_Proposed_adapt = adaptedModelLDA.copy()
-            QDA_incre_Proposed_adapt = adaptedModelQDA.copy()
+            LDA_incre_proposedMcc_adapt = adaptedModelLDA.copy()
+            QDA_incre_proposedMcc_adapt = adaptedModelQDA.copy()
 
             for rand in list(permutationUnlabeledGestures):
                 trainFeatures = dataMatrix[
                                 (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) &
                                 (dataMatrix[:, allFeatures + 3] == rand[0]) & (
                                         dataMatrix[:, allFeatures + 2] == rand[1]), 0:allFeatures]
-                trainLabels = dataMatrix[
-                    (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) &
-                    (dataMatrix[:, allFeatures + 3] == rand[0]) & (
-                            dataMatrix[:, allFeatures + 2] == rand[1]), allFeatures + 2]
+                # trainLabels = dataMatrix[
+                #     (dataMatrix[:, allFeatures + 1] == person) & (dataMatrix[:, allFeatures] == 0) &
+                #     (dataMatrix[:, allFeatures + 3] == rand[0]) & (
+                #             dataMatrix[:, allFeatures + 2] == rand[1]), allFeatures + 2]
 
-                nShots += 1
                 trainFeatures = scaler.transform(trainFeatures)
 
-                datasetIdeal = np.append(datasetIdeal,
-                                         np.hstack((trainFeatures, np.resize(trainLabels, (len(trainLabels), 1)))),
-                                         axis=0)
-                idealModel = currentDistributionValues(datasetIdeal[:, :allFeatures], datasetIdeal[:, allFeatures],
-                                                       classes, allFeatures, shotStart)
-                # results.at[idx, 'AccLDA_Ideal'], results.at[idx, 'precision_LDA_Ideal'], results.at[
-                #     idx, 'recall_LDA_Ideal'], _ = DA_Classifiers.accuracyModelLDA(
-                #     testFeatures, testLabels, idealModel, classes)
-                #
-                # results.at[idx, 'AccQDA_Ideal'], results.at[idx, 'precision_QDA_Ideal'], results.at[
-                #     idx, 'recall_QDA_Ideal'], _ = DA_Classifiers.accuracyModelQDA(
-                #     testFeatures, testLabels, idealModel, classes)
 
-                results.at[idx, 'AccLDA_Ideal'], _, _, _ = DA_Classifiers.accuracyModelLDA(
-                    testFeatures, testLabels, idealModel, classes)
 
-                results.at[idx, 'AccQDA_Ideal'], _, _, _ = DA_Classifiers.accuracyModelQDA(
-                    testFeatures, testLabels, idealModel, classes)
-
-                numberUnlabeledGestureList += list(
-                    np.hstack((trainFeatures, np.ones((len(trainLabels), 1)) * numberUnlabeledGestures)))
                 numberUnlabeledGestures += 1
 
-                LDA_incre_Proposed_adapt, _, _ = SemiSupervised.model_incre_Proposed(
-                    LDA_incre_Proposed_adapt, classes, trainFeatures, adaptedModelLDA,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart)
+                type_DA = 'LDA'
 
-                LDA_incre_Proposed, _, _ = SemiSupervised.model_incre_Proposed(
-                    LDA_incre_Proposed, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart)
+                name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                LDA_incre_proposedMcc_adapt, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
+                    LDA_incre_proposedMcc_adapt, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                    'LDA')
 
-                LDA_incre_weight, _, _ = SemiSupervised.model_incre_weight(
-                    LDA_incre_weight, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart)
+                name = type_DA + '_' + 'incre_proposedMcc'
+                LDA_incre_proposedMcc, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
+                    LDA_incre_proposedMcc, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                    'LDA')
 
-                LDA_incre_selTraining, _, _ = SemiSupervised.model_incre_selfTraining(
-                    LDA_incre_selTraining, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart)
+                name = type_DA + '_' + 'incre_proposedLabel'
+                LDA_incre_proposedLabel, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedLabel(
+                    LDA_incre_proposedLabel, classes, trainFeatures, 'LDA')
 
-                LDA_incre_Nigam_10, _, _ = SemiSupervised.model_incre_Nigam(
-                    LDA_incre_Nigam_10, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart, weight_lambda=1)
-                LDA_incre_Nigam_02, _, _ = SemiSupervised.model_incre_Nigam(
-                    LDA_incre_Nigam_02, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart,
-                    weight_lambda=0.2)
-                LDA_incre_Nigam_04, _, _ = SemiSupervised.model_incre_Nigam(
-                    LDA_incre_Nigam_04, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart,
-                    weight_lambda=0.4)
-                LDA_incre_Nigam_06, _, _ = SemiSupervised.model_incre_Nigam(
-                    LDA_incre_Nigam_06, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart,
-                    weight_lambda=0.6)
-                LDA_incre_Nigam_08, _, _ = SemiSupervised.model_incre_Nigam(
-                    LDA_incre_Nigam_08, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'LDA', samplesInMemory, shotStart,
-                    weight_lambda=0.8)
+                name = type_DA + '_' + 'incre_sequential'
+                LDA_incre_sequential, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_labels(
+                    LDA_incre_sequential, classes, trainFeatures, 'LDA')
 
-                QDA_incre_Proposed_adapt, _, _ = SemiSupervised.model_incre_Proposed(
-                    QDA_incre_Proposed_adapt, classes, trainFeatures, adaptedModelQDA,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart)
+                name = type_DA + '_' + 'incre_supervised'
+                LDA_incre_supervised, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_supervised(
+                    LDA_incre_supervised, classes, trainFeatures, 'LDA', rand[1])
 
-                QDA_incre_Proposed, _, _ = SemiSupervised.model_incre_Proposed(
-                    QDA_incre_Proposed, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
+                LDA_incre_Nigam_01, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    LDA_incre_Nigam_01, classes, trainFeatures, 'LDA', weight_Nigam=0.1)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.2)
+                LDA_incre_Nigam_02, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    LDA_incre_Nigam_02, classes, trainFeatures, 'LDA', weight_Nigam=0.2)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.4)
+                LDA_incre_Nigam_04, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    LDA_incre_Nigam_04, classes, trainFeatures, 'LDA', weight_Nigam=0.4)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.6)
+                LDA_incre_Nigam_06, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    LDA_incre_Nigam_06, classes, trainFeatures, 'LDA', weight_Nigam=0.6)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.8)
+                LDA_incre_Nigam_08, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    LDA_incre_Nigam_08, classes, trainFeatures, 'LDA', weight_Nigam=0.8)
+                name = type_DA + '_' + 'incre_Nigam_' + str(1.0)
+                LDA_incre_Nigam_10, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    LDA_incre_Nigam_10, classes, trainFeatures, 'LDA', weight_Nigam=1)
 
-                QDA_incre_weight, _, _ = SemiSupervised.model_incre_weight(
-                    QDA_incre_weight, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart)
+                ###################################
+                type_DA = 'QDA'
 
-                QDA_incre_selTraining, _, _ = SemiSupervised.model_incre_selfTraining(
-                    QDA_incre_selTraining, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart)
+                name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                QDA_incre_proposedMcc_adapt, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
+                    QDA_incre_proposedMcc_adapt, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                    'QDA')
 
-                QDA_incre_Nigam_10, _, _ = SemiSupervised.model_incre_Nigam(
-                    QDA_incre_Nigam_10, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart, weight_lambda=1)
-                QDA_incre_Nigam_02, _, _ = SemiSupervised.model_incre_Nigam(
-                    QDA_incre_Nigam_02, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart,
-                    weight_lambda=0.2)
-                QDA_incre_Nigam_04, _, _ = SemiSupervised.model_incre_Nigam(
-                    QDA_incre_Nigam_04, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart,
-                    weight_lambda=0.4)
-                QDA_incre_Nigam_06, _, _ = SemiSupervised.model_incre_Nigam(
-                    QDA_incre_Nigam_06, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart,
-                    weight_lambda=0.6)
-                QDA_incre_Nigam_08, _, _ = SemiSupervised.model_incre_Nigam(
-                    QDA_incre_Nigam_08, classes, trainFeatures, weakModel,
-                    labeledGesturesFeatures, labeledGesturesLabels, 'QDA', samplesInMemory, shotStart,
-                    weight_lambda=0.8)
+                name = type_DA + '_' + 'incre_proposedMcc'
+                QDA_incre_proposedMcc, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
+                    QDA_incre_proposedMcc, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                    'QDA')
 
-                if np.any(evaluatedGestures == np.ones(len(evaluatedGestures)) * (numberUnlabeledGestures - 1)):
+                name = type_DA + '_' + 'incre_proposedLabel'
+                QDA_incre_proposedLabel, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedLabel(
+                    QDA_incre_proposedLabel, classes, trainFeatures, 'QDA')
 
+                name = type_DA + '_' + 'incre_sequential'
+                QDA_incre_sequential, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_labels(
+                    QDA_incre_sequential, classes, trainFeatures, 'QDA')
+
+                name = type_DA + '_' + 'incre_supervised'
+                QDA_incre_supervised, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_supervised(
+                    QDA_incre_supervised, classes, trainFeatures, 'QDA', rand[1])
+
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
+                QDA_incre_Nigam_01, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    QDA_incre_Nigam_01, classes, trainFeatures, 'QDA', weight_Nigam=0.1)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.2)
+                QDA_incre_Nigam_02, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    QDA_incre_Nigam_02, classes, trainFeatures, 'QDA', weight_Nigam=0.2)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.4)
+                QDA_incre_Nigam_04, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    QDA_incre_Nigam_04, classes, trainFeatures, 'QDA', weight_Nigam=0.4)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.6)
+                QDA_incre_Nigam_06, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    QDA_incre_Nigam_06, classes, trainFeatures, 'QDA', weight_Nigam=0.6)
+                name = type_DA + '_' + 'incre_Nigam_' + str(0.8)
+                QDA_incre_Nigam_08, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    QDA_incre_Nigam_08, classes, trainFeatures, 'QDA', weight_Nigam=0.8)
+                name = type_DA + '_' + 'incre_Nigam_' + str(1.0)
+                QDA_incre_Nigam_10, results.at[idx, 'time' + '_' + name], results.at[
+                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedNigam(
+                    QDA_incre_Nigam_10, classes, trainFeatures, 'QDA', weight_Nigam=1)
+
+                results.at[idx, 'Feature Set'] = featureSet
+                results.at[idx, 'person'] = person
+                results.at[idx, 'exp_time'] = seed
+                results.at[idx, 'shot_class'] = rand
+                results.at[idx, 'unlabeled Gesture'] = numberUnlabeledGestures
+
+                idx += 1
+                if np.any(evaluatedGestures == np.ones(len(evaluatedGestures)) * (numberUnlabeledGestures)):
+                    idx -= 1
                     type_DA = 'LDA'
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
-                        testFeatures, testLabels, LDA_incre_Proposed_adapt, classes)
-                    name = type_DA + '_' + 'incre_proposed_adapt'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                        testFeatures, testLabels, LDA_incre_proposedMcc_adapt, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
-                        testFeatures, testLabels, LDA_incre_Proposed, classes)
-                    name = type_DA + '_' + 'incre_proposed'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_proposedMcc'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                        testFeatures, testLabels, LDA_incre_proposedMcc, classes)
+                    # print('\n' + name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
-                        testFeatures, testLabels, LDA_incre_weight, classes)
-                    name = type_DA + '_' + 'incre_weight'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_proposedLabel'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                        testFeatures, testLabels, LDA_incre_proposedLabel, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
-                        testFeatures, testLabels, LDA_incre_selTraining, classes)
-                    name = type_DA + '_' + 'incre_selTraining'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_sequential'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                        testFeatures, testLabels, LDA_incre_sequential, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
+                    name = type_DA + '_' + 'incre_supervised'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                        testFeatures, testLabels, LDA_incre_supervised, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                        testFeatures, testLabels, LDA_incre_Nigam_01, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.2)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
                         testFeatures, testLabels, LDA_incre_Nigam_02, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.2)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.4)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
                         testFeatures, testLabels, LDA_incre_Nigam_04, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.4)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.6)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
                         testFeatures, testLabels, LDA_incre_Nigam_06, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.6)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.8)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
                         testFeatures, testLabels, LDA_incre_Nigam_08, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.8)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(1.0)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
                         testFeatures, testLabels, LDA_incre_Nigam_10, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(1)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
                     ###QDA
                     type_DA = 'QDA'
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
-                        testFeatures, testLabels, QDA_incre_Proposed_adapt, classes)
-                    name = type_DA + '_' + 'incre_Proposed_adapt'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                        testFeatures, testLabels, QDA_incre_proposedMcc_adapt, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
-                        testFeatures, testLabels, QDA_incre_Proposed, classes)
-                    name = type_DA + '_' + 'incre_Proposed'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_proposedMcc'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                        testFeatures, testLabels, QDA_incre_proposedMcc, classes)
+                    # print('\n' + name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
-                        testFeatures, testLabels, QDA_incre_weight, classes)
-                    name = type_DA + '_' + 'incre_weight'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_proposedLabel'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                        testFeatures, testLabels, QDA_incre_proposedLabel, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
-                        testFeatures, testLabels, QDA_incre_selTraining, classes)
-                    name = type_DA + '_' + 'incre_selTraining'
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    name = type_DA + '_' + 'incre_sequential'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                        testFeatures, testLabels, QDA_incre_sequential, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
+                    name = type_DA + '_' + 'incre_supervised'
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                        testFeatures, testLabels, QDA_incre_supervised, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                        testFeatures, testLabels, QDA_incre_Nigam_01, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.2)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
                         testFeatures, testLabels, QDA_incre_Nigam_02, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.2)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.4)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
                         testFeatures, testLabels, QDA_incre_Nigam_04, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.4)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.6)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
                         testFeatures, testLabels, QDA_incre_Nigam_06, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.6)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(0.8)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
                         testFeatures, testLabels, QDA_incre_Nigam_08, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(0.8)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
-                    resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+
+                    name = type_DA + '_' + 'incre_Nigam_' + str(1.0)
+                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
                         testFeatures, testLabels, QDA_incre_Nigam_10, classes)
-                    name = type_DA + '_' + 'incre_Nigam_lambda_' + str(1)
-                    print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                    results.at[idx, name] = resultsACC_b
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-                    for type_DA in ['LDA', 'QDA']:
-                        for kBest in [None, 1, 5, 10, 15]:
-                            b, _, _ = SemiSupervised.model_Proposed(
-                                0, classes, 0, 0, weakModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA,
-                                samplesInMemory, shotStart,
-                                numberUnlabeledGestureList, dataTotal, kBest=kBest)
-                            if type_DA == 'LDA':
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            else:
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            name = type_DA + '_' + 'proposed_kBest_' + str(kBest)
-                            print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                            results.at[idx, name] = resultsACC_b
-
-                            b, _, _ = SemiSupervised.model_weight(
-                                0, classes, 0, 0, weakModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA,
-                                samplesInMemory, shotStart,
-                                numberUnlabeledGestureList, dataTotal, kBest=kBest)
-                            if type_DA == 'LDA':
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            else:
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            name = type_DA + '_' + 'weight_kBest_' + str(kBest)
-                            print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                            results.at[idx, name] = resultsACC_b
-
-                            b, _, _ = SemiSupervised.model_seflfTraining(
-                                0, classes, 0, 0, weakModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA, 0,
-                                0,
-                                numberUnlabeledGestureList, dataTotal, kBest=1)
-                            if type_DA == 'LDA':
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            else:
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            name = type_DA + '_' + 'selfTraining_kBest_' + str(kBest)
-                            print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                            results.at[idx, name] = resultsACC_b
-
-                        for weight_lambda in [0.2, 0.4, 0.6, 0.8, 1]:
-                            times = 20
-                            b, _, _ = SemiSupervised.model_Nigam(
-                                0, classes, 0, 0, weakModel, labeledGesturesFeatures, labeledGesturesLabels, type_DA, 0,
-                                0,
-                                numberUnlabeledGestureList, dataTotal, weight_lambda=weight_lambda, times=times)
-                            if type_DA == 'LDA':
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelLDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            else:
-                                resultsACC_b, _, _, _ = DA_Classifiers.accuracyModelQDA(testFeatures, testLabels, b,
-                                                                                        classes)
-                            name = type_DA + '_' + 'Nigam_lambda_' + str(weight_lambda)
-                            print(name + ' ' + str(numberUnlabeledGestures - 1), resultsACC_b)
-                            results.at[idx, name] = resultsACC_b
-
-                    results.at[idx, 'Feature Set'] = featureSet
-                    results.at[idx, 'person'] = person
-                    results.at[idx, 'exp_time'] = seed
-                    results.at[idx, 'shot_class'] = rand
-                    results.at[idx, '# shots'] = nShots
-                    results.at[idx, 'unlabeled Gesture'] = numberUnlabeledGestures - 1
-
-                    results.to_csv(nameFile)
                     idx += 1
-
-                # results, idx, LDA_incre_gestures_labels, LDA_incre_gestures_weight, LDA_incre_gestures_weight_MSDA, \
-                # LDA_incre_samples_labels, LDA_incre_samples_prob, LDA_incre_gestures_labels_adapt, \
-                # LDA_incre_gestures_weight_adapt, LDA_incre_gestures_weight_MSDA_adapt, LDA_incre_samples_labels_adapt, \
-                # LDA_incre_samples_prob_adapt, QDA_incre_gestures_labels, QDA_incre_gestures_weight, \
-                # QDA_incre_gestures_weight_MSDA, QDA_incre_samples_labels, QDA_incre_samples_prob, \
-                # QDA_incre_gestures_labels_adapt, QDA_incre_gestures_weight_adapt, QDA_incre_gestures_weight_MSDA_adapt, \
-                # QDA_incre_samples_labels_adapt, QDA_incre_samples_prob_adapt = \
-                #     resultsDataframe(
-                #         trainFeatures, trainLabels, classes, results, testFeatures, testLabels, idx, person, seed,
-                #         nShots, rand, featureSet, nameFile, printR, labeledGesturesFeatures, labeledGesturesLabels,
-                #         weakModel, samplesInMemory, shotStart, adaptedModelLDA, adaptedModelQDA,
-                #         numberUnlabeledGestureList, dataTotal, LDA_incre_gestures_labels, LDA_incre_gestures_weight,
-                #         LDA_incre_gestures_weight_MSDA, LDA_incre_samples_labels, LDA_incre_samples_prob,
-                #         LDA_incre_gestures_labels_adapt, LDA_incre_gestures_weight_adapt,
-                #         LDA_incre_gestures_weight_MSDA_adapt, LDA_incre_samples_labels_adapt,
-                #         LDA_incre_samples_prob_adapt, QDA_incre_gestures_labels, QDA_incre_gestures_weight,
-                #         QDA_incre_gestures_weight_MSDA, QDA_incre_samples_labels, QDA_incre_samples_prob,
-                #         QDA_incre_gestures_labels_adapt, QDA_incre_gestures_weight_adapt,
-                #         QDA_incre_gestures_weight_MSDA_adapt, QDA_incre_samples_labels_adapt,
-                #         QDA_incre_samples_prob_adapt)
-    #
-    # return results
+                    results.to_csv(nameFile)
 
 
 def PKModels(dataMatrix, classes, peoplePriorK, evaluatedPerson, allFeatures):
@@ -1279,18 +1229,20 @@ def SemiSupervisedModels(currentModel, type_DA, trainFeatures, trainLabels, clas
 
 
 def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures, shotStart):
-    currentValues = pd.DataFrame(columns=['cov', 'mean', 'class', 'weight_mean', 'weight_cov', '# gestures'])
+    currentValues = pd.DataFrame(
+        columns=['cov', 'mean', 'class', 'N', 'LDAcov'])
     trainLabelsAux = trainLabels[np.newaxis]
     Matrix = np.hstack((trainFeatures, trainLabelsAux.T))
     for cla in range(classes):
-        currentValues.at[cla, 'cov'] = np.cov(Matrix[np.where((Matrix[:, allFeatures] == cla + 1)), 0:allFeatures][0],
-                                              rowvar=False)
-        currentValues.at[cla, 'mean'] = np.mean(Matrix[np.where((Matrix[:, allFeatures] == cla + 1)), 0:allFeatures][0],
-                                                axis=0)
+        X = Matrix[np.where((Matrix[:, allFeatures] == cla + 1)), 0:allFeatures][0]
+        currentValues.at[cla, 'cov'] = np.cov(X, rowvar=False)
+        # currentValues.at[cla, 'cov_accumulated'] = currentValues.loc[cla, 'cov']
+        currentValues.at[cla, 'mean'] = np.mean(X, axis=0)
+        # currentValues.at[cla, 'mean_accumulated'] = currentValues.loc[cla, 'mean']
         currentValues.at[cla, 'class'] = cla + 1
-        currentValues.at[cla, 'weight_mean'] = shotStart
-        currentValues.at[cla, 'weight_cov'] = shotStart
-    currentValues.at[0, '# gestures'] = shotStart
+        N = np.size(X, axis=0)
+        currentValues.at[cla, 'N'] = N
+    currentValues.at[0, 'LDAcov'] = DA_Classifiers.LDA_Cov_weights(currentValues)
     return currentValues
 
 

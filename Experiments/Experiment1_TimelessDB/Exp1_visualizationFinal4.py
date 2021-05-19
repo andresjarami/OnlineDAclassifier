@@ -497,18 +497,18 @@ def vectors_calculation2(results, rows):
                 results['1_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
             E2_LDA_incre_gestures_weight.append(
-                results['2_ErrorLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
+                results['1_ErrorLDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
             E2_LDA_incre_gestures_labels.append(
-                results['2_ErrorLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
+                results['1_ErrorLDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
             E2_LDA_incre_gestures_weight_MSDA.append(
-                results['2_ErrorLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
+                results['1_ErrorLDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
             E2_QDA_incre_gestures_weight.append(
-                results['2_ErrorQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
+                results['1_ErrorQDA_incre_gestures_weight'].loc[results['# shots'] == i].mean())
             E2_QDA_incre_gestures_labels.append(
-                results['2_ErrorQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
+                results['1_ErrorQDA_incre_gestures_labels'].loc[results['# shots'] == i].mean())
             E2_QDA_incre_gestures_weight_MSDA.append(
-                results['2_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
+                results['1_ErrorQDA_incre_gestures_weight_MSDA'].loc[results['# shots'] == i].mean())
 
     return LDA_Ideal, LDA_NoAdapted, LDA_incre_gestures_labels, LDA_incre_gestures_weight, \
            LDA_incre_gestures_weight_MSDA, LDA_incre_samples_labels, LDA_incre_samples_prob, LDA_semi_gestures_labels, \
@@ -554,15 +554,15 @@ def graphs(rows1, rows2, database, LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2,
 
     ax[0, 0].plot(x1, LDA_Ideal_1, label='All labeled')
     ax[0, 0].plot(x1, LDA_NoAdapted_1, label='Baseline')
-    ax[0, 0].plot(x1, LDA_incre_gestures_weight_1, label='Nigam r=1')
-    ax[0, 0].plot(x1, LDA_incre_gestures_labels_1, label='Cheng per gesture')
-    ax[0, 0].plot(x1, LDA_incre_gestures_weight_MSDA_1, label='Proposed weights')
-    ax[0, 0].plot(x1, LDA_incre_samples_labels_1, label='Cheng per segment')
+    ax[0, 0].plot(x1, LDA_incre_gestures_weight_1, label='incre_gestures_weights')
+    # ax[0, 0].plot(x1, LDA_incre_gestures_labels_1, label='incre_gestures_labels')
+    ax[0, 0].plot(x1, LDA_incre_gestures_weight_MSDA_1, label='incre_gestures_weights_MSDA')
+    # ax[0, 0].plot(x1, LDA_incre_samples_labels_1, label='incre_samples_labels')
     # ax[0, 0].plot(x1, LDA_incre_samples_prob_1, label='incre_gestures_weights_MSDA')
 
-    # ax[0, 0].plot(x1, LDA_semi_gestures_weight_1, label='semi_gestures_weights')
+    ax[0, 0].plot(x1, LDA_semi_gestures_weight_1, label='semi_gestures_weights')
     # ax[0, 0].plot(x1, LDA_semi_gestures_labels_1, label='semi_gestures_labels')
-    # ax[0, 0].plot(x1, LDA_semi_gestures_weight_MSDA_1, label='semi_gestures_weights_MSDA')
+    ax[0, 0].plot(x1, LDA_semi_gestures_weight_MSDA_1, label='semi_gestures_weights_MSDA')
     # ax[0, 0].plot(x1, LDA_semi_samples_labels_1, label='semi_samples_labels')
     # ax[0, 0].plot(x1, LDA_semi_samples_prob_1, label='semi_gestures_weights_MSDA')
     
@@ -591,15 +591,15 @@ def graphs(rows1, rows2, database, LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2,
     
     ax[1, 0].plot(x1, QDA_Ideal_1, label='All labeled')
     ax[1, 0].plot(x1, QDA_NoAdapted_1, label='Baseline')
-    ax[1, 0].plot(x1, QDA_incre_gestures_weight_1, label='Nigam r=1')
-    ax[1, 0].plot(x1, QDA_incre_gestures_labels_1, label='Cheng per gesture')
-    ax[1, 0].plot(x1, QDA_incre_gestures_weight_MSDA_1, label='Proposed weights')
-    ax[1, 0].plot(x1, QDA_incre_samples_labels_1, label='Cheng per segment')
+    ax[1, 0].plot(x1, QDA_incre_gestures_weight_1, label='incre_gestures_weights')
+    # ax[1, 0].plot(x1, QDA_incre_gestures_labels_1, label='incre_gestures_labels')
+    ax[1, 0].plot(x1, QDA_incre_gestures_weight_MSDA_1, label='incre_gestures_weights_MSDA')
+    # ax[1, 0].plot(x1, QDA_incre_samples_labels_1, label='incre_samples_labels')
     # ax[1, 0].plot(x1, QDA_incre_samples_prob_1, label='incre_samples_prob')
 
-    # ax[1, 0].plot(x1, QDA_semi_gestures_weight_1, label='semi_gestures_weights')
+    ax[1, 0].plot(x1, QDA_semi_gestures_weight_1, label='semi_gestures_weights')
     # ax[1, 0].plot(x1, QDA_semi_gestures_labels_1, label='semi_gestures_labels')
-    # ax[1, 0].plot(x1, QDA_semi_gestures_weight_MSDA_1, label='semi_gestures_weights_MSDA')
+    ax[1, 0].plot(x1, QDA_semi_gestures_weight_MSDA_1, label='semi_gestures_weights_MSDA')
     # ax[1, 0].plot(x1, QDA_semi_samples_labels_1, label='semi_samples_labels')
     # ax[1, 0].plot(x1, QDA_semi_samples_prob_1, label='semi_samples_prob')
     
@@ -636,25 +636,25 @@ def graphs(rows1, rows2, database, LDA_Ideal_2, LDA_NoAdapted_2, LDA_PostProb_2,
     fig1, ax = plt.subplots(nrows=2, ncols=1, sharey='row', sharex='col')
     # fig.suptitle('Accuracy vs. Unlabeled Gestures (over time)')
 
-    # ax[0].plot(x1, E1_LDA_incre_gestures_weight_1, label='error 1 Cheng per gesture')
-    # ax[0].plot(x1, E1_LDA_incre_gestures_weight_MSDA_1, label='error 1 Proposed weights')
-    # ax[0].plot(x1, E1_LDA_incre_gestures_labels_1, label='error 1 Nigam r=1')
+    ax[0].plot(x1, E1_LDA_incre_gestures_weight_1, label='LDA_PostProb_e1')
+    ax[0].plot(x1, E1_LDA_incre_gestures_weight_MSDA_1, label='LDA_PostProb_MSDA_e1')
+    ax[0].plot(x1, E1_LDA_incre_gestures_labels_1, label='LDA_Labels_e1')
 
-    ax[0].plot(x1, E2_LDA_incre_gestures_weight_1, label='error 2 Cheng per gesture')
-    ax[0].plot(x1, E2_LDA_incre_gestures_weight_MSDA_1, label='error 2 Proposed weights')
-    ax[0].plot(x1, E2_LDA_incre_gestures_labels_1, label='error 2 Nigam r=1')
+    ax[0].plot(x1, E2_LDA_incre_gestures_weight_1, label='LDA_PostProb_e2')
+    ax[0].plot(x1, E2_LDA_incre_gestures_weight_MSDA_1, label='LDA_PostProb_MSDA_e2')
+    ax[0].plot(x1, E2_LDA_incre_gestures_labels_1, label='LDA_Labels_e2')
 
     ax[0].set_ylabel('error')
     ax[0].set_title(database + ' (LDA)')
     ax[0].grid(color='gainsboro', linewidth=1)
 
-    # ax[1].plot(x1, E1_QDA_incre_gestures_weight_1, label='error 1 Cheng per gesture')
-    # ax[1].plot(x1, E1_QDA_incre_gestures_weight_MSDA_1, label='error 1 Proposed weights')
-    # ax[1].plot(x1, E1_QDA_incre_gestures_labels_1, label='error 1 Nigam r=1')
+    ax[1].plot(x1, E1_QDA_incre_gestures_weight_1, label='QDA_PostProb_e1')
+    ax[1].plot(x1, E1_QDA_incre_gestures_weight_MSDA_1, label='QDA_PostProb_MSDA_e1')
+    ax[1].plot(x1, E1_QDA_incre_gestures_labels_1, label='QDA_Labels_e1')
 
-    ax[1].plot(x1, E2_QDA_incre_gestures_weight_1, label='error 2 Cheng per gesture')
-    ax[1].plot(x1, E2_QDA_incre_gestures_weight_MSDA_1, label='error 2 Proposed weights')
-    ax[1].plot(x1, E2_QDA_incre_gestures_labels_1, label='error 2 Nigam r=1')
+    ax[1].plot(x1, E2_QDA_incre_gestures_weight_1, label='QDA_PostProb_e2')
+    ax[1].plot(x1, E2_QDA_incre_gestures_weight_MSDA_1, label='QDA_PostProb_MSDA_e2')
+    ax[1].plot(x1, E2_QDA_incre_gestures_labels_1, label='QDA_Labels_e2')
 
     ax[1].set_ylabel('error')
     ax[1].set_title(database + ' (QDA)')
@@ -673,6 +673,161 @@ def analysis1(folder, database, samplesInMemory, featureSet, times):
     results2, rows2 = uploadResultsDatabase('resultsFinal/', database, samplesInMemory, featureSet, times, shotStart=1)
 
     results_Old, x_Old = uploadResultsDatabasesVF1('../ResultsExp1_RQ1/', database, windowSize='295')
+
+    if database == 'EPN':
+        evaluatedGestures = [0, 1, 5, 10, 20, 40, 60, 80, 100, 120]
+    elif database == 'Nina5':
+        evaluatedGestures = [0, 1, 5, 10, 20, 30, 40, 50, 54]
+    elif database == 'Cote':
+        evaluatedGestures = [0, 1, 6, 11, 16, 21]
+
+    nigam02 = []
+    nigam04 = []
+    nigam06 = []
+    nigam08 = []
+    nigam10 = []
+    weak=[]
+    for i in evaluatedGestures:
+        nigam02.append(results1['LDA_Nigam_lambda_0.2'].loc[results1['# shots']==i].mean())
+        nigam04.append(results1['LDA_Nigam_lambda_0.4'].loc[results1['# shots'] == i].mean())
+        nigam06.append(results1['LDA_Nigam_lambda_0.6'].loc[results1['# shots'] == i].mean())
+        nigam08.append(results1['LDA_Nigam_lambda_0.8'].loc[results1['# shots'] == i].mean())
+        nigam10.append(results1['LDA_Nigam_lambda_1'].loc[results1['# shots'] == i].mean())
+        weak.append(results1['LDA_weak'].loc[results1['# shots'] == 1].mean())
+
+    plt.plot(evaluatedGestures,nigam02,label='nigam02')
+    plt.plot(evaluatedGestures, nigam04, label='nigam04')
+    plt.plot(evaluatedGestures, nigam06, label='nigam06')
+    plt.plot(evaluatedGestures, nigam08, label='nigam08')
+    plt.plot(evaluatedGestures, nigam10, label='nigam10')
+    plt.plot(evaluatedGestures, weak, label='weak')
+    plt.title('LDA')
+    plt.legend()
+    plt.show()
+
+    nigam02 = []
+    nigam04 = []
+    nigam06 = []
+    nigam08 = []
+    nigam10 = []
+    for i in evaluatedGestures:
+        nigam02.append(results1['QDA_Nigam_lambda_0.2'].loc[results1['# shots']==i].mean())
+        nigam04.append(results1['QDA_Nigam_lambda_0.4'].loc[results1['# shots'] == i].mean())
+        nigam06.append(results1['QDA_Nigam_lambda_0.6'].loc[results1['# shots'] == i].mean())
+        nigam08.append(results1['QDA_Nigam_lambda_0.8'].loc[results1['# shots'] == i].mean())
+        nigam10.append(results1['QDA_Nigam_lambda_1'].loc[results1['# shots'] == i].mean())
+
+    plt.plot(evaluatedGestures,nigam02,label='nigam02')
+    plt.plot(evaluatedGestures, nigam04, label='nigam04')
+    plt.plot(evaluatedGestures, nigam06, label='nigam06')
+    plt.plot(evaluatedGestures, nigam08, label='nigam08')
+    plt.plot(evaluatedGestures, nigam10, label='nigam10')
+    plt.title('QDA')
+    plt.legend()
+    plt.show()
+
+    #####INCREMENTAL NIGAM
+    nigam02 = []
+    nigam04 = []
+    nigam06 = []
+    nigam08 = []
+    nigam10 = []
+    weak = []
+    for i in evaluatedGestures:
+        nigam02.append(results1['LDA_incre_Nigam_lambda_0.2'].loc[results1['# shots'] == i].mean())
+        nigam04.append(results1['LDA_incre_Nigam_lambda_0.4'].loc[results1['# shots'] == i].mean())
+        nigam06.append(results1['LDA_incre_Nigam_lambda_0.6'].loc[results1['# shots'] == i].mean())
+        nigam08.append(results1['LDA_incre_Nigam_lambda_0.8'].loc[results1['# shots'] == i].mean())
+        nigam10.append(results1['LDA_incre_Nigam_lambda_1'].loc[results1['# shots'] == i].mean())
+        weak.append(results1['LDA_weak'].loc[results1['# shots'] == 1].mean())
+
+    plt.plot(evaluatedGestures, nigam02, label='nigam02')
+    plt.plot(evaluatedGestures, nigam04, label='nigam04')
+    plt.plot(evaluatedGestures, nigam06, label='nigam06')
+    plt.plot(evaluatedGestures, nigam08, label='nigam08')
+    plt.plot(evaluatedGestures, nigam10, label='nigam10')
+    plt.plot(evaluatedGestures, weak, label='weak')
+    plt.title('LDA incre')
+    plt.legend()
+    plt.show()
+
+    nigam02 = []
+    nigam04 = []
+    nigam06 = []
+    nigam08 = []
+    nigam10 = []
+    for i in evaluatedGestures:
+        nigam02.append(results1['QDA_incre_Nigam_lambda_0.2'].loc[results1['# shots'] == i].mean())
+        nigam04.append(results1['QDA_incre_Nigam_lambda_0.4'].loc[results1['# shots'] == i].mean())
+        nigam06.append(results1['QDA_incre_Nigam_lambda_0.6'].loc[results1['# shots'] == i].mean())
+        nigam08.append(results1['QDA_incre_Nigam_lambda_0.8'].loc[results1['# shots'] == i].mean())
+        nigam10.append(results1['QDA_incre_Nigam_lambda_1'].loc[results1['# shots'] == i].mean())
+
+    plt.plot(evaluatedGestures, nigam02, label='nigam02')
+    plt.plot(evaluatedGestures, nigam04, label='nigam04')
+    plt.plot(evaluatedGestures, nigam06, label='nigam06')
+    plt.plot(evaluatedGestures, nigam08, label='nigam08')
+    plt.plot(evaluatedGestures, nigam10, label='nigam10')
+    plt.title('QDA incre')
+    plt.legend()
+    plt.show()
+
+    #######Kbest
+
+    kbestNone = []
+    kbest1 = []
+    kbest5 = []
+    kbest10 = []
+    kbest15 = []
+    weak = []
+    modelName='selfTraining'
+    DA='LDA'
+    for i in evaluatedGestures:
+        kbestNone.append(results1[DA+'_'+modelName+'_kBest_None'].loc[results1['# shots'] == i].mean())
+        kbest1.append(results1[DA+'_'+modelName+'_kBest_1'].loc[results1['# shots'] == i].mean())
+        kbest5.append(results1[DA+'_' + modelName + '_kBest_5'].loc[results1['# shots'] == i].mean())
+        kbest10.append(results1[DA+'_' + modelName + '_kBest_10'].loc[results1['# shots'] == i].mean())
+        kbest15.append(results1[DA+'_' + modelName + '_kBest_15'].loc[results1['# shots'] == i].mean())
+        weak.append(results1[DA+'_weak'].loc[results1['# shots'] == 1].mean())
+
+    plt.plot(evaluatedGestures, kbestNone, label='kbestNone')
+    plt.plot(evaluatedGestures, kbest1, label='kbest1')
+    plt.plot(evaluatedGestures, kbest5, label='kbest5')
+    plt.plot(evaluatedGestures, kbest10, label='kbest10')
+    plt.plot(evaluatedGestures, kbest15, label='kbest15')
+    plt.plot(evaluatedGestures, weak, label='weak')
+    plt.title(DA+' '+modelName)
+    plt.legend()
+    plt.show()
+
+
+    ########incremental
+
+    self = []
+    propo = []
+    weight = []
+    ideal = []
+    adapt = []
+    weak = []
+    DA = 'LDA'
+    for i in evaluatedGestures:
+        self.append(results1[DA + '_incre_' + 'selTraining'].loc[results1['# shots'] == i].mean())
+        propo.append(results1[DA + '_incre_' + 'proposed'].loc[results1['# shots'] == i].mean())
+        weight.append(results1[DA + '_incre_' + 'weight' ].loc[results1['# shots'] == i].mean())
+        ideal.append(results1['Acc'+DA+'_Ideal'].loc[results1['# shots'] == i].mean())
+        adapt.append(results1[DA + '_incre_' + 'proposed_adapt'].loc[results1['# shots'] == i].mean())
+        weak.append(results1[DA + '_weak'].loc[results1['# shots'] == 1].mean())
+
+    plt.plot(evaluatedGestures, self, label='self')
+    plt.plot(evaluatedGestures, propo, label='propo')
+    plt.plot(evaluatedGestures, weight, label='weight')
+    plt.plot(evaluatedGestures, ideal, label='ideal')
+    plt.plot(evaluatedGestures, adapt, label='adapt')
+    plt.plot(evaluatedGestures, weak, label='weak')
+    plt.title(DA + ' incre ALL')
+    plt.legend()
+    plt.show()
+
 
     LDA_Ideal_1, LDA_NoAdapted_1, LDA_incre_gestures_labels_1, LDA_incre_gestures_weight_1, \
     LDA_incre_gestures_weight_MSDA_1, LDA_incre_samples_labels_1, LDA_incre_samples_prob_1, LDA_semi_gestures_labels_1, \
@@ -765,6 +920,6 @@ import Experimet1_Visualization as EV
 # analysis1(folder='resultsFinal/', database='EPN', samplesInMemory=0, featureSet=1,times=5)
 
 
-analysis1(folder='resultsFinal3/', database='Cote', samplesInMemory=0, featureSet=1, times=4)
-analysis1(folder='resultsFinal3/', database='Nina5', samplesInMemory=0, featureSet=1, times=4)
-analysis1(folder='resultsFinal3/', database='EPN', samplesInMemory=0, featureSet=1, times=4)
+analysis1(folder='resultsFinal4/', database='Cote', samplesInMemory=0, featureSet=1, times=4)
+analysis1(folder='resultsFinal4/', database='Nina5', samplesInMemory=0, featureSet=1, times=4)
+analysis1(folder='resultsFinal4/', database='EPN', samplesInMemory=0, featureSet=1, times=4)

@@ -98,7 +98,7 @@ def OurModel(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFea
     numSamples = 50
     trainFeatures, trainLabels = subsetTraining(trainFeatures, trainLabels, numSamples, classes)
 
-    adaptiveModel = pd.DataFrame(columns=['cov', 'mean', 'class', 'weight_mean', 'weight_cov', '# gestures'])
+    adaptiveModel = currentValues.copy()
 
     for cla in range(classes):
         adaptiveModel.at[cla, 'cov'] = np.zeros((allFeatures, allFeatures))
@@ -154,11 +154,11 @@ def OurModel(currentValues, preTrainedDataMatrix, classes, allFeatures, trainFea
         adaptiveModel.at[cla, 'mean'] = np.sum(preTrainedMatrix_Class['mean'] * wPeopleMean) + currentMean * \
                                         wTargetMean[
                                             cla]
-        adaptiveModel.at[cla, 'class'] = cla + 1
-        adaptiveModel.at[cla, 'weight_mean'] = currentValues.loc[cla, 'weight_mean']
-        adaptiveModel.at[cla, 'weight_cov'] = currentValues.loc[cla, 'weight_cov']
+        # adaptiveModel.at[cla, 'class'] = cla + 1
+        # adaptiveModel.at[cla, 'weight_mean'] = currentValues.loc[cla, 'weight_mean']
+        # adaptiveModel.at[cla, 'weight_cov'] = currentValues.loc[cla, 'weight_cov']
 
-    adaptiveModel.at[0, '# gestures'] = shotStart
+    # adaptiveModel.at[0, '# gestures'] = shotStart
     trainingTime = time.time() - t
     return adaptiveModel, wTargetMean, wTargetMean.mean(), wTargetCov, wTargetCov.mean(), trainingTime
 
