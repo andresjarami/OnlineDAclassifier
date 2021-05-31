@@ -29,40 +29,51 @@ def mcc(TP, TN, FP, FN):
 
 
 # %% Models
-def updateModel(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
-    for cla in range(classes):
-        mean = model.loc[cla, 'mean']
-        cov = model.loc[cla, 'cov']
-        N = model.loc[cla, 'N']
-        w = weights[cla]
+# def updateModel(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
+#     for cla in range(classes):
+#         mean = model.loc[cla, 'mean']
+#         cov = model.loc[cla, 'cov']
+#         N = model.loc[cla, 'N']
+#         w = weights[cla]
+#
+#         model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
+#                                 (N + chunk_N * w)
+#         aux = np.resize(chunk_mean - mean, (len(chunk_mean), 1))
+#         model.at[cla, 'cov'] = (1 / (N + chunk_N * w - 1)) * \
+#                                (cov * (N - 1) + chunk_cov * w * (chunk_N - 1) +
+#                                 np.dot(aux, aux.T.conj()) * (N * chunk_N * w) / (N + chunk_N * w))
+#         model.at[cla, 'N'] = N + chunk_N * w
+#     if type_DA == 'LDA':
+#         model.at[0, 'LDAcov'] = DA_Classifiers.LDA_Cov_weights(model)
+#     return model
 
-        model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
-                                (N + chunk_N * w)
-        aux = np.resize(chunk_mean - mean, (len(chunk_mean), 1))
-        model.at[cla, 'cov'] = (1 / (N + chunk_N * w - 1)) * \
-                               (cov * (N - 1) + chunk_cov * w * (chunk_N - 1) +
-                                np.dot(aux, aux.T.conj()) * (N * chunk_N * w) / (N + chunk_N * w))
-        model.at[cla, 'N'] = N + chunk_N * w
-    if type_DA == 'LDA':
-        model.at[0, 'LDAcov'] = DA_Classifiers.LDA_Cov_weights(model)
-    return model
 
 def updateModel2(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
     for cla in range(classes):
-        mean = model.loc[cla, 'mean']
-        cov = model.loc[cla, 'cov']
-        N = model.loc[cla, 'N']
         w = weights[cla]
+        if w != 0:
+            mean = model.loc[cla, 'mean']
+            cov = model.loc[cla, 'cov']
+            N = model.loc[cla, 'N']
 
-        model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
-                                (N + chunk_N * w)
-        # aux = np.resize(chunk_mean - mean, (len(chunk_mean), 1))
-        # model.at[cla, 'cov'] = (1 / (N + chunk_N * w - 1)) * \
-        #                        (cov * (N - 1) + chunk_cov * w * (chunk_N - 1) +
-        #                         np.dot(aux, aux.T.conj()) * (N * chunk_N * w) / (N + chunk_N * w))
-        model.at[cla, 'cov'] = (N * cov + chunk_N * w * chunk_cov) / \
-                                (N + chunk_N * w)
-        model.at[cla, 'N'] = N + chunk_N * w
+            model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
+                                    (N + chunk_N * w)
+            #####1
+            # aux = np.resize(chunk_mean - mean, (len(chunk_mean), 1))
+            # model.at[cla, 'cov'] = (1 / (N + chunk_N * w - 1)) * \
+            #                        (cov * (N - 1) + chunk_cov * w * (chunk_N - 1) +
+            #                         np.dot(aux, aux.T.conj()) * (N * chunk_N * w) / (N + chunk_N * w))
+            ######2
+            aux = np.resize(chunk_mean - mean, (len(chunk_mean), 1))
+            model.at[cla, 'cov'] = (1 / (N + chunk_N * w - 1)) * \
+                                   (cov * (N - 1) + chunk_cov * w * (chunk_N - 1) +
+                                    np.dot(aux, aux.T.conj()) * N * chunk_N * (N * w + chunk_N) / (
+                                            ((N + chunk_N) ** 2) * (N + chunk_N * w - 1)))
+            ######3
+            # model.at[cla, 'cov'] = (N * cov + chunk_N * w * chunk_cov) / \
+            #                         (N + chunk_N * w)
+
+            model.at[cla, 'N'] = N + chunk_N * w
     if type_DA == 'LDA':
         model.at[0, 'LDAcov'] = DA_Classifiers.LDA_Cov_weights(model)
     return model
@@ -128,6 +139,25 @@ def model_incre_proposedNigam(currentModel, classes, trainFeatures, type_DA, wei
 
     return updateModel2(classes, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov, gesture_N, type_DA), \
            time.time() - t, weightsUnlabeledGesture
+
+
+def model_incre_threshold(currentModel, classes, trainFeatures, type_DA, threshold):
+    t = time.time()
+
+
+    p = post_probabilities_Calculation(trainFeatures, currentModel, classes, type_DA)
+    if np.max(p) > threshold:
+
+        gesture_mean = np.mean(trainFeatures, axis=0)
+        gesture_cov = np.cov(trainFeatures, rowvar=False)
+        gesture_N = np.size(trainFeatures, axis=0)
+        weightsUnlabeledGesture = np.zeros(classes)
+        weightsUnlabeledGesture[np.argmax(p)] = 1
+
+        return updateModel2(classes, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov, gesture_N,
+                            type_DA), time.time() - t, weightsUnlabeledGesture
+    else:
+        return currentModel, time.time() - t, np.zeros(classes)
 
 
 def model_incre_proposedLabel(currentModel, classes, trainFeatures, type_DA):
@@ -209,8 +239,8 @@ def calculationMcc(trueLabels, predeictedLabeles, currentClass):
     FN = len(np.where((trueLabels == vectorCurrentClass) & (trueLabels != predeictedLabeles))[0])
     TN = len(np.where((trueLabels != vectorCurrentClass) & (trueLabels == predeictedLabeles))[0])
     FP = len(np.where((trueLabels != vectorCurrentClass) & (trueLabels != predeictedLabeles))[0])
+
     return mcc(TP, TN, FP, FN)
-    # return TP / (TP + 0.5 * (FP + FN))
 
 
 def discriminantTab(trainFeatures, personMean, personCov, classes, currentValues):
@@ -276,7 +306,7 @@ def weightMSDA_reduce(currentValues, personMean, personCov, classes, trainFeatur
         for cla in range(classes):
             auxCurrentValues = currentValues.copy()
             auxCurrentValues['cov'].at[cla] = personCov
-            LDACov = DA_Classifiers.LDA_Cov(auxCurrentValues, classes)
+            LDACov = DA_Classifiers.LDA_Cov_weights(auxCurrentValues)
 
             tabDiscriminantValues = []
             if np.linalg.det(LDACov) > 0:

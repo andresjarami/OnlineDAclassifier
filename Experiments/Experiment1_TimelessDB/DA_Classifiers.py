@@ -21,13 +21,14 @@ def LDA_Discriminant_pseudo(x, covariance, mean):
     return np.dot(np.dot(x, invCov), mean) - 0.5 * np.dot(np.dot(mean, invCov), mean)
 
 
-def LDA_Cov(trainedModel, classes):
-    LDACov = trainedModel['cov'].sum() / classes
-    return LDACov
+# def LDA_Cov(trainedModel, classes):
+#     LDACov = trainedModel['cov'].sum() / classes
+#     return LDACov
 
 def LDA_Cov_weights(trainedModel):
-    sumCov = np.sum(trainedModel['cov'] * trainedModel['N'])
-    LDACov = sumCov / trainedModel['N'].sum()
+    classes = trainedModel.shape[0]
+    sumCov = np.sum(trainedModel['cov'] * (trainedModel['N'] - 1))
+    LDACov = sumCov / (trainedModel['N'].sum() - classes)
     return LDACov
 
 
@@ -72,7 +73,7 @@ def accuracyModelLDA(testFeatures, testLabels, model, classes):
     true = 0
     count = 0
     # LDACov = LDA_Cov(model, classes)
-    LDACov = model.loc[0,'LDAcov']
+    LDACov = model.loc[0, 'LDAcov']
     precision = np.zeros((2, classes))
     recall = np.zeros((2, classes))
     for i in range(np.size(testLabels)):

@@ -380,7 +380,8 @@ def mccModelLDA(testFeatures, testLabels, model, classes, currentClass, step):
     FN = 0
 
     currentClass = currentClass + 1
-    LDACov = DA_Classifiers.LDA_Cov(model, classes)
+    LDACov = DA_Classifiers.LDA_Cov_weights(model)
+
     for i in range(0, np.size(testLabels), step):
         currentPredictor = DA_Classifiers.predictedModelLDA(testFeatures[i, :], model, classes, LDACov)
         if currentPredictor == testLabels[i]:
@@ -426,7 +427,7 @@ def mccModelLDA_ALL(testFeatures, testLabels, model, classes, step):
     FP = np.zeros([classes])
     FN = np.zeros([classes])
 
-    LDACov = DA_Classifiers.LDA_Cov(model, classes)
+    LDACov = DA_Classifiers.LDA_Cov_weights(model)
 
     for i in range(0, np.size(testLabels), step):
         currentPredictor = DA_Classifiers.predictedModelLDA(testFeatures[i, :], model, classes, LDACov)
