@@ -193,14 +193,14 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
             testFeatures = scaler.transform(testFeatures)
 
             try:
-                adaptedModelLDA = pd.read_pickle(
-                    'pretrainedModels/adaptedModelLDA_' + typeDatabase + '_featureSet_' + str(
-                        featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
-                        seed) + '.pkl')
-                adaptedModelQDA = pd.read_pickle(
-                    'pretrainedModels/adaptedModelQDA_' + typeDatabase + '_featureSet_' + str(
-                        featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
-                        seed) + '.pkl')
+                # adaptedModelLDA = pd.read_pickle(
+                #     'pretrainedModels/adaptedModelLDA_' + typeDatabase + '_featureSet_' + str(
+                #         featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
+                #         seed) + '.pkl')
+                # adaptedModelQDA = pd.read_pickle(
+                #     'pretrainedModels/adaptedModelQDA_' + typeDatabase + '_featureSet_' + str(
+                #         featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
+                #         seed) + '.pkl')
 
                 weakModel = pd.read_pickle(
                     'pretrainedModels/weakModel_' + typeDatabase + '_featureSet_' + str(featureSet) + '_person_' + str(
@@ -218,27 +218,27 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                         person) + '_shotStart_' + str(shotStart) + '_seed_' + str(seed) + '.pkl')
 
                 # adaptive model
-                dataPK, _ = preprocessingPK(dataMatrix, allFeatures, scaler)
-                preTrainedDataMatrix = PKModels(dataPK, classes, peoplePriorK, person, allFeatures)
-
-                k = 1 - (np.log(shotStart) / np.log(numberShots + 1))
-                step = 1
-
-                adaptedModelLDA, _, _, _, _, _ = adaptive.OurModel(
-                    weakModel, preTrainedDataMatrix, classes, allFeatures, labeledGesturesFeatures,
-                    labeledGesturesLabels, step, 'LDA', k, shotStart)
-                adaptedModelQDA, _, _, _, _, _ = adaptive.OurModel(
-                    weakModel, preTrainedDataMatrix, classes, allFeatures, labeledGesturesFeatures,
-                    labeledGesturesLabels, step, 'QDA', k, shotStart)
-
-                adaptedModelLDA.to_pickle(
-                    'pretrainedModels/adaptedModelLDA_' + typeDatabase + '_featureSet_' + str(
-                        featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
-                        seed) + '.pkl')
-                adaptedModelQDA.to_pickle(
-                    'pretrainedModels/adaptedModelQDA_' + typeDatabase + '_featureSet_' + str(
-                        featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
-                        seed) + '.pkl')
+                # dataPK, _ = preprocessingPK(dataMatrix, allFeatures, scaler)
+                # preTrainedDataMatrix = PKModels(dataPK, classes, peoplePriorK, person, allFeatures)
+                #
+                # k = 1 - (np.log(shotStart) / np.log(numberShots + 1))
+                # step = 1
+                #
+                # adaptedModelLDA, _, _, _, _, _ = adaptive.OurModel(
+                #     weakModel, preTrainedDataMatrix, classes, allFeatures, labeledGesturesFeatures,
+                #     labeledGesturesLabels, step, 'LDA', k, shotStart)
+                # adaptedModelQDA, _, _, _, _, _ = adaptive.OurModel(
+                #     weakModel, preTrainedDataMatrix, classes, allFeatures, labeledGesturesFeatures,
+                #     labeledGesturesLabels, step, 'QDA', k, shotStart)
+                #
+                # adaptedModelLDA.to_pickle(
+                #     'pretrainedModels/adaptedModelLDA_' + typeDatabase + '_featureSet_' + str(
+                #         featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
+                #         seed) + '.pkl')
+                # adaptedModelQDA.to_pickle(
+                #     'pretrainedModels/adaptedModelQDA_' + typeDatabase + '_featureSet_' + str(
+                #         featureSet) + '_person_' + str(person) + '_shotStart_' + str(shotStart) + '_seed_' + str(
+                #         seed) + '.pkl')
 
             numberUnlabeledGestures = 0
 
@@ -254,17 +254,17 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                 testFeatures, testLabels, weakModel, classes)
             print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
-            name = 'LDA' + '_' + 'adapted'
-            results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
-                idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
-                testFeatures, testLabels, adaptedModelLDA, classes)
-            print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
-
-            name = 'QDA' + '_' + 'adapted'
-            results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
-                idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
-                testFeatures, testLabels, adaptedModelQDA, classes)
-            print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+            # name = 'LDA' + '_' + 'adapted'
+            # results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+            #     idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+            #     testFeatures, testLabels, adaptedModelLDA, classes)
+            # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+            #
+            # name = 'QDA' + '_' + 'adapted'
+            # results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+            #     idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+            #     testFeatures, testLabels, adaptedModelQDA, classes)
+            # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
             numSamples = 50
             labeledGesturesFeatures, labeledGesturesLabels = adaptive.subsetTraining(
@@ -308,8 +308,8 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
             QDA_incre_threshold_08 = weakModel.copy()
             QDA_incre_threshold_09 = weakModel.copy()
 
-            LDA_incre_proposedMcc_adapt = adaptedModelLDA.copy()
-            QDA_incre_proposedMcc_adapt = adaptedModelQDA.copy()
+            # LDA_incre_proposedMcc_adapt = adaptedModelLDA.copy()
+            # QDA_incre_proposedMcc_adapt = adaptedModelQDA.copy()
 
             for rand in list(permutationUnlabeledGestures):
                 trainFeatures = dataMatrix[
@@ -327,11 +327,11 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
 
                 type_DA = 'LDA'
 
-                name = type_DA + '_' + 'incre_proposedMcc_adapt'
-                LDA_incre_proposedMcc_adapt, results.at[idx, 'time' + '_' + name], results.at[
-                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
-                    LDA_incre_proposedMcc_adapt, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
-                    'LDA')
+                # name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                # LDA_incre_proposedMcc_adapt, results.at[idx, 'time' + '_' + name], results.at[
+                #     idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
+                #     LDA_incre_proposedMcc_adapt, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                #     'LDA')
 
                 name = type_DA + '_' + 'incre_proposedMcc'
                 LDA_incre_proposedMcc, results.at[idx, 'time' + '_' + name], results.at[
@@ -415,11 +415,11 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                 ###################################
                 type_DA = 'QDA'
 
-                name = type_DA + '_' + 'incre_proposedMcc_adapt'
-                QDA_incre_proposedMcc_adapt, results.at[idx, 'time' + '_' + name], results.at[
-                    idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
-                    QDA_incre_proposedMcc_adapt, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
-                    'QDA')
+                # name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                # QDA_incre_proposedMcc_adapt, results.at[idx, 'time' + '_' + name], results.at[
+                #     idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_proposedProbMSDA(
+                #     QDA_incre_proposedMcc_adapt, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                #     'QDA')
 
                 name = type_DA + '_' + 'incre_proposedMcc'
                 QDA_incre_proposedMcc, results.at[idx, 'time' + '_' + name], results.at[
@@ -511,11 +511,11 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                     idx -= 1
                     type_DA = 'LDA'
 
-                    name = type_DA + '_' + 'incre_proposedMcc_adapt'
-                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
-                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
-                        testFeatures, testLabels, LDA_incre_proposedMcc_adapt, classes)
-                    print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+                    # name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                    # results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                    #     idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelLDA(
+                    #     testFeatures, testLabels, LDA_incre_proposedMcc_adapt, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
                     name = type_DA + '_' + 'incre_proposedMcc'
                     results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
@@ -628,11 +628,11 @@ def evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameF
                     ###QDA
                     type_DA = 'QDA'
 
-                    name = type_DA + '_' + 'incre_proposedMcc_adapt'
-                    results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
-                        idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
-                        testFeatures, testLabels, QDA_incre_proposedMcc_adapt, classes)
-                    print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
+                    # name = type_DA + '_' + 'incre_proposedMcc_adapt'
+                    # results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[
+                    #     idx, 'recall' + '_' + name], _ = DA_Classifiers.accuracyModelQDA(
+                    #     testFeatures, testLabels, QDA_incre_proposedMcc_adapt, classes)
+                    # print(name + ' ' + str(numberUnlabeledGestures), results.at[idx, name])
 
                     name = type_DA + '_' + 'incre_proposedMcc'
                     results.at[idx, name], results.at[idx, 'precision' + '_' + name], results.at[

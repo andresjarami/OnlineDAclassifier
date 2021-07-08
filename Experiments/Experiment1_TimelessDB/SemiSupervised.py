@@ -68,7 +68,7 @@ def updateModel2(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_D
             model.at[cla, 'cov'] = (1 / (N + chunk_N * w - 1)) * \
                                    (cov * (N - 1) + chunk_cov * w * (chunk_N - 1) +
                                     np.dot(aux, aux.T.conj()) * N * chunk_N * (N * w + chunk_N) / (
-                                            ((N + chunk_N) ** 2) * (N + chunk_N * w - 1)))
+                                            (N + chunk_N) ** 2) )
             ######3
             # model.at[cla, 'cov'] = (N * cov + chunk_N * w * chunk_cov) / \
             #                         (N + chunk_N * w)
