@@ -118,58 +118,124 @@ sample = np.array([2, 3, 1, 78])
 
 #################chunk 222222222222222222222222
 chunk = np.array([[2, 3, 1, 78], [3, 4, 5, 6], [3, 5, 1, 8]])
+chunk2 = np.array([[3, 6, 1, 7], [1, 4, 0, 6], [3000, 500, 1000, 15555]])
+chunk3 = np.array([[78, 60, 11, 17], [81, 74, 50, 36], [2, 5, 10, 15], [2, 3, 1, 1]])
 N_chunk = 3
+N_chunk2 = 3
+N_chunk3 = 4
 
 cov_chunk = np.cov(chunk, rowvar=False)
 mean_chunk = np.mean(chunk, axis=0)
+cov_chunk2 = np.cov(chunk2, rowvar=False)
+mean_chunk2 = np.mean(chunk2, axis=0)
+cov_chunk3 = np.cov(chunk3, rowvar=False)
+mean_chunk3 = np.mean(chunk3, axis=0)
 
-data_chunk = np.vstack((data, chunk))
+data_chunk = np.vstack((data, chunk, chunk2,chunk3))
 cov_data_chunk = np.cov(data_chunk, rowvar=False)
 mean_data_chunk = np.mean(data_chunk, axis=0)
 
 pr = 1
+######chunk1
 x_mean = np.resize(mean_chunk - mean_data, (len(sample), 1))
-cov_data_chunk_andres2 = ((N_data - 1) / (N_data + N_chunk * pr - 1)) * cov_data + \
-                           (pr * (N_chunk - 1) / (N_data + N_chunk * pr - 1)) * cov_chunk + \
-                           (N_chunk * N_data * (N_chunk + N_data * pr ) / (
-                                       (N_data + N_chunk) * (N_data + N_chunk) * (N_data + N_chunk * pr - 1))) * \
-                           np.dot(x_mean, x_mean.T.conj())
+cov_data_chunk_andres2 = (1 / (N_data + N_chunk * pr - 1)) * \
+                         (cov_data * (N_data - 1) + cov_chunk * pr * (N_chunk - 1) +
+                          np.dot(x_mean, x_mean.T.conj()) * (N_data * N_chunk * pr) / (N_data + N_chunk * pr))
+
+######chunk2
+N_data2 = N_data + N_chunk
+mean_data_chunk_andres2 = (mean_data * N_data + mean_chunk * N_chunk * pr) / (N_data + N_chunk * pr)
+x_mean = np.resize(mean_chunk2 - mean_data_chunk_andres2, (len(sample), 1))
+cov_data_chunk_andres2 = (1 / (N_data2 + N_chunk2 * pr - 1)) * \
+                         (cov_data_chunk_andres2 * (N_data2 - 1) + cov_chunk2 * pr * (N_chunk2 - 1) +
+                          np.dot(x_mean, x_mean.T.conj()) * (N_data2 * N_chunk2 * pr) / (N_data2 + N_chunk2 * pr))
+
 print('error cov chunk 2', cov_data_chunk - cov_data_chunk_andres2)
-
+############################################
 pr = 0.2
-prob = [1, 1, 1, 1, 1, 1, 1, pr, pr, pr]
-
+pr2 = 0.4
+pr3 = 0.8
+prob = [1, 1, 1, 1, 1, 1, 1, pr, pr, pr, pr2, pr2, pr2, pr3, pr3, pr3, pr3]
+######chunk1
 mean_data_chunk_noProb = np.zeros(4)
 for i in range(10):
-    mean_data_chunk_noProb += data_chunk[i, :]
-mean_data_chunk_noProb /= 10
+    mean_data_chunk_noProb += data_chunk[i, :] * prob[i]
+mean_data_chunk_noProb /= 7.6
 
 cov_data_chunk_noProb = np.zeros((4, 4))
 for i in range(10):
     x_mean = np.resize(data_chunk[i, :] - mean_data_chunk_noProb, (len(data_chunk[i, :]), 1))
     cov_data_chunk_noProb += np.dot(x_mean, x_mean.T.conj()) * prob[i]
-cov_data_chunk_noProb /= (np.sum(prob) - 1)
+cov_data_chunk_noProb /= (7.6 - 1)
 
 
 x_mean = np.resize(mean_chunk - mean_data, (len(sample), 1))
-cov_data_chunk_w_andres2 = ((N_data - 1) / (N_data + N_chunk * pr - 1)) * cov_data + \
-                           (pr * (N_chunk - 1) / (N_data + N_chunk * pr - 1)) * cov_chunk + \
-                           (N_chunk * N_data * (N_chunk + N_data * pr ) / (
-                                       (N_data + N_chunk) * (N_data + N_chunk) * (N_data + N_chunk * pr - 1))) * \
-                           np.dot(x_mean, x_mean.T.conj())
-
-
+cov_data_chunk_w_andres2 = (1 / (N_data + N_chunk * pr - 1)) * \
+                           (cov_data * (N_data - 1) + cov_chunk * pr * (N_chunk - 1) +
+                            np.dot(x_mean, x_mean.T.conj()) * (N_data * N_chunk * pr) / (N_data + N_chunk * pr))
 
 print('error cov chunk w2', cov_data_chunk_noProb - cov_data_chunk_w_andres2)
 
-mean = mean_data
-cov = cov_data
-N = N_data
-w = 0.2
+######chunk2
+mean_data_chunk_noProb = np.zeros(4)
+for i in range(13):
+    mean_data_chunk_noProb += data_chunk[i, :] * prob[i]
+mean_data_chunk_noProb /= 8.8
 
-testA = (N * mean + N_chunk * w * mean_chunk) / \
-        (N + N_chunk * w)
-aux = np.resize(mean_chunk - mean, (len(mean_chunk), 1))
-testC = (1 / (N + N_chunk * w - 1)) * \
-        (cov * (N - 1) + cov_chunk * w * (N_chunk - 1) +
-         np.dot(aux, aux.T.conj()) * (N * N_chunk * w) / (N + N_chunk * w))
+cov_data_chunk_noProb = np.zeros((4, 4))
+for i in range(13):
+    x_mean = np.resize(data_chunk[i, :] - mean_data_chunk_noProb, (len(data_chunk[i, :]), 1))
+    cov_data_chunk_noProb += np.dot(x_mean, x_mean.T.conj()) * prob[i]
+cov_data_chunk_noProb /= (8.8 - 1)
+
+
+N_data2 = N_data + N_chunk * pr
+mean2 = (mean_data * N_data + mean_chunk * N_chunk * pr) / (N_data2)
+x_mean = np.resize(mean_chunk2 - mean2, (len(sample), 1))
+cov_data_chunk_w_andres2 = (1 / (N_data2 + N_chunk2 * pr2 - 1)) * \
+                           (cov_data_chunk_w_andres2 * (N_data2 - 1) + cov_chunk2 * pr2 * (N_chunk2 - 1) +
+                            np.dot(x_mean, x_mean.T.conj()) * (N_data2 * N_chunk2 * pr2) / (N_data2 + N_chunk2 * pr2))
+
+print('error cov chunk w2', cov_data_chunk_noProb - cov_data_chunk_w_andres2)
+
+######chunk3
+mean_data_chunk_noProb = np.zeros(4)
+for i in range(17):
+    mean_data_chunk_noProb += data_chunk[i, :] * prob[i]
+mean_data_chunk_noProb /= np.sum(prob)
+
+cov_data_chunk_noProb = np.zeros((4, 4))
+for i in range(17):
+    x_mean = np.resize(data_chunk[i, :] - mean_data_chunk_noProb, (len(data_chunk[i, :]), 1))
+    cov_data_chunk_noProb += np.dot(x_mean, x_mean.T.conj()) * prob[i]
+cov_data_chunk_noProb /= (np.sum(prob) - 1)
+
+
+N_data3 = N_data2 + N_chunk2 * pr2
+mean3 = (mean2 * N_data2 + mean_chunk2 * N_chunk2 * pr2) / (N_data3)
+x_mean = np.resize(mean_chunk3 - mean3, (len(sample), 1))
+cov_data_chunk_w_andres3 = (1 / (N_data3 + N_chunk3 * pr3 - 1)) * \
+                           (cov_data_chunk_w_andres2 * (N_data3 - 1) + cov_chunk3 * pr3 * (N_chunk3 - 1) +
+                            np.dot(x_mean, x_mean.T.conj()) * (N_data3 * N_chunk3 * pr3) / (N_data3 + N_chunk3 * pr3))
+
+# cov_data_chunk_w_andres2 = (1 / (N_data3 + N_chunk3 * pr3 - 1)) * \
+#                            (cov_data * (N_data - 1) + cov_chunk * pr * (N_chunk - 1) + cov_chunk2 * pr2 * (
+#                                    N_chunk2 - 1) + cov_chunk3 * pr3 * (N_chunk3 - 1) +
+#                             np.dot(x_mean, x_mean.T.conj()) *
+#                             (N_data * (N_chunk3 * pr3) ** 2 + (N_data3 ** 2 * N_chunk * pr) + (
+#                                     N_data3 ** 2 * N_chunk2 * pr2)) / (N_data3 + N_chunk3 * pr3) ** 2)
+
+
+print('error cov chunk w2', cov_data_chunk_noProb - cov_data_chunk_w_andres3)
+
+# mean = mean_data
+# cov = cov_data
+# N = N_data
+# w = 0.2
+#
+# testA = (N * mean + N_chunk * w * mean_chunk) / \
+#         (N + N_chunk * w)
+# aux = np.resize(mean_chunk - mean, (len(mean_chunk), 1))
+# testC = (1 / (N + N_chunk * w - 1)) * \
+#         (cov * (N - 1) + cov_chunk * w * (N_chunk - 1) +
+#          np.dot(aux, aux.T.conj()) * (N * N_chunk * w) / (N + N_chunk * w))

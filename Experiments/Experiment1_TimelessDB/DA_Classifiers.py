@@ -69,29 +69,23 @@ def predictedModelLDA_pseudo_Prob(sample, model, classes, LDACov):
 
 
 def accuracyModelLDA(testFeatures, testLabels, model, classes):
-    t = 0
     true = 0
-    count = 0
     # LDACov = LDA_Cov(model, classes)
     LDACov = model.loc[0, 'LDAcov']
     precision = np.zeros((2, classes))
     recall = np.zeros((2, classes))
     for i in range(np.size(testLabels)):
-        auxt = time.time()
         currentPredictor = predictedModelLDA(testFeatures[i, :], model, classes, LDACov)
-        t += (time.time() - auxt)
         if currentPredictor == testLabels[i]:
             true += 1
-            count += 1
             recall[0, int(testLabels[i] - 1)] += 1
             precision[0, int(currentPredictor - 1)] += 1
         else:
-            count += 1
             recall[1, int(testLabels[i] - 1)] += 1
             precision[1, int(currentPredictor - 1)] += 1
 
-    return true / count, np.nan_to_num(precision[0, :] / precision.sum(axis=0)), np.nan_to_num(
-        recall[0, :] / recall.sum(axis=0)), t / np.size(testLabels)
+    return true / np.size(testLabels), np.nan_to_num(precision[0, :] / precision.sum(axis=0)), np.nan_to_num(
+        recall[0, :] / recall.sum(axis=0))
 
 
 # QDA Classifier
@@ -145,26 +139,20 @@ def predictedModelQDA_pseudo_Prob(sample, model, classes):
 
 
 def accuracyModelQDA(testFeatures, testLabels, model, classes):
-    t = 0
     true = 0
-    count = 0
     precision = np.zeros((2, classes))
     recall = np.zeros((2, classes))
-    for i in range(0, np.size(testLabels)):
-        auxt = time.time()
+    for i in range(np.size(testLabels)):
         currentPredictor = predictedModelQDA(testFeatures[i, :], model, classes)
-        t += (time.time() - auxt)
         if currentPredictor == testLabels[i]:
             true += 1
-            count += 1
             recall[0, int(testLabels[i] - 1)] += 1
             precision[0, int(currentPredictor - 1)] += 1
         else:
-            count += 1
             recall[1, int(testLabels[i] - 1)] += 1
             precision[1, int(currentPredictor - 1)] += 1
-    return true / count, np.nan_to_num(precision[0, :] / precision.sum(axis=0)), np.nan_to_num(
-        recall[0, :] / recall.sum(axis=0)), t / np.size(testLabels)
+    return true / np.size(testLabels), np.nan_to_num(precision[0, :] / precision.sum(axis=0)), np.nan_to_num(
+        recall[0, :] / recall.sum(axis=0))
 
 
 ######

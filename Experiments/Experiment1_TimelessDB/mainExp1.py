@@ -3,7 +3,6 @@ import sys
 
 ## Input Variables
 
-
 # featureSet = int(sys.argv[1])
 # startPerson = int(sys.argv[2])
 # endPerson = int(sys.argv[3])
@@ -16,14 +15,12 @@ import sys
 # nameFile = folder + '_' + typeDatabase + '_FS_' + sys.argv[1] + '_sP_' + sys.argv[2] + '_eP_' + sys.argv[3] + \
 #            '_sStart_' + sys.argv[7] + '_inTime_' + sys.argv[8] + '_fiTime_' + sys.argv[9] + '.csv'
 
-
-
 # pairs=[[42,1,5],[44,2,4],[44,2,7],[46,3,2],[45,3,3],[45,3,7]]
 # for pair in pairs:
 featureSet = 1
-startPerson = 31 # Cote 20-36,EPN 31-60, Nina5 1-10
-endPerson = 36 # Cote 20-36,EPN 31-60, Nina5 1-10
-folder = 'resultsExample/a'
+startPerson = 1 # Cote 20-36,EPN 31-60, Nina5 1-10
+endPerson = 60 # Cote 20-36,EPN 31-60, Nina5 1-10
+folder = 'resultsExample/ee'
 typeDatabase = 'EPN'
 printResults = 1
 shotStart = 1
@@ -41,6 +38,7 @@ dataMatrix, _, _, classes, peoplePriorK, _, numberShots, _, allFeatures, _ = fun
 functionsExp1.evaluation(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameFile, startPerson,
                          endPerson, allFeatures, printResults, shotStart, initialExpTime,
                          finalExpTime, typeDatabase)
+
 # lenChunk=50
 # overlapChunk=0
 # functionsExp1.evaluation2(dataMatrix, classes, peoplePriorK, featureSet, numberShots, nameFile, startPerson,

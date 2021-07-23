@@ -9,7 +9,7 @@ import Features as Features
 
 
 def saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
-             wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database):
+             wampMatrix, timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database):
     timesFeatures = np.vstack((timeFeatureSet1, timeFeatureSet2, timeFeatureSet3))
     auxName = 'timesFeatures' + windowFile
     myFile = database + '/' + auxName + '.csv'
@@ -88,9 +88,6 @@ def appendFeatureMatrix(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, 
            timeFeatureSet1, timeFeatureSet2, timeFeatureSet3
 
 
-
-
-
 def emgCoteAllard(group, gender, person, carpet, gesture):
     myarray = np.fromfile(
         place + '/MyoArmbandDataset-master/' + group + '/' + gender + str(person) + '/' + carpet + '/classe_' + str(
@@ -100,7 +97,7 @@ def emgCoteAllard(group, gender, person, carpet, gesture):
     return emg
 
 
-for database in ['Nina5', 'Cote', 'EPN']:
+for database in ['EPN']:
     sampleRate = 200
     window = 295
     overlap = 290
@@ -120,7 +117,8 @@ for database in ['Nina5', 'Cote', 'EPN']:
     msrMatrix = []
     wampMatrix = []
     rmsMatrix = []
-    place = '../../../DA-basedAdaptationTechnique/FewShotLearningEMG/data'
+    # place = '../../../DA-basedAdaptationTechnique/FewShotLearningEMG/data'
+    place = '..'
 
     if database == 'Nina5':
 
@@ -202,7 +200,7 @@ for database in ['Nina5', 'Cote', 'EPN']:
                         rpR += 1
 
         saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
-                 wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
+                 wampMatrix, timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
 
     elif database == 'Cote':
         # COTE ALLARD DATABASE
@@ -212,7 +210,7 @@ for database in ['Nina5', 'Cote', 'EPN']:
         classes = 7
         peopleGroups = 2
         genders = 2  # Female and Male
-        gesturesPerFolder = 28  # Number of Gsetures per folder
+        gesturesPerFolder = 28  # Number of Getures per folder
 
         person = 1
         for i in range(peopleGroups):
@@ -274,7 +272,7 @@ for database in ['Nina5', 'Cote', 'EPN']:
                     person += 1
 
         saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
-                 wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
+                 wampMatrix, timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
 
     elif database == 'EPN':
 
@@ -286,13 +284,16 @@ for database in ['Nina5', 'Cote', 'EPN']:
         people = 60
         types = 2  # For training(0) or Testing(1)
 
-        for ty in range(types):
-            for person in range(1, people + 1):
-                for cl in range(1, classes + 1):
-                    for rp in range(1, repetitions + 1):
+        for person in range(1, people + 1):
+            print(person)
+            for cl in range(1, classes + 1):
+                rp = 0
+                for ty in range(types):
+                    for repetition in range(1, repetitions + 1):
+                        rp += 1
                         aux = scipy.io.loadmat(
-                            place + '/CollectedData/detectedData/emg_person' + str(person) + '_class' + str(
-                                cl) + '_rpt' + str(rp) + '_type' + str(ty) + '.mat')
+                            place + '/CollectedData/allUsers_data/detectedData/emg_person' + str(person) + '_class' + str(
+                                cl) + '_rpt' + str(repetition) + '_type' + str(ty) + '.mat')
                         auxEMG = aux['emg']
 
                         wi = 0
@@ -309,4 +310,4 @@ for database in ['Nina5', 'Cote', 'EPN']:
                             wi += incrmentSamples
 
         saveFile(logvarMatrix, mavMatrix, wlMatrix, zcMatrix, sscMatrix, lscaleMatrix, mflMatrix, msrMatrix,
-                 wampMatrix,timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
+                 wampMatrix, timeFeatureSet1, timeFeatureSet2, timeFeatureSet3, windowFile, database)
