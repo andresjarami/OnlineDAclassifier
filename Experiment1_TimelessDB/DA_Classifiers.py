@@ -21,15 +21,19 @@ def LDA_Discriminant_pseudo(x, covariance, mean):
     return np.dot(np.dot(x, invCov), mean) - 0.5 * np.dot(np.dot(mean, invCov), mean)
 
 
-# def LDA_Cov(trainedModel, classes):
-#     LDACov = trainedModel['cov'].sum() / classes
-#     return LDACov
+def LDA_Cov(trainedModel):
+    classes = trainedModel.shape[0]
+    LDACov = trainedModel['cov'].sum() / classes
+    return LDACov
 
 def LDA_Cov_weights(trainedModel):
     classes = trainedModel.shape[0]
     sumCov = np.sum(trainedModel['cov'] * (trainedModel['N'] - 1))
     LDACov = sumCov / (trainedModel['N'].sum() - classes)
     return LDACov
+
+
+
 
 
 def predictedModelLDA(sample, model, classes, LDACov):

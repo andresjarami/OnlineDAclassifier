@@ -1,4 +1,7 @@
 import numpy as np
+import warnings
+
+warnings.filterwarnings("error")
 
 
 def logVAR(EMG, ch):
@@ -78,7 +81,12 @@ def MFL(EMG, ch):
         for i in range(ch):
             x_f = EMG[1:np.size(EMG, 0), i]
             x = EMG[0:np.size(EMG, 0) - 1, i]
-            mflVector[i] = np.log10(np.sqrt(np.sum((x_f - x) ** 2)))
+            try:
+                mflVector[i] = np.log10(np.sqrt(np.sum((x_f - x) ** 2)))
+            except RuntimeWarning:
+                print('error negative value', x_f, x, np.sum((x_f - x) ** 2))
+                mflVector[i] = 0
+
     return mflVector
 
 

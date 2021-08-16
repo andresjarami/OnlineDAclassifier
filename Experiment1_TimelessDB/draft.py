@@ -174,7 +174,7 @@ cov_data_chunk_w_andres2 = (1 / (N_data + N_chunk * pr - 1)) * \
                            (cov_data * (N_data - 1) + cov_chunk * pr * (N_chunk - 1) +
                             np.dot(x_mean, x_mean.T.conj()) * (N_data * N_chunk * pr) / (N_data + N_chunk * pr))
 
-print('error cov chunk w2', cov_data_chunk_noProb - cov_data_chunk_w_andres2)
+print('error cov chunk w1', cov_data_chunk_noProb - cov_data_chunk_w_andres2)
 
 ######chunk2
 mean_data_chunk_noProb = np.zeros(4)
@@ -226,7 +226,7 @@ cov_data_chunk_w_andres3 = (1 / (N_data3 + N_chunk3 * pr3 - 1)) * \
 #                                     N_data3 ** 2 * N_chunk2 * pr2)) / (N_data3 + N_chunk3 * pr3) ** 2)
 
 
-print('error cov chunk w2', cov_data_chunk_noProb - cov_data_chunk_w_andres3)
+print('error cov chunk w3', cov_data_chunk_noProb - cov_data_chunk_w_andres3)
 
 # mean = mean_data
 # cov = cov_data
