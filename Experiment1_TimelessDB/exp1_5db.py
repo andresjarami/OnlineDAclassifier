@@ -20,9 +20,10 @@ def uploadResults(folder, database, samples, people, times, featureSet, classes,
         average.loc[0, metric + '_' + typeDA + '_' + 'incre_proposed2'] = 0
         average.loc[0, metric + '_' + typeDA + '_' + 'incre_proposed3'] = 0
         average.loc[0, metric + '_' + typeDA + '_' + 'incre_labels'] = 0
-        average.loc[0, metric + '_' + typeDA + '_' + 'incre_sequential'] = 0
-        average.loc[0, metric + '_' + typeDA + '_' + 'incre_sequential_probs'] = 0
+        average.loc[0, metric + '_' + typeDA + '_' + 'incre_labels_SA'] = 0
+        average.loc[0, metric + '_' + typeDA + '_' + 'incre_sequential_SA'] = 0
         average.loc[0, metric + '_' + typeDA + '_' + 'incre_supervised'] = 0
+        average.loc[0, metric + '_' + typeDA + '_' + 'incre_supervised_SA'] = 0
         for l in [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]:
             average.loc[0, metric + '_' + typeDA + '_' + 'incre_Nigam_' + str(l)] = 0
         for l in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
@@ -58,12 +59,14 @@ def uploadResults(folder, database, samples, people, times, featureSet, classes,
                             samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_proposed3']
                         average.loc[0, metric + '_' + typeDA + '_' + 'incre_labels'] += resultsTest.loc[
                             samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_labels']
-                        average.loc[0, metric + '_' + typeDA + '_' + 'incre_sequential'] += resultsTest.loc[
-                            samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_sequential']
-                        average.loc[0, metric + '_' + typeDA + '_' + 'incre_sequential_probs'] += resultsTest.loc[
-                            samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_sequential_probs']
+                        average.loc[0, metric + '_' + typeDA + '_' + 'incre_labels_SA'] += resultsTest.loc[
+                            samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_labels_SA']
+                        average.loc[0, metric + '_' + typeDA + '_' + 'incre_sequential_SA'] += resultsTest.loc[
+                            samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_sequential_SA']
                         average.loc[0, metric + '_' + typeDA + '_' + 'incre_supervised'] += resultsTest.loc[
                             samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_supervised']
+                        average.loc[0, metric + '_' + typeDA + '_' + 'incre_supervised_SA'] += resultsTest.loc[
+                            samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_supervised_SA']
                         for l in [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]:
                             average.loc[0, metric + '_' + typeDA + '_' + 'incre_Nigam_' + str(l)] += resultsTest.loc[
                                 samples * classes * day - 1, metric + '_' + typeDA + '_' + 'incre_Nigam_' + str(l)]
@@ -118,17 +121,16 @@ def uploadResultsDatabasesVF1(folder, database, featureSet, times, shotStart, ty
 
 
 featureSet = 1
-times = 3
+times = 20
 windowSize = 290
 shotStart = 1
 plt.rcParams["figure.figsize"] = (22, 10)
-for info in [['Cote', 'LDA', 0.95, 1], ['Cote', 'QDA', 0.91, 1], ['Nina5', 'LDA', 0.56, .75],
-             ['Nina5', 'QDA', 0.45, .8], ['LongTerm3DC', 'LDA', 0.64, .85], ['LongTerm3DC', 'QDA', 0.4, 0.85],
-             ['Capgmyo_dbb', 'LDA', 0.83, 1], ['Capgmyo_dbb', 'QDA', 0.65, 1], ['EPN_612', 'LDA', 0.56, .8],
-             ['EPN_612', 'QDA', 0.51, 0.8]]:
-# for info in [['LongTerm3DC', 'LDA', 0.64, 1], ['LongTerm3DC', 'QDA', 0.4, 1]]:
-    for folder_idx in range(2,4):
-        folder = 'results_5DB_' + str(folder_idx) + '/'
+# for info in [['Cote', 'LDA', 0.95, 1], ['Cote', 'QDA', 0.91, 1], ['Nina5', 'LDA', 0.56, 0.75],
+#              ['Nina5', 'QDA', 0.45, 0.85], ['LongTerm3DC', 'LDA', 0.64, 0.84], ['LongTerm3DC', 'QDA', 0.4, 0.85],
+#              ['Capgmyo_dbb', 'LDA', 0.83, 1], ['Capgmyo_dbb', 'QDA', 0.65, 1]]:
+for info in [['EPN_612', 'LDA', 0.56, 0.75],['EPN_612', 'QDA', 0.40, 0.80]]:
+    for folder_idx in range(2,3):
+        folder = 'results' + str(folder_idx) + '/'
         result, detail = uploadResultsDatabasesVF1(folder, info[0], featureSet, times, shotStart, info[1])
         result = result.T
         # my_colors = 'brbbbgkkkkkkyyyyyyyy'
@@ -142,6 +144,6 @@ for info in [['Cote', 'LDA', 0.95, 1], ['Cote', 'QDA', 0.91, 1], ['Nina5', 'LDA'
         plt.xticks(rotation=80, horizontalalignment="center")
         for p in ax.patches:
             b = p.get_bbox()
-            ax.annotate("{:.3f}".format(b.y1 + b.y0), (p.get_x() , p.get_height() * 1.05))
+            ax.annotate("{:.3f}".format(b.y1 + b.y0), (p.get_x() , p.get_height() * 1.005))
 
         plt.show()

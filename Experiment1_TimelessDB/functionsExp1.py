@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
-from sklearn.decomposition import IncrementalPCA
 
 import DA_Classifiers as DA_Classifiers
 import SemiSupervised as SemiSupervised
@@ -572,29 +571,29 @@ def evaluation_notest(featureSet, nameFile, startPerson, endPerson, printR, init
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.2)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_Nigam_02)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.4)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_Nigam_04)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_Nigam_04)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.6)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_Nigam_06)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_Nigam_06)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.8)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_Nigam_08)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_Nigam_08)
                         name = type_DA + '_' + 'incre_Nigam_' + str(1.0)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_Nigam_10)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.2)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_02)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_02)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.3)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_03)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_03)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.4)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_04)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_04)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.5)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_05)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_05)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.6)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_06)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_06)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.7)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_07)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_07)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.8)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_08)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_08)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.9)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_threshold_09)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_threshold_09)
                         ###################################
                         type_DA = 'QDA'
                         name = type_DA + '_' + 'weak'
@@ -608,39 +607,39 @@ def evaluation_notest(featureSet, nameFile, startPerson, endPerson, printR, init
                         name = type_DA + '_' + 'incre_labels'
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_label)
                         name = type_DA + '_' + 'incre_sequential'
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_sequential)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_sequential)
                         name = type_DA + '_' + 'incre_sequential_probs'
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_sequential_probs)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_sequential_probs)
                         name = type_DA + '_' + 'incre_supervised'
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_supervised)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_Nigam_01)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_Nigam_01)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.2)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_Nigam_02)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.4)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_Nigam_04)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.6)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_Nigam_06)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_Nigam_06)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.8)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_Nigam_08)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_Nigam_08)
                         name = type_DA + '_' + 'incre_Nigam_' + str(1.0)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_Nigam_10)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.2)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_02)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.3)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_threshold_03)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_03)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.4)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_threshold_04)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_04)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.5)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_threshold_05)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_05)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.6)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_06)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.7)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_threshold_07)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_07)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.8)
                         results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_08)
                         name = type_DA + '_' + 'incre_threshold_' + str(0.9)
-                        results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_threshold_09)
+                        results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_threshold_09)
 
                         if printR:
                             print('person', person, 'day', day, 'exp', seed)
@@ -893,9 +892,10 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
             results[metric + '_' + typeDA + '_' + 'weak'] = ''
             results[metric + '_' + typeDA + '_' + 'incre_proposed'] = ''
             results[metric + '_' + typeDA + '_' + 'incre_labels'] = ''
-            results[metric + '_' + typeDA + '_' + 'incre_sequential'] = ''
-            results[metric + '_' + typeDA + '_' + 'incre_sequential_probs'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_labels_SA'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_sequential_SA'] = ''
             results[metric + '_' + typeDA + '_' + 'incre_supervised'] = ''
+            results[metric + '_' + typeDA + '_' + 'incre_supervised_SA'] = ''
             for l in [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]:
                 results[metric + '_' + typeDA + '_' + 'incre_Nigam_' + str(l)] = ''
             for l in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
@@ -955,9 +955,10 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                 LDA_incre_proposed2 = weakModel.copy()
                 LDA_incre_proposed3 = weakModel.copy()
                 LDA_incre_label = weakModel.copy()
-                LDA_incre_sequential = weakModel.copy()
-                LDA_incre_sequential_probs = weakModel.copy()
+                LDA_incre_label_SA = weakModel.copy()
+                LDA_incre_sequential_SA = weakModel.copy()
                 LDA_incre_supervised = weakModel.copy()
+                LDA_incre_supervised_SA = weakModel.copy()
                 LDA_incre_Nigam_01 = weakModel.copy()
                 LDA_incre_Nigam_02 = weakModel.copy()
                 LDA_incre_Nigam_04 = weakModel.copy()
@@ -978,9 +979,10 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                 QDA_incre_proposed2 = weakModel.copy()
                 QDA_incre_proposed3 = weakModel.copy()
                 QDA_incre_label = weakModel.copy()
-                QDA_incre_sequential = weakModel.copy()
-                QDA_incre_sequential_probs = weakModel.copy()
+                QDA_incre_label_SA = weakModel.copy()
+                QDA_incre_sequential_SA = weakModel.copy()
                 QDA_incre_supervised = weakModel.copy()
+                QDA_incre_supervised_SA = weakModel.copy()
                 QDA_incre_Nigam_01 = weakModel.copy()
                 QDA_incre_Nigam_02 = weakModel.copy()
                 QDA_incre_Nigam_04 = weakModel.copy()
@@ -1001,9 +1003,10 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                 CM_LDA_incre_proposed2 = np.zeros((classes, classes))
                 CM_LDA_incre_proposed3 = np.zeros((classes, classes))
                 CM_LDA_incre_label = np.zeros((classes, classes))
-                CM_LDA_incre_sequential = np.zeros((classes, classes))
-                CM_LDA_incre_sequential_probs = np.zeros((classes, classes))
+                CM_LDA_incre_label_SA = np.zeros((classes, classes))
+                CM_LDA_incre_sequential_SA = np.zeros((classes, classes))
                 CM_LDA_incre_supervised = np.zeros((classes, classes))
+                CM_LDA_incre_supervised_SA = np.zeros((classes, classes))
                 CM_LDA_incre_Nigam_01 = np.zeros((classes, classes))
                 CM_LDA_incre_Nigam_02 = np.zeros((classes, classes))
                 CM_LDA_incre_Nigam_04 = np.zeros((classes, classes))
@@ -1024,9 +1027,10 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                 CM_QDA_incre_proposed2 = np.zeros((classes, classes))
                 CM_QDA_incre_proposed3 = np.zeros((classes, classes))
                 CM_QDA_incre_label = np.zeros((classes, classes))
-                CM_QDA_incre_sequential = np.zeros((classes, classes))
-                CM_QDA_incre_sequential_probs = np.zeros((classes, classes))
+                CM_QDA_incre_label_SA = np.zeros((classes, classes))
+                CM_QDA_incre_sequential_SA = np.zeros((classes, classes))
                 CM_QDA_incre_supervised = np.zeros((classes, classes))
+                CM_QDA_incre_supervised_SA = np.zeros((classes, classes))
                 CM_QDA_incre_Nigam_01 = np.zeros((classes, classes))
                 CM_QDA_incre_Nigam_02 = np.zeros((classes, classes))
                 CM_QDA_incre_Nigam_04 = np.zeros((classes, classes))
@@ -1097,22 +1101,26 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                         idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_labels(
                         LDA_incre_label, classes, trainFeatures, rand[1], type_DA, CM_LDA_incre_label, weakModel)
 
-                    name = type_DA + '_' + 'incre_sequential'
-                    LDA_incre_sequential, results.at[idx, 'time' + '_' + name], results.at[
-                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_labels(
-                        LDA_incre_sequential, classes, trainFeatures, rand[1], type_DA, CM_LDA_incre_sequential,
-                        weakModel)
+                    name = type_DA + '_' + 'incre_labels_SA'
+                    LDA_incre_label_SA, results.at[idx, 'time' + '_' + name], results.at[
+                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_labels_stateArt(
+                        LDA_incre_label_SA, classes, trainFeatures, rand[1], type_DA, CM_LDA_incre_label_SA, weakModel)
 
-                    name = type_DA + '_' + 'incre_sequential_probs'
-                    LDA_incre_sequential_probs, results.at[idx, 'time' + '_' + name], results.at[
-                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_probs(
-                        LDA_incre_sequential_probs, classes, trainFeatures, rand[1], type_DA,
-                        CM_LDA_incre_sequential_probs, weakModel)
+                    name = type_DA + '_' + 'incre_sequential_SA'
+                    LDA_incre_sequential_SA, results.at[idx, 'time' + '_' + name], results.at[
+                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_labels_stateArt(
+                        LDA_incre_sequential_SA, classes, trainFeatures, rand[1], type_DA, CM_LDA_incre_sequential_SA,
+                        weakModel)
 
                     name = type_DA + '_' + 'incre_supervised'
                     LDA_incre_supervised, results.at[idx, 'time' + '_' + name], results.at[
                         idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_supervised(
                         LDA_incre_supervised, classes, trainFeatures, rand[1], type_DA, CM_LDA_incre_supervised)
+
+                    name = type_DA + '_' + 'incre_supervised_SA'
+                    LDA_incre_supervised_SA, results.at[idx, 'time' + '_' + name], results.at[
+                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_supervised_stateArt(
+                        LDA_incre_supervised_SA, classes, trainFeatures, rand[1], type_DA, CM_LDA_incre_supervised_SA)
 
                     name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
                     LDA_incre_Nigam_01, results.at[idx, 'time' + '_' + name], results.at[
@@ -1216,22 +1224,26 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                         idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_labels(
                         QDA_incre_label, classes, trainFeatures, rand[1], type_DA, CM_QDA_incre_label, weakModel)
 
-                    name = type_DA + '_' + 'incre_sequential'
-                    QDA_incre_sequential, results.at[idx, 'time' + '_' + name], results.at[
-                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_labels(
-                        QDA_incre_sequential, classes, trainFeatures, rand[1], type_DA, CM_QDA_incre_sequential,
-                        weakModel)
+                    name = type_DA + '_' + 'incre_labels_SA'
+                    QDA_incre_label_SA, results.at[idx, 'time' + '_' + name], results.at[
+                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_labels_stateArt(
+                        QDA_incre_label_SA, classes, trainFeatures, rand[1], type_DA, CM_QDA_incre_label_SA, weakModel)
 
-                    name = type_DA + '_' + 'incre_sequential_probs'
-                    QDA_incre_sequential_probs, results.at[idx, 'time' + '_' + name], results.at[
-                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_probs(
-                        QDA_incre_sequential_probs, classes, trainFeatures, rand[1], type_DA,
-                        CM_QDA_incre_sequential_probs, weakModel)
+                    name = type_DA + '_' + 'incre_sequential_SA'
+                    QDA_incre_sequential_SA, results.at[idx, 'time' + '_' + name], results.at[
+                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_sequential_labels_stateArt(
+                        QDA_incre_sequential_SA, classes, trainFeatures, rand[1], type_DA, CM_QDA_incre_sequential_SA,
+                        weakModel)
 
                     name = type_DA + '_' + 'incre_supervised'
                     QDA_incre_supervised, results.at[idx, 'time' + '_' + name], results.at[
                         idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_supervised(
                         QDA_incre_supervised, classes, trainFeatures, rand[1], type_DA, CM_QDA_incre_supervised)
+
+                    name = type_DA + '_' + 'incre_supervised_SA'
+                    QDA_incre_supervised_SA, results.at[idx, 'time' + '_' + name], results.at[
+                        idx, 'w_predicted' + '_' + name] = SemiSupervised.model_incre_supervised_stateArt(
+                        QDA_incre_supervised_SA, classes, trainFeatures, rand[1], type_DA, CM_QDA_incre_supervised_SA)
 
                     name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
                     QDA_incre_Nigam_01, results.at[idx, 'time' + '_' + name], results.at[
@@ -1315,51 +1327,6 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                     results.at[idx, 'unlabeled Gesture'] = numberUnlabeledGestures
                     numberUnlabeledGestures += 1
 
-                    # if np.all(permutationUnlabeledGestures[-1] == rand):
-                    #
-                    #     type_DA = 'LDA'
-                    #     name = type_DA + '_' + 'weak'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_weak)
-                    #     name = type_DA + '_' + 'incre_proposed'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_proposed)
-                    #     name = type_DA + '_' + 'incre_proposed2'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_proposed2)
-                    #     name = type_DA + '_' + 'incre_proposed3'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_proposed3)
-                    #
-                    #     name = type_DA + '_' + 'incre_sequential'
-                    #     results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_LDA_incre_sequential)
-                    #     name = type_DA + '_' + 'incre_sequential_probs'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_LDA_incre_sequential_probs)
-                    #
-                    #     ###################################
-                    #     type_DA = 'QDA'
-                    #     name = type_DA + '_' + 'weak'
-                    #     results.at[idx, 'acc_' + name]=accuracyPerGesture(CM_QDA_weak)
-                    #     name = type_DA + '_' + 'incre_proposed'
-                    #     results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_proposed)
-                    #     name = type_DA + '_' + 'incre_proposed2'
-                    #     results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_proposed2)
-                    #     name = type_DA + '_' + 'incre_proposed3'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_proposed3)
-                    #
-                    #     name = type_DA + '_' + 'incre_sequential'
-                    #     results.at[idx, 'acc_' + name] = accuracyPerGesture(CM_QDA_incre_sequential)
-                    #     name = type_DA + '_' + 'incre_sequential_probs'
-                    #     results.at[idx, 'acc_' + name]= accuracyPerGesture(CM_QDA_incre_sequential_probs)
-                    #
-                    #
-                    #     if printR:
-                    #         print('person', person, 'day', day)
-                    #         for type_DA in ['LDA', 'QDA']:
-                    #             # for model in ['weak', 'incre_proposed', 'incre_labels', 'incre_sequential',
-                    #             #               'incre_sequential_probs', 'incre_supervised',
-                    #             #               'incre_Nigam_' + str(1.0)]:
-                    #             for model in ['weak', 'incre_proposed', 'incre_proposed2', 'incre_proposed3',
-                    #                           'incre_sequential',
-                    #                           'incre_sequential_probs']:
-                    #                 name = type_DA + '_' + model
-                    #                 print('acc_' + name, results.loc[idx, 'acc_' + name])
 
                     if np.all(permutationUnlabeledGestures[-1] == rand):
 
@@ -1382,18 +1349,22 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelLDA(
                             testGesturesFeatures, testGesturesLabels, LDA_incre_label, classes)
-                        name = type_DA + '_' + 'incre_sequential'
+                        name = type_DA + '_' + 'incre_labels_SA'
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelLDA(
-                            testGesturesFeatures, testGesturesLabels, LDA_incre_sequential, classes)
-                        name = type_DA + '_' + 'incre_sequential_probs'
+                            testGesturesFeatures, testGesturesLabels, LDA_incre_label_SA, classes)
+                        name = type_DA + '_' + 'incre_sequential_SA'
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelLDA(
-                            testGesturesFeatures, testGesturesLabels, LDA_incre_sequential_probs, classes)
+                            testGesturesFeatures, testGesturesLabels, LDA_incre_sequential_SA, classes)
                         name = type_DA + '_' + 'incre_supervised'
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelLDA(
                             testGesturesFeatures, testGesturesLabels, LDA_incre_supervised, classes)
+                        name = type_DA + '_' + 'incre_supervised_SA'
+                        results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
+                            idx, 'recall_' + name] = DA_Classifiers.accuracyModelLDA(
+                            testGesturesFeatures, testGesturesLabels, LDA_incre_supervised_SA, classes)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelLDA(
@@ -1470,18 +1441,22 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelQDA(
                             testGesturesFeatures, testGesturesLabels, QDA_incre_label, classes)
-                        name = type_DA + '_' + 'incre_sequential'
+                        name = type_DA + '_' + 'incre_labels_SA'
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelQDA(
-                            testGesturesFeatures, testGesturesLabels, QDA_incre_sequential, classes)
-                        name = type_DA + '_' + 'incre_sequential_probs'
+                            testGesturesFeatures, testGesturesLabels, QDA_incre_label_SA, classes)
+                        name = type_DA + '_' + 'incre_sequential_SA'
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelQDA(
-                            testGesturesFeatures, testGesturesLabels, QDA_incre_sequential_probs, classes)
+                            testGesturesFeatures, testGesturesLabels, QDA_incre_sequential_SA, classes)
                         name = type_DA + '_' + 'incre_supervised'
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelQDA(
                             testGesturesFeatures, testGesturesLabels, QDA_incre_supervised, classes)
+                        name = type_DA + '_' + 'incre_supervised_SA'
+                        results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
+                            idx, 'recall_' + name] = DA_Classifiers.accuracyModelQDA(
+                            testGesturesFeatures, testGesturesLabels, QDA_incre_supervised_SA, classes)
                         name = type_DA + '_' + 'incre_Nigam_' + str(0.1)
                         results.at[idx, 'acc_' + name], results.at[idx, 'precision_' + name], results.at[
                             idx, 'recall_' + name] = DA_Classifiers.accuracyModelQDA(
@@ -1542,7 +1517,9 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                         if printR:
                             print('person', person, 'day', day, 'exp', seed)
                             for type_DA in ['LDA', 'QDA']:
-                                for model in ['weak', 'incre_proposed', 'incre_proposed2', 'incre_proposed3']:
+                                for model in ['weak', 'incre_proposed', 'incre_proposed2', 'incre_proposed3',
+                                              'incre_supervised', 'incre_supervised_SA',
+                                              'incre_sequential_SA', 'incre_labels', 'incre_labels_SA']:
                                     name = type_DA + '_' + model
                                     print('acc_' + name, results.loc[idx, 'acc_' + name])
 
@@ -2040,7 +2017,7 @@ def currentDistributionValues2(dataMatrix, allFeatures, setGestures, person, cla
 
 def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures, oldData):
     currentValues = pd.DataFrame(
-        columns=['cov', 'mean', 'class', 'N', 'N_cov', 'LDAcov', 'Total_LDAcov', 'N_LDA'])
+        columns=['cov', 'mean', 'class', 'N', 'N_cov', 'LDAcov', 'N_LDA'])
     trainLabelsAux = trainLabels[np.newaxis]
     Matrix = np.hstack((trainFeatures, trainLabelsAux.T))
 

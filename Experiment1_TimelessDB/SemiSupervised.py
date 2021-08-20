@@ -28,6 +28,7 @@ def mcc(TP, TN, FP, FN):
     return mccValue
 
 
+
 # %% Proposed Updating
 
 def updating_stateArt(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
@@ -53,30 +54,39 @@ def updating_stateArt(classes, weights, model, chunk_mean, chunk_cov, chunk_N, t
     return model
 
 def updating_proposed(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
+    for cla in range(classes):
+        w = weights[cla]
+        if w != 0:
+            mean = model.loc[cla, 'mean']
+            cov = model.loc[cla, 'cov']
+            N = model.loc[cla, 'N']
+            N_cov = model.loc[cla, 'N_cov']
+
+            model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
+                                    (N + chunk_N * w)
+            model.at[cla, 'N'] = N + chunk_N * w
+
+            ####1
+            # model.at[cla, 'cov'] = (N_cov * cov + (chunk_N - 1) * w * chunk_cov) / \
+            #                        (N_cov + (chunk_N - 1) * w)
+            #
+            # model.at[cla, 'N_cov'] = N_cov + (chunk_N - 1) * w
+
+            ####2
+
+            model.at[cla, 'cov'] = (N_cov * cov + w * (chunk_N - 1) * chunk_cov) / \
+                                   (N_cov + chunk_N * w - 1)
+
+            model.at[cla, 'N_cov'] = N_cov + chunk_N * w - 1
+
     if type_DA == 'LDA':
+
         LDAcov = model.loc[0, 'LDAcov']
         N_LDA = model.loc[0, 'N_LDA']
         model.at[0, 'LDAcov'] = (LDAcov * N_LDA + (chunk_N - 1) * chunk_cov) / (N_LDA + (chunk_N - 1))
         model.at[0, 'N_LDA'] = N_LDA + (chunk_N - 1)
-    else:
-        for cla in range(classes):
-            w = weights[cla]
-            if w != 0:
-                mean = model.loc[cla, 'mean']
-                cov = model.loc[cla, 'cov']
-                N = model.loc[cla, 'N']
-                N_cov = model.loc[cla, 'N_cov']
-
-                model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
-                                        (N + chunk_N * w)
-
-
-                model.at[cla, 'cov'] = (N_cov * cov + (chunk_N - 1) * w * chunk_cov) / \
-                                       (N_cov + (chunk_N - 1) * w)
-
-                model.at[cla, 'N'] = N + chunk_N * w
-
     return model
+
 
 
 # %% predicted labels (posterior probability)
@@ -170,9 +180,8 @@ def model_incre_proposed(currentModel, classes, trainFeatures, trainLabel, label
     weightsUnlabeledGesture = ((postProb_trainFeatures2 * entrophyVector(postProb_trainFeatures2)) + (
             weightsMcc_norm * entrophyVector(weightsMcc_norm))) / 2
 
-    # if type_DA == 'QDA':
-    #     print('QDA total1', weightsUnlabeledGesture, trainLabel)
-
+    if type_DA == 'QDA':
+        print('QDA total1', weightsUnlabeledGesture, trainLabel)
 
     return updating_proposed(classes, weightsUnlabeledGesture, currentModel.copy(), gesture_mean, gesture_cov,
                              gesture_N, type_DA), time.time() - t, weightsUnlabeledGesture
@@ -322,85 +331,6 @@ def weightMSDA_reduce(currentValues, personMean, personCov, classes, trainFeatur
             return calculationWeight(personPseudoDiscriminantValues, tabPseudoDiscriminantValues, classes, trainLabels)
 
 
-
-
-def discriminantTab_oneParameter(trainFeatures, personMean, personCov, classes, currentValues):
-    tabDiscriminantValues = []
-    personDiscriminantValues = []
-    for cla in range(classes):
-        covariance = currentValues['cov'].at[cla]
-        mean = currentValues['mean'].at[cla]
-        det = np.linalg.det(covariance)
-        tabDiscriminantValues.append([-.5 * np.log(det) - .5 * np.dot(
-            np.dot((trainFeatures[a, :] - mean), np.linalg.inv(covariance)), (trainFeatures[a, :] - mean).T)
-                                      for a in range(len(trainFeatures))])
-        if np.all(personMean == 0):
-            mean2 = currentValues['mean'].at[cla]
-        else:
-            mean2 = personMean
-        if np.all(personCov == 0):
-            covariance2 = currentValues['cov'].at[cla]
-        else:
-            covariance2 = personCov
-        det = np.linalg.det(covariance2)
-        personDiscriminantValues.append([-.5 * np.log(det) - .5 * np.dot(
-            np.dot((trainFeatures[a, :] - mean2), np.linalg.inv(covariance2)), (trainFeatures[a, :] - mean2).T)
-                                         for a in range(len(trainFeatures))])
-    tabDiscriminantValues = np.array(tabDiscriminantValues)
-    personDiscriminantValues = np.array(personDiscriminantValues)
-    return personDiscriminantValues, tabDiscriminantValues
-
-
-def pseudoDiscriminantTab_oneParameter(trainFeatures, personMean, personCov, classes, currentValues):
-    tabPseudoDiscriminantValues = []
-    personPseudoDiscriminantValues = []
-    for cla in range(classes):
-        covariance = currentValues['cov'].at[cla]
-        mean = currentValues['mean'].at[cla]
-        tabPseudoDiscriminantValues.append([- .5 * np.dot(
-            np.dot((trainFeatures[a, :] - mean), np.linalg.pinv(covariance)), (trainFeatures[a, :] - mean).T)
-                                            for a in range(len(trainFeatures))])
-        if np.all(personMean == 0):
-            mean2 = currentValues['mean'].at[cla]
-        else:
-            mean2 = personMean
-        if np.all(personCov == 0):
-            covariance2 = currentValues['cov'].at[cla]
-        else:
-            covariance2 = personCov
-        personPseudoDiscriminantValues.append([- .5 * np.dot(
-            np.dot((trainFeatures[a, :] - mean2), np.linalg.pinv(covariance2)), (trainFeatures[a, :] - mean2).T)
-                                               for a in range(len(trainFeatures))])
-    tabPseudoDiscriminantValues = np.array(tabPseudoDiscriminantValues)
-    personPseudoDiscriminantValues = np.array(personPseudoDiscriminantValues)
-    return personPseudoDiscriminantValues, tabPseudoDiscriminantValues
-
-
-def calculationWeight_oneParameter(personDiscriminantValues, tabDiscriminantValues, classes, trainLabels):
-    weights = []
-    for cla in range(classes):
-        auxTab = tabDiscriminantValues.copy()
-        auxTab[cla, :] = personDiscriminantValues[cla, :]
-        weights.append(calculationMcc(trainLabels, np.argmax(auxTab, axis=0) + 1, cla))
-    return weights
-
-
-def calculationWeight2_oneParameter(determinantsCurrentModel, personPseudoDiscriminantValues,
-                                    tabPseudoDiscriminantValues,
-                                    personDiscriminantValues, tabDiscriminantValues, classes, trainLabels):
-    weights = []
-    for cla in range(classes):
-        if determinantsCurrentModel[cla] == float('NaN'):
-            auxTab = tabPseudoDiscriminantValues.copy()
-            auxTab[cla, :] = personPseudoDiscriminantValues[cla, :]
-        else:
-            auxTab = tabDiscriminantValues.copy()
-            auxTab[cla, :] = personDiscriminantValues[cla, :]
-
-        weights.append(calculationMcc(trainLabels, np.argmax(auxTab, axis=0) + 1, cla))
-    return weights
-
-
 # %% model using Nigam weight
 def model_incre_weight_Nigam(currentModel, classes, trainFeatures, trainLabel, type_DA, CM, weakModel, weight_Nigam):
     predictedLabels = predicted_labels(trainFeatures, currentModel, classes, type_DA)
@@ -451,8 +381,22 @@ def model_incre_labels(currentModel, classes, trainFeatures, trainLabel, type_DA
                              type_DA), time.time() - t, weightsUnlabeledGesture
 
 
+def model_incre_labels_stateArt(currentModel, classes, trainFeatures, trainLabel, type_DA, CM, weakModel):
+    predictedLabels = predicted_labels(trainFeatures, currentModel, classes, type_DA)
+    CM[trainLabel - 1, :] += predictedLabels
+    t = time.time()
+    gesture_mean = np.mean(trainFeatures, axis=0)
+    gesture_cov = np.cov(trainFeatures, rowvar=False)
+    gesture_N = np.size(trainFeatures, axis=0)
+    weightsUnlabeledGesture = np.zeros(classes)
+    postProb_trainFeatures2 = predicted_labels(trainFeatures, weakModel, classes, type_DA) / predictedLabels.sum()
+    weightsUnlabeledGesture[np.argmax(postProb_trainFeatures2)] = 1
+    return updating_stateArt(classes, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov, gesture_N,
+                             type_DA), time.time() - t, weightsUnlabeledGesture
+
+
 # %% sequential model (unlike the other that are chunk models) using the pseudo labeled samples (from posterior probabilities) to update itself
-def model_incre_sequential_labels(currentModel, classes, trainFeatures, trainLabel, type_DA, CM, weakModel):
+def model_incre_sequential_labels_stateArt(currentModel, classes, trainFeatures, trainLabel, type_DA, CM, weakModel):
     timeModel = 0
     for sample in range(len(trainFeatures[:, 0])):
         x = trainFeatures[sample, :]
@@ -470,37 +414,37 @@ def model_incre_sequential_labels(currentModel, classes, trainFeatures, trainLab
         gesture_cov = 0
         gesture_N = 1
         t = time.time()
-        currentModel = updating_proposed(classes, weightsUnlabeledGesture, currentModel, x, gesture_cov, gesture_N,
+        currentModel = updating_stateArt(classes, weightsUnlabeledGesture, currentModel, x, gesture_cov, gesture_N,
                                          type_DA)
         timeModel += time.time() - t
     # there are a weight for each sample in the chunk
     return currentModel, timeModel, 0
 
 
-# %% sequential model (unlike the other that are chunk models) using the pseudo labeled samples (from posterior probabilities) to update itself
-def model_incre_sequential_probs(currentModel, classes, trainFeatures, trainLabel, type_DA, CM, weakModel):
-    timeModel = 0
-    for sample in range(len(trainFeatures[:, 0])):
-        x = trainFeatures[sample, :]
-        if type_DA == 'LDA':
-            weightsUnlabeledGesture = DA_Classifiers.predictedModelLDA_Prob(x, currentModel, classes,
-                                                                            currentModel.loc[0, 'LDAcov'])
-            weightsUnlabeledGesture2 = DA_Classifiers.predictedModelLDA_Prob(x, weakModel, classes,
-                                                                             weakModel.loc[0, 'LDAcov'])
-        elif type_DA == 'QDA':
-            weightsUnlabeledGesture = DA_Classifiers.predictedModelQDA_Prob(x, currentModel, classes)
-            weightsUnlabeledGesture2 = DA_Classifiers.predictedModelQDA_Prob(x, weakModel, classes)
-
-        CM[trainLabel - 1, np.argmax(weightsUnlabeledGesture)] += 1
-
-        gesture_cov = 0
-        gesture_N = 1
-        t = time.time()
-        currentModel = updating_proposed(classes, weightsUnlabeledGesture2, currentModel, x, gesture_cov, gesture_N,
-                                         type_DA)
-        timeModel += time.time() - t
-    # there are a weight for each sample in the chunk
-    return currentModel, timeModel, 0
+# # %% sequential model (unlike the other that are chunk models) using the pseudo labeled samples (from posterior probabilities) to update itself
+# def model_incre_sequential_probs(currentModel, classes, trainFeatures, trainLabel, type_DA, CM, weakModel):
+#     timeModel = 0
+#     for sample in range(len(trainFeatures[:, 0])):
+#         x = trainFeatures[sample, :]
+#         if type_DA == 'LDA':
+#             weightsUnlabeledGesture = DA_Classifiers.predictedModelLDA_Prob(x, currentModel, classes,
+#                                                                             currentModel.loc[0, 'LDAcov'])
+#             weightsUnlabeledGesture2 = DA_Classifiers.predictedModelLDA_Prob(x, weakModel, classes,
+#                                                                              weakModel.loc[0, 'LDAcov'])
+#         elif type_DA == 'QDA':
+#             weightsUnlabeledGesture = DA_Classifiers.predictedModelQDA_Prob(x, currentModel, classes)
+#             weightsUnlabeledGesture2 = DA_Classifiers.predictedModelQDA_Prob(x, weakModel, classes)
+#
+#         CM[trainLabel - 1, np.argmax(weightsUnlabeledGesture)] += 1
+#
+#         gesture_cov = 0
+#         gesture_N = 1
+#         t = time.time()
+#         currentModel = updating_proposed(classes, weightsUnlabeledGesture2, currentModel, x, gesture_cov, gesture_N,
+#                                          type_DA)
+#         timeModel += time.time() - t
+#     # there are a weight for each sample in the chunk
+#     return currentModel, timeModel, 0
 
 
 # %% model using the labeled samples to update itself (supervised incremental model)
@@ -516,6 +460,22 @@ def model_incre_supervised(currentModel, classes, trainFeatures, trainLabel, typ
     weightsUnlabeledGesture[trainLabel - 1] = 1
 
     return updating_proposed(classes, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov, gesture_N,
+                             type_DA), time.time() - t, weightsUnlabeledGesture
+
+
+# %% model using the labeled samples to update itself (supervised incremental model)
+def model_incre_supervised_stateArt(currentModel, classes, trainFeatures, trainLabel, type_DA, CM):
+    predictedLabels = predicted_labels(trainFeatures, currentModel, classes, type_DA)
+    CM[trainLabel - 1, :] += predictedLabels
+    t = time.time()
+    gesture_mean = np.mean(trainFeatures, axis=0)
+    gesture_cov = np.cov(trainFeatures, rowvar=False)
+    gesture_N = np.size(trainFeatures, axis=0)
+
+    weightsUnlabeledGesture = np.zeros(classes)
+    weightsUnlabeledGesture[trainLabel - 1] = 1
+
+    return updating_stateArt(classes, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov, gesture_N,
                              type_DA), time.time() - t, weightsUnlabeledGesture
 
 
