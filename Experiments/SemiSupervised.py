@@ -53,7 +53,7 @@ def updating_stateArt(classes, weights, model, chunk_mean, chunk_cov, chunk_N, t
 
     return model
 
-def updating_proposed(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
+def updating_proposed_semi(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
     for cla in range(classes):
         w = weights[cla]
         if w != 0:
@@ -66,23 +66,40 @@ def updating_proposed(classes, weights, model, chunk_mean, chunk_cov, chunk_N, t
                                     (N + chunk_N * w)
             model.at[cla, 'N'] = N + chunk_N * w
 
-            ####1
-            # model.at[cla, 'cov'] = (N_cov * cov + (chunk_N - 1) * w * chunk_cov) / \
-            #                        (N_cov + (chunk_N - 1) * w)
-            #
-            # model.at[cla, 'N_cov'] = N_cov + (chunk_N - 1) * w
-
-            ####2
 
             model.at[cla, 'cov'] = (N_cov * cov + w * (chunk_N - 1) * chunk_cov) / \
                                    (N_cov + chunk_N * w - 1)
-
             model.at[cla, 'N_cov'] = N_cov + chunk_N * w - 1
 
     if type_DA == 'LDA':
-
         LDAcov = model.loc[0, 'LDAcov']
         N_LDA = model.loc[0, 'N_LDA']
+        model.at[0, 'LDAcov'] = (LDAcov * N_LDA + (chunk_N - 1) * chunk_cov) / (N_LDA + (chunk_N - 1))
+        model.at[0, 'N_LDA'] = N_LDA + (chunk_N - 1)
+    return model
+
+
+
+def updating_proposed_sup(classes, weights, model, chunk_mean, chunk_cov, chunk_N, type_DA):
+    for cla in range(classes):
+        w = weights[cla]
+        if w != 0:
+            mean = model.loc[cla, 'mean']
+            cov = model.loc[cla, 'cov']
+            N = model.loc[cla, 'N']
+            N_cov = model.loc[cla, 'N_cov']
+
+            model.at[cla, 'mean'] = (N * mean + chunk_N * w * chunk_mean) / \
+                                    (N + chunk_N * w)
+            model.at[cla, 'N'] = N + chunk_N * w
+
+            model.at[cla, 'cov'] = (N_cov * cov + (chunk_N - 1) * w * chunk_cov) / \
+                                   (N_cov + (chunk_N - 1) * w)
+
+            model.at[cla, 'N_cov'] = N_cov + (chunk_N - 1) * w
+
+
+    if type_DA == 'LDA':
         model.at[0, 'LDAcov'] = (LDAcov * N_LDA + (chunk_N - 1) * chunk_cov) / (N_LDA + (chunk_N - 1))
         model.at[0, 'N_LDA'] = N_LDA + (chunk_N - 1)
     return model

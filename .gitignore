@@ -2,11 +2,8 @@
 **/.ipynb_checkpoints
 **/.idea
 **/__pycache__
-**/results/**
+**/Results/**
 **/data/**
 **/detectedData/**
-**/ExtractedDataCollectedData/**
-**/ExtractedDataCoteAllard/**
-**/ExtractedDataNinaDB5/**
 **.log
 **.pt
