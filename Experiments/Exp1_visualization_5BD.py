@@ -122,13 +122,13 @@ times = 3
 windowSize = 290
 shotStart = 1
 plt.rcParams["figure.figsize"] = (22, 10)
-for info in [['Cote', 'LDA', 0.95, 1], ['Cote', 'QDA', 0.91, 1], ['Nina5', 'LDA', 0.56, .75],
-             ['Nina5', 'QDA', 0.45, .8], ['LongTerm3DC', 'LDA', 0.64, .85], ['LongTerm3DC', 'QDA', 0.4, 0.85],
-             ['Capgmyo_dbb', 'LDA', 0.83, 1], ['Capgmyo_dbb', 'QDA', 0.65, 1], ['EPN_612', 'LDA', 0.56, .8],
-             ['EPN_612', 'QDA', 0.51, 0.8]]:
-# for info in [['LongTerm3DC', 'LDA', 0.64, 1], ['LongTerm3DC', 'QDA', 0.4, 1]]:
+# for info in [['Cote', 'LDA', 0.95, 1], ['Cote', 'QDA', 0.91, 1], ['Nina5', 'LDA', 0.56, .75],
+#              ['Nina5', 'QDA', 0.45, .8], ['LongTerm3DC', 'LDA', 0.64, .85], ['LongTerm3DC', 'QDA', 0.4, 0.85],
+#              ['Capgmyo_dbb', 'LDA', 0.83, 1], ['Capgmyo_dbb', 'QDA', 0.65, 1], ['EPN_612', 'LDA', 0.56, .8],
+#              ['EPN_612', 'QDA', 0.51, 0.8]]:
+for info in [['EPN_612', 'LDA', 0.56, 1], ['EPN_612', 'QDA', 0.51, 1]]:
     for folder_idx in range(2,4):
-        folder = 'results_5DB_' + str(folder_idx) + '/'
+        folder = '../Results/results_5DB_' + str(folder_idx) + '/'
         result, detail = uploadResultsDatabasesVF1(folder, info[0], featureSet, times, shotStart, info[1])
         result = result.T
         # my_colors = 'brbbbgkkkkkkyyyyyyyy'

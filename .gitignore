@@ -3,6 +3,7 @@
 **/.idea
 **/__pycache__
 **/Results/**
+**/Images/**
 **/data/**
 **/detectedData/**
 **.log
