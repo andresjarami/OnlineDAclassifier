@@ -221,7 +221,7 @@ def get_data_acc(dataFrame, gestureSet):
     metric = 'acc'
     numberClassifiers = 48
 
-    classifierSet = ['weak_model', 'batch_model', 'incre_proposed_sup', 'incre_proposed_semi']
+    classifierSet = ['weak', 'batch_model', 'incre_proposed_sup', 'incre_proposed_semi']
     for weight in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
         classifierSet.append('incre_weight_postprobability_' + str(weight))
     for threshold in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
@@ -395,46 +395,46 @@ for i in range(2):
 # ax[3, 0].legend(loc='upper center', bbox_to_anchor=(1, -0.05),
 #                 fancybox=True, shadow=True, ncol=3)
 
-plt.savefig('../images/acc.png', dpi=300)
+plt.savefig('../images/acc1.png', dpi=300)
 plt.show()
 
 # %% GRAPH PAPER TIME UPDATE
 
-fig, ax = plt.subplots(nrows=5, ncols=2, figsize=(12, 26))
-idx = 0
-numberClassifiers = 24
-for info in ['Nina5', 'Cote', 'LongTerm3DC', 'Capgmyo_dbb','EPN_612']:
-    if info == 'Nina5':
-        x_ticks = np.hstack((np.arange(0, 40 + 1, 10), np.array([54])))
-    elif info == 'Cote':
-        x_ticks = np.hstack((np.arange(0, 40 + 1, 10), np.array([56])))
-    elif info == 'LongTerm3DC':
-        x_ticks = np.hstack((np.arange(0, 8 + 1, 2), np.array([11])))
-    elif info == 'Capgmyo_dbb':
-        x_ticks = np.hstack((np.arange(0, 40 + 1, 10), np.array([48])))
-    elif info == 'EPN_612':
-        x_ticks = np.hstack((np.arange(0, 120+ 1, 30), np.array([144])))
-
-    folder = '../Results/final/'
-    data_acc, data_time_update, data_time_weight, data_weight, gestureSet = uploadResultsDatabasesVF1(
-        folder, info, featureSet, times, shotStart)
-
-    # Compare all classifiers
-    classifierSet = ['batch', 'OnlineSUP', 'OnlineSEMI']
-    idx_classifierSet = np.arange(6)
-    plot_arrays(data_time_update,idx, ax, classifierSet, idx_classifierSet, x_ticks, 'updating time [s]', gestureSet)
-    print('\nAverage of the updating time over time (streaming gestures over time t) of our online classifiers ('+info+' dataset): ')
-    print('LDA OnlineSUP: ',data_time_update[:,1].mean(),'±',data_time_update[:,1].std())
-    print('QDA OnlineSEMI: ', data_time_update[:, 2].mean(), '±', data_time_update[:, 2].std())
-    print('QDA OnlineSUP: ', data_time_update[:, 4].mean(), '±', data_time_update[:, 4].std())
-    print('QDA OnlineSEMI: ', data_time_update[:, 5].mean(), '±', data_time_update[:, 5].std())
-
-    idx += 1
-
-ax[0, 0].set_title('LDA')
-ax[0, 1].set_title('QDA')
-for i in range(2):
-    ax[4, i].set_xlabel('streaming gestures over time $t$')
+# fig, ax = plt.subplots(nrows=5, ncols=2, figsize=(12, 26))
+# idx = 0
+# numberClassifiers = 24
+# for info in ['Nina5', 'Cote', 'LongTerm3DC', 'Capgmyo_dbb','EPN_612']:
+#     if info == 'Nina5':
+#         x_ticks = np.hstack((np.arange(0, 40 + 1, 10), np.array([54])))
+#     elif info == 'Cote':
+#         x_ticks = np.hstack((np.arange(0, 40 + 1, 10), np.array([56])))
+#     elif info == 'LongTerm3DC':
+#         x_ticks = np.hstack((np.arange(0, 8 + 1, 2), np.array([11])))
+#     elif info == 'Capgmyo_dbb':
+#         x_ticks = np.hstack((np.arange(0, 40 + 1, 10), np.array([48])))
+#     elif info == 'EPN_612':
+#         x_ticks = np.hstack((np.arange(0, 120+ 1, 30), np.array([144])))
+#
+#     folder = '../Results/final/'
+#     data_acc, data_time_update, data_time_weight, data_weight, gestureSet = uploadResultsDatabasesVF1(
+#         folder, info, featureSet, times, shotStart)
+#
+#     # Compare all classifiers
+#     classifierSet = ['batch', 'OnlineSUP', 'OnlineSEMI']
+#     idx_classifierSet = np.arange(6)
+#     plot_arrays(data_time_update,idx, ax, classifierSet, idx_classifierSet, x_ticks, 'updating time [s]', gestureSet)
+#     print('\nAverage of the updating time over time (streaming gestures over time t) of our online classifiers ('+info+' dataset): ')
+#     print('LDA OnlineSUP: ',data_time_update[:,1].mean(),'±',data_time_update[:,1].std())
+#     print('QDA OnlineSEMI: ', data_time_update[:, 2].mean(), '±', data_time_update[:, 2].std())
+#     print('QDA OnlineSUP: ', data_time_update[:, 4].mean(), '±', data_time_update[:, 4].std())
+#     print('QDA OnlineSEMI: ', data_time_update[:, 5].mean(), '±', data_time_update[:, 5].std())
+#
+#     idx += 1
+#
+# ax[0, 0].set_title('LDA')
+# ax[0, 1].set_title('QDA')
+# for i in range(2):
+#     ax[4, i].set_xlabel('streaming gestures over time $t$')
 
 # ax[3, 0].legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
 #                 fancybox=True, shadow=True, ncol=3)

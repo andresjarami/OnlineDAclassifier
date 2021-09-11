@@ -97,7 +97,7 @@ def min_max_normalization(emg, bit_resolution):
 
 
 # for database in ['Nina5', 'Cote', 'Capgmyo_dbb', 'LongTerm3DC', 'EPN_612']:
-for database in ['Capgmyo_dbb']:
+for database in ['EPN_120']:
     window = 290
     overlap = 280
     windowFile = '_290ms'
@@ -287,7 +287,7 @@ for database in ['Capgmyo_dbb']:
                              person)
                     person += 1
 
-    elif database == 'EPN_612':
+    elif database == 'EPN_120':
         # EPN_612 DATABASE
         sampleRate = 200
         windowSamples = int(window * sampleRate / 1000)
@@ -295,8 +295,8 @@ for database in ['Capgmyo_dbb']:
 
         repetitions = 50
         ch = 8
-        classes = 6
-        people = 612
+        classes = 5
+        people = 120
         day = 1
         bit_resolution = 8  # myoarmband
 
@@ -317,10 +317,9 @@ for database in ['Capgmyo_dbb']:
             for cl in range(1, classes + 1):
                 for rp in range(1, repetitions + 1):
                     aux = scipy.io.loadmat(
-                        place + '/EMG_EPN612_Dataset/detected_data/emg_person' + str(person) + '_class' + str(
+                        place + '/EMG_EPN120_Dataset/segmented_data/emg_person' + str(person) + '_class' + str(
                             cl) + '_rpt' + str(rp) + '.mat')
-                    emg = aux['emg']
-                    emg = min_max_normalization(emg, bit_resolution)
+                    emg = aux['emg'] # Data is already normalized (8 bit-resolution)
 
                     wi = 0
                     segments = int((len(emg) - windowSamples) / incrmentSamples + 1)

@@ -14,23 +14,32 @@ import sys
 # finalExpTime = int(sys.argv[9])
 # nameFile = folder + '_' + typeDatabase + '_FS_' + sys.argv[1] + '_sP_' + sys.argv[2] + '_eP_' + sys.argv[3] + \
 #            '_sStart_' + sys.argv[7] + '_inTime_' + sys.argv[8] + '_fiTime_' + sys.argv[9] + '.csv'
+#
+#
+# # ### Evaluation
+#
+# functions_exp.evaluation(featureSet, nameFile, startPerson, endPerson, printResults, shotStart, initialExpTime,
+#                      finalExpTime, typeDatabase,all_models = True)
 
-for featureSet in [1]:
-    folder = '../Results/resultsExample/otherWeih'
-    # for info in [['Capgmyo_dbb', 1, 5],['Cote', 20, 24],['EPN_612', 1, 5] ]:
-    for info in [['Capgmyo_dbb', 4, 6]]:
+
+
+for featureSet in [3]:
+    folder = '../Results/resultsExample/orr'
+    # for info in [['Capgmyo_dbb', 1, 5],['Cote', 20, 24],['EPN_120', 1, 5] ]:
+    for info in [['Capgmyo_dbb', 5, 8]]:
         typeDatabase = info[0]
-        startPerson = info[1]  # Cote 20-36,EPN_612 1-612, Nina5 1-10, LongTerm3DC 1-20, Capgmyo_dbb 1-10
+        startPerson = info[1]  # Cote 20-36,EPN_120 1-120, Nina5 1-10, LongTerm3DC 1-20, Capgmyo_dbb 1-10
         endPerson = info[2]
         printResults = 1
         shotStart = 1  # LongTerm3DC 3(all of day 1),
-        initialExpTime = 2
-        finalExpTime = 2
+        initialExpTime = 1
+        finalExpTime = 1
         nameFile = folder + '_' + typeDatabase + '_FS_' + str(featureSet) + '_sP_' + str(
             startPerson) + '_eP_' + str(endPerson) + '_sStart_' + str(shotStart) + '_inTime_' + str(
             initialExpTime) + '_fiTime_' + str(finalExpTime) + '.csv'
 
         # ### Evaluation
 
-functions_exp.evaluation(featureSet, nameFile, startPerson, endPerson, printResults, shotStart, initialExpTime,
-                         finalExpTime, typeDatabase)
+        functions_exp.evaluation(featureSet, nameFile, startPerson, endPerson, printResults, shotStart, initialExpTime,
+                                 finalExpTime, typeDatabase,all_models = False)
+

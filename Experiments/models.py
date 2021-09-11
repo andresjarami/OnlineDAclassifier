@@ -217,14 +217,20 @@ def updating_our_proposed(classes, weights, model, chunk_mean, chunk_cov, chunk_
                                     (N + chunk_N * w)
             model.at[cla, 'N'] = N + chunk_N * w
 
-            if type_DA == 'QDA':
-                model.at[cla, 'cov'] = ((N - 1) * cov + w * (chunk_N - 1) * chunk_cov) / \
+            # if type_DA == 'QDA':
+            model.at[cla, 'cov'] = ((N - 1) * cov + w * (chunk_N - 1) * chunk_cov) / \
                                        (N + chunk_N * w - 1)
+
+
+    # if type_DA == 'LDA':
+    #     LDAcov = model.loc[0, 'LDAcov']
+    #     N_total = model.loc[0, 'N_total']
+    #     model.at[0, 'LDAcov'] = (LDAcov * (N_total - 1) + (chunk_N - 1) * chunk_cov) / (N_total + chunk_N - 1)
+    #     model.at[0, 'N_LDA'] = N_total + chunk_N
+
     if type_DA == 'LDA':
-        LDAcov = model.loc[0, 'LDAcov']
-        N_total = model.loc[0, 'N_total']
-        model.at[0, 'LDAcov'] = (LDAcov * (N_total - 1) + (chunk_N - 1) * chunk_cov) / (N_total + chunk_N - 1)
-        model.at[0, 'N_LDA'] = N_total + chunk_N
+        model.at[0, 'LDAcov'] = DA_Classifiers.LDA_Cov_weights(model)
+
     return model
 
 
@@ -236,7 +242,7 @@ def model_ours_soft_labels(currentModel, classes, trainFeatures, labeledGestures
     postProb_trainFeatures = predicted_labels(trainFeatures, weakModel, classes, type_DA) / len(trainFeatures)
 
     weightsMcc = np.array(
-        our_soft_labelling_technique(currentModel, gesture_mean, gesture_cov, classes, labeledGesturesFeatures,
+        our_soft_labelling_technique(weakModel, gesture_mean, gesture_cov, classes, labeledGesturesFeatures,
                                      labeledGesturesLabels, type_DA))
 
     if weightsMcc.sum() != 0:
@@ -299,7 +305,7 @@ def model_state_art_soft_labels(currentModel, classes, trainFeatures, labeledGes
     postProb_trainFeatures = predicted_labels(trainFeatures, weakModel, classes, type_DA) / len(trainFeatures)
 
     weightsMcc = np.array(
-        our_soft_labelling_technique(currentModel, gesture_mean, gesture_cov, classes, labeledGesturesFeatures,
+        our_soft_labelling_technique(weakModel, gesture_mean, gesture_cov, classes, labeledGesturesFeatures,
                                      labeledGesturesLabels, type_DA))
 
     if weightsMcc.sum() != 0:
@@ -323,7 +329,7 @@ def model_state_art_labels(currentModel, classes, trainLabel, type_DA, gesture_N
     weightsUnlabeledGesture = np.zeros(classes)
     weightsUnlabeledGesture[trainLabel - 1] = 1
     time_update = time.time()
-    model = updating_state_art(trainLabel - 1, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov,
+    model = updating_state_art(classes, weightsUnlabeledGesture, currentModel, gesture_mean, gesture_cov,
                                gesture_N, type_DA)
     time_update = time.time() - time_update
 
