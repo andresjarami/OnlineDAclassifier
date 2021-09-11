@@ -17,59 +17,38 @@ def uploadDatabases(Database, person, featureSet):
     path = '../'
     segment = '_290ms'
     personFile = '_' + str(person)
+    numSamples = 20
 
     if Database == 'EPN_120':
         classes = 5
         CH = 8
-        numberShots = 50
-        # numSamples = 250  # to holds real-time
-        numSamples = 20  # to holds real-time
+        numberGesturesTotal = 50
         days = 1
-        testSamples = 25
-        # best parameters (according accuracy) for classifer using posterior probabilities weights and threshold
-        b_wp = 1.0
-        b_t = 0.5
+        numberGesturesTest = 25
     elif Database == 'Nina5':
         classes = 18
         CH = 16
-        numberShots = 6
-        numSamples = 20  # to holds real-time
+        numberGesturesTotal = 6
         days = 1
-        testSamples = 4
-        # best parameters (according accuracy) for classifer using posterior probabilities weights and threshold
-        b_wp = 0.6
-        b_t = 0.1
+        numberGesturesTest = 4
     elif Database == 'Cote':
         classes = 7
         CH = 8
-        numberShots = 12
-        # numSamples = 120  # to holds real-time
-        numSamples = 20  # to holds real-time
+        numberGesturesTotal = 12
         days = 1
-        testSamples = 9
-        # best parameters (according accuracy) for classifer using posterior probabilities weights and threshold
-        b_wp = 1.0
-        b_t = 0.4
+        numberGesturesTest = 9
     elif Database == 'Capgmyo_dbb':
         classes = 8
         CH = 128
-        numberShots = 10
-        numSamples = 20  # to holds real-time
+        numberGesturesTotal = 10
         days = 2
-        testSamples = 7
-        # best parameters (according accuracy) for classifer using posterior probabilities weights and threshold
-        b_wp = 1.0
-        b_t = 0.5
+        numberGesturesTest = 7
     elif Database == 'LongTerm3DC':
         classes = 11
         CH = 10
-        numberShots = 3
-        numSamples = 20  # to holds real-time
+        numberGesturesTotal = 3
         days = 3
-        testSamples = 2
-        # best parameters (according accuracy) for classifer using posterior probabilities weights and threshold
-        b_wp = 1.0
-        b_t = 0.7
+        numberGesturesTest = 2
 
     if featureSet == 1:
         # Setting variables
@@ -80,13 +59,7 @@ def uploadDatabases(Database, person, featureSet):
         # Getting Data
         logvarMatrix = np.load(path + 'ExtractedData/' + Database + '/' + Feature1 + segment + personFile + '.npy')
 
-        # if Database == 'Nina5':
-        #     dataMatrix = logvarMatrix[:, 8:]
-        # else:
         dataMatrix = logvarMatrix.copy()
-
-        labelsDataMatrix = dataMatrix[:, allFeatures + 2]
-
 
     elif featureSet == 2:
         # Setting variables
@@ -102,13 +75,7 @@ def uploadDatabases(Database, person, featureSet):
         zcMatrix = np.load(path + 'ExtractedData/' + Database + '/' + Feature3 + segment + personFile + '.npy')
         sscMatrix = np.load(path + 'ExtractedData/' + Database + '/' + Feature4 + segment + personFile + '.npy')
 
-        # if Database == 'Nina5':
-        #     dataMatrix = np.hstack(
-        #         (mavMatrix[:, 8:CH * 2], wlMatrix[:, 8:CH * 2], zcMatrix[:, 8:CH * 2], sscMatrix[:, 8:]))
-        # else:
         dataMatrix = np.hstack((mavMatrix[:, :CH], wlMatrix[:, :CH], zcMatrix[:, :CH], sscMatrix[:, :]))
-
-        labelsDataMatrix = dataMatrix[:, allFeatures + 2]
 
     elif featureSet == 3:
         # Setting variables
@@ -125,20 +92,13 @@ def uploadDatabases(Database, person, featureSet):
         msrMatrix = np.load(path + 'ExtractedData/' + Database + '/' + Feature3 + segment + personFile + '.npy')
         wampMatrix = np.load(path + 'ExtractedData/' + Database + '/' + Feature4 + segment + personFile + '.npy')
 
-        # if Database == 'Nina5':
-        #     dataMatrix = np.hstack(
-        #         (lscaleMatrix[:, 8:CH * 2], mflMatrix[:, 8:CH * 2], msrMatrix[:, 8:CH * 2], wampMatrix[:, 8:]))
-        # else:
         dataMatrix = np.hstack((lscaleMatrix[:, :CH], mflMatrix[:, :CH], msrMatrix[:, :CH], wampMatrix[:, :]))
 
-        labelsDataMatrix = dataMatrix[:, allFeatures + 2]
-
-    return dataMatrix, classes, numberShots, allFeatures, numSamples, days, testSamples, b_wp, b_t
+    return dataMatrix, classes, numberGesturesTotal, allFeatures, numSamples, days, numberGesturesTest
 
 
 def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamples, initialTime, finalTime,
-               typeDatabase,all_models):
-
+               typeDatabase, all_models):
     scaler = preprocessing.MinMaxScaler()
 
     results = pd.DataFrame(
@@ -147,24 +107,26 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
     for metric in ['precision', 'recall']:
         for type_DA in ['LDA', 'QDA']:
             results[metric + '_' + type_DA + '_' + 'weak'] = ''
-            results[metric + '_' + type_DA + '_' + 'batch'] = ''
+            results[metric + '_' + type_DA + '_' + 'batch_weighted_soft_labels'] = ''
+            results[metric + '_' + type_DA + '_' + 'batch_weighted_labels'] = ''
+            results[metric + '_' + type_DA + '_' + 'batch_traditional_soft_labels'] = ''
+            results[metric + '_' + type_DA + '_' + 'batch_traditional_labels'] = ''
 
-    for type_model in ['ours', 'state_art']:
-        for metric in ['precision', 'recall']:
-            for type_DA in ['LDA', 'QDA']:
-                results[metric + '_' + type_DA + '_' + type_model + '_soft_labels'] = ''
-                results[metric + '_' + type_DA + '_' + type_model + '_labels'] = ''
-                for weight in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
-                    results[metric + '_' + type_DA + '_' + type_model + '_probs_' + str(weight)] = ''
-                for threshold in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                    results[metric + '_' + type_DA + '_' + type_model + '_threshold_' + str(threshold)] = ''
+            results[metric + '_' + type_DA + '_ours_soft_labels'] = ''
+            results[metric + '_' + type_DA + '_ours_labels'] = ''
+            results[metric + '_' + type_DA + '_traditional_COV_soft_labels'] = ''
+            results[metric + '_' + type_DA + '__traditional_COV_labels'] = ''
+            for weight in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+                results[metric + '_' + type_DA + '_Nigam_' + str(weight)] = ''
+            for threshold in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+                results[metric + '_' + type_DA + '_thresholding_' + str(threshold)] = ''
 
     idx = 0
 
     for person in range(startPerson, endPerson + 1):
         # Upload Data
 
-        dataMatrix, classes, numberShots, allFeatures, numSamples, days, testSamples, b_wp, b_t = uploadDatabases(
+        dataMatrix, classes, numberGesturesTotal, allFeatures, numSamples, days, numberGesturesTest = uploadDatabases(
             typeDatabase, person, featureSet)
 
         for seed in range(initialTime, finalTime + 1):
@@ -173,23 +135,18 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
 
                 print('p', person, 's', seed, 'd', day)
                 numberGestures = 1
-                np.random.seed(person + seed * 1000 + day * 10000)  # to get a different seed per each person
+                np.random.seed(person + seed * 1000 + day * 10000)  # to get a different seed per each person and day
 
                 labeledGestures = []
                 unlabeledGestures = []
                 testGestures = []
                 for cla in range(1, classes + 1):
-                    repetitions = np.random.choice(numberShots, numberShots, replace=False) + 1
+                    repetitions = np.random.choice(numberGesturesTotal, numberGesturesTotal, replace=False) + 1
                     labeledGestures += [[shot, cla, day] for shot in repetitions[:initialSamples]]
-                    unlabeledGestures += [[shot, cla, day] for shot in repetitions[initialSamples:testSamples]]
-                    testGestures += [[shot, cla, day] for shot in repetitions[testSamples:]]
+                    unlabeledGestures += [[shot, cla, day] for shot in repetitions[initialSamples:numberGesturesTest]]
+                    testGestures += [[shot, cla, day] for shot in repetitions[numberGesturesTest:]]
 
                 permutationUnlabeledGestures = np.random.permutation(unlabeledGestures)
-                # print(labeledGestures)
-                # print(unlabeledGestures)
-                # print(list(permutationUnlabeledGestures))
-                # print(testGestures)
-
                 labeledGesturesFeatures, labeledGesturesLabels = getGestureSet(dataMatrix, allFeatures,
                                                                                labeledGestures, person)
                 labeledGesturesFeatures = scaler.fit_transform(labeledGesturesFeatures)
@@ -198,112 +155,75 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                                                                          person)
                 testGesturesFeatures = scaler.transform(testGesturesFeatures)
 
-                if typeDatabase == 'Capgmyo_dbb':
+                if typeDatabase == 'Capgmyo_dbb':  # dimension reduction using PCA for Capgmyo_dbb that has 128 ch
                     pca_model = PCA(n_components=0.99, svd_solver='full')
                     labeledGesturesFeatures = pca_model.fit_transform(labeledGesturesFeatures)
                     testGesturesFeatures = pca_model.transform(testGesturesFeatures)
                     print('features', np.size(labeledGesturesFeatures, axis=1))
 
-                weak_model, _, _ = currentDistributionValues(
+                initial_model, _, _ = models.initial_model(
                     labeledGesturesFeatures, labeledGesturesLabels, classes, np.size(labeledGesturesFeatures, axis=1))
 
-                accumLabeledGesturesFeatures = labeledGesturesFeatures
-                accumLabeledGesturesLabels = labeledGesturesLabels
+
 
                 labeledGesturesFeatures, labeledGesturesLabels = systematicSampling(
                     labeledGesturesFeatures, labeledGesturesLabels, numSamples, classes)
 
-                LDA_ours_labels = weak_model.copy()
-                LDA_ours_soft_labels = weak_model.copy()
-                LDA_ours_probs_01 = weak_model.copy()
-                LDA_ours_probs_02 = weak_model.copy()
-                LDA_ours_probs_03 = weak_model.copy()
-                LDA_ours_probs_04 = weak_model.copy()
-                LDA_ours_probs_05 = weak_model.copy()
-                LDA_ours_probs_06 = weak_model.copy()
-                LDA_ours_probs_07 = weak_model.copy()
-                LDA_ours_probs_08 = weak_model.copy()
-                LDA_ours_probs_09 = weak_model.copy()
-                LDA_ours_probs_10 = weak_model.copy()
-                LDA_ours_threshold_00 = weak_model.copy()
-                LDA_ours_threshold_01 = weak_model.copy()
-                LDA_ours_threshold_02 = weak_model.copy()
-                LDA_ours_threshold_03 = weak_model.copy()
-                LDA_ours_threshold_04 = weak_model.copy()
-                LDA_ours_threshold_05 = weak_model.copy()
-                LDA_ours_threshold_06 = weak_model.copy()
-                LDA_ours_threshold_07 = weak_model.copy()
-                LDA_ours_threshold_08 = weak_model.copy()
-                LDA_ours_threshold_09 = weak_model.copy()
+                LDA_ours_labels = initial_model.copy()
+                LDA_ours_soft_labels = initial_model.copy()
+                LDA_batch_weighted_labels = initial_model.copy()
+                LDA_batch_weighted_soft_labels = initial_model.copy()
+                LDA_batch_traditional_labels = initial_model.copy()
+                LDA_batch_traditional_soft_labels = initial_model.copy()
+                LDA_Nigam_01 = initial_model.copy()
+                LDA_Nigam_02 = initial_model.copy()
+                LDA_Nigam_03 = initial_model.copy()
+                LDA_Nigam_04 = initial_model.copy()
+                LDA_Nigam_05 = initial_model.copy()
+                LDA_Nigam_06 = initial_model.copy()
+                LDA_Nigam_07 = initial_model.copy()
+                LDA_Nigam_08 = initial_model.copy()
+                LDA_Nigam_09 = initial_model.copy()
+                LDA_Nigam_10 = initial_model.copy()
+                LDA_thresholding_00 = initial_model.copy()
+                LDA_thresholding_01 = initial_model.copy()
+                LDA_thresholding_02 = initial_model.copy()
+                LDA_thresholding_03 = initial_model.copy()
+                LDA_thresholding_04 = initial_model.copy()
+                LDA_thresholding_05 = initial_model.copy()
+                LDA_thresholding_06 = initial_model.copy()
+                LDA_thresholding_07 = initial_model.copy()
+                LDA_thresholding_08 = initial_model.copy()
+                LDA_thresholding_09 = initial_model.copy()
 
-                LDA_state_art_labels = weak_model.copy()
-                LDA_state_art_soft_labels = weak_model.copy()
-                LDA_state_art_probs_01 = weak_model.copy()
-                LDA_state_art_probs_02 = weak_model.copy()
-                LDA_state_art_probs_03 = weak_model.copy()
-                LDA_state_art_probs_04 = weak_model.copy()
-                LDA_state_art_probs_05 = weak_model.copy()
-                LDA_state_art_probs_06 = weak_model.copy()
-                LDA_state_art_probs_07 = weak_model.copy()
-                LDA_state_art_probs_08 = weak_model.copy()
-                LDA_state_art_probs_09 = weak_model.copy()
-                LDA_state_art_probs_10 = weak_model.copy()
-                LDA_state_art_threshold_00 = weak_model.copy()
-                LDA_state_art_threshold_01 = weak_model.copy()
-                LDA_state_art_threshold_02 = weak_model.copy()
-                LDA_state_art_threshold_03 = weak_model.copy()
-                LDA_state_art_threshold_04 = weak_model.copy()
-                LDA_state_art_threshold_05 = weak_model.copy()
-                LDA_state_art_threshold_06 = weak_model.copy()
-                LDA_state_art_threshold_07 = weak_model.copy()
-                LDA_state_art_threshold_08 = weak_model.copy()
-                LDA_state_art_threshold_09 = weak_model.copy()
+                QDA_ours_labels = initial_model.copy()
+                QDA_ours_soft_labels = initial_model.copy()
+                QDA_batch_weighted_labels = initial_model.copy()
+                QDA_batch_weighted_soft_labels = initial_model.copy()
+                QDA_batch_traditional_labels = initial_model.copy()
+                QDA_batch_traditional_soft_labels = initial_model.copy()
+                QDA_Nigam_01 = initial_model.copy()
+                QDA_Nigam_02 = initial_model.copy()
+                QDA_Nigam_03 = initial_model.copy()
+                QDA_Nigam_04 = initial_model.copy()
+                QDA_Nigam_05 = initial_model.copy()
+                QDA_Nigam_06 = initial_model.copy()
+                QDA_Nigam_07 = initial_model.copy()
+                QDA_Nigam_08 = initial_model.copy()
+                QDA_Nigam_09 = initial_model.copy()
+                QDA_Nigam_10 = initial_model.copy()
+                QDA_thresholding_00 = initial_model.copy()
+                QDA_thresholding_01 = initial_model.copy()
+                QDA_thresholding_02 = initial_model.copy()
+                QDA_thresholding_03 = initial_model.copy()
+                QDA_thresholding_04 = initial_model.copy()
+                QDA_thresholding_05 = initial_model.copy()
+                QDA_thresholding_06 = initial_model.copy()
+                QDA_thresholding_07 = initial_model.copy()
+                QDA_thresholding_08 = initial_model.copy()
+                QDA_thresholding_09 = initial_model.copy()
 
-                QDA_ours_labels = weak_model.copy()
-                QDA_ours_soft_labels = weak_model.copy()
-                QDA_ours_probs_01 = weak_model.copy()
-                QDA_ours_probs_02 = weak_model.copy()
-                QDA_ours_probs_03 = weak_model.copy()
-                QDA_ours_probs_04 = weak_model.copy()
-                QDA_ours_probs_05 = weak_model.copy()
-                QDA_ours_probs_06 = weak_model.copy()
-                QDA_ours_probs_07 = weak_model.copy()
-                QDA_ours_probs_08 = weak_model.copy()
-                QDA_ours_probs_09 = weak_model.copy()
-                QDA_ours_probs_10 = weak_model.copy()
-                QDA_ours_threshold_00 = weak_model.copy()
-                QDA_ours_threshold_01 = weak_model.copy()
-                QDA_ours_threshold_02 = weak_model.copy()
-                QDA_ours_threshold_03 = weak_model.copy()
-                QDA_ours_threshold_04 = weak_model.copy()
-                QDA_ours_threshold_05 = weak_model.copy()
-                QDA_ours_threshold_06 = weak_model.copy()
-                QDA_ours_threshold_07 = weak_model.copy()
-                QDA_ours_threshold_08 = weak_model.copy()
-                QDA_ours_threshold_09 = weak_model.copy()
 
-                QDA_state_art_labels = weak_model.copy()
-                QDA_state_art_soft_labels = weak_model.copy()
-                QDA_state_art_probs_01 = weak_model.copy()
-                QDA_state_art_probs_02 = weak_model.copy()
-                QDA_state_art_probs_03 = weak_model.copy()
-                QDA_state_art_probs_04 = weak_model.copy()
-                QDA_state_art_probs_05 = weak_model.copy()
-                QDA_state_art_probs_06 = weak_model.copy()
-                QDA_state_art_probs_07 = weak_model.copy()
-                QDA_state_art_probs_08 = weak_model.copy()
-                QDA_state_art_probs_09 = weak_model.copy()
-                QDA_state_art_probs_10 = weak_model.copy()
-                QDA_state_art_threshold_00 = weak_model.copy()
-                QDA_state_art_threshold_01 = weak_model.copy()
-                QDA_state_art_threshold_02 = weak_model.copy()
-                QDA_state_art_threshold_03 = weak_model.copy()
-                QDA_state_art_threshold_04 = weak_model.copy()
-                QDA_state_art_threshold_05 = weak_model.copy()
-                QDA_state_art_threshold_06 = weak_model.copy()
-                QDA_state_art_threshold_07 = weak_model.copy()
-                QDA_state_art_threshold_08 = weak_model.copy()
-                QDA_state_art_threshold_09 = weak_model.copy()
 
                 # Number of points show in the graphs
                 number_points = 5
@@ -346,36 +266,21 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                     for type_DA in ['LDA', 'QDA']:
                         name = type_DA + '_' + 'weak'
                         results = update_results(results, idx, name, true_weight, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, weak_model, classes, type_DA, reported_points,
+                                                 testGesturesLabels, initial_model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                    ###### Batch learning
-                    name = 'batch'
-                    accumLabeledGesturesFeatures = np.vstack((accumLabeledGesturesFeatures, trainFeatures))
-                    accumLabeledGesturesLabels = np.hstack((accumLabeledGesturesLabels, trainLabels))
-
-                    batch_model, results.at[idx, 'time_update_LDA_' + name], results.at[
-                        idx, 'time_update_QDA_' + name], = currentDistributionValues(
-                        accumLabeledGesturesFeatures, accumLabeledGesturesLabels, classes,
-                        np.size(trainFeatures, axis=1))
-
-                    for type_DA in ['LDA', 'QDA']:
-                        name = type_DA + '_' + 'batch'
-                        results = update_results(results, idx, name, true_weight, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, batch_model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
 
                     ################################# LDA #########################
                     type_DA = 'LDA'
 
-                    ############################# OURS LDA
+                    # OURS LDA
 
                     name = type_DA + '_' + 'ours_soft_labels'
                     LDA_ours_soft_labels, results.at[
                         idx, 'time_update' + '_' + name], results.at[
                         idx, 'time_weight' + '_' + name], weight_vector = models.model_ours_soft_labels(
                         LDA_ours_soft_labels, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
-                        type_DA, weak_model, gesture_N, gesture_mean, gesture_cov)
+                        type_DA, initial_model, gesture_N, gesture_mean, gesture_cov)
                     model = LDA_ours_soft_labels
                     results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                              testGesturesLabels, model, classes, type_DA, reported_points,
@@ -390,447 +295,254 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                                              testGesturesLabels, model, classes, type_DA, reported_points,
                                              numberGestures, printR, nameFile)
 
+                    # Batch classifiers LDA
+
+                    name = type_DA + '_' + 'batch_weighted_soft_labels'
+                    LDA_batch_weighted_soft_labels, results.at[
+                        idx, 'time_update' + '_' + name], results.at[
+                        idx, 'time_weight' + '_' + name], weight_vector = models.model_batch_weighted_soft_labels(
+                        LDA_batch_weighted_soft_labels, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
+                        type_DA, initial_model, gesture_N, gesture_mean, gesture_cov)
+                    model = LDA_ours_soft_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+                    name = type_DA + '_' + 'batch_weighted_labels'
+                    LDA_batch_weighted_labels, results.at[
+                        idx, 'time_update' + '_' + name], weight_vector = models.model_batch_weighted_labels(
+                        LDA_batch_weighted_labels, classes, rand[1], type_DA, gesture_N, gesture_mean, gesture_cov)
+                    model = LDA_ours_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+                    name = type_DA + '_' + 'batch_traditional_soft_labels'
+                    LDA_batch_traditional_soft_labels, results.at[
+                        idx, 'time_update' + '_' + name], results.at[
+                        idx, 'time_weight' + '_' + name], weight_vector = models.model_batch_traditional_soft_labels(
+                        LDA_batch_traditional_soft_labels, classes, trainFeatures, labeledGesturesFeatures,
+                        labeledGesturesLabels,
+                        type_DA, initial_model, gesture_N, gesture_mean, gesture_cov)
+                    model = LDA_ours_soft_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+                    name = type_DA + '_' + 'batch_traditional_labels'
+                    LDA_batch_traditional_labels, results.at[
+                        idx, 'time_update' + '_' + name], weight_vector = models.model_batch_traditional_labels(
+                        LDA_batch_traditional_labels, classes, rand[1], type_DA, gesture_N, gesture_mean, gesture_cov)
+                    model = LDA_ours_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+
                     if all_models == True:
                         #### Probs with our LDA classifier
-                        name = type_DA + '_' + 'ours_probs_' + str(0.1)
-                        LDA_ours_probs_01, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.1)
+                        LDA_Nigam_01, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_01, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_01, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.1)
-                        model = LDA_ours_probs_01
+                        model = LDA_Nigam_01
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.2)
-                        LDA_ours_probs_02, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.2)
+                        LDA_Nigam_02, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_02, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_02, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.2)
-                        model = LDA_ours_probs_02
+                        model = LDA_Nigam_02
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.3)
-                        LDA_ours_probs_03, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.3)
+                        LDA_Nigam_03, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_03, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_03, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.3)
-                        model = LDA_ours_probs_03
+                        model = LDA_Nigam_03
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.4)
-                        LDA_ours_probs_04, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.4)
+                        LDA_Nigam_04, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_04, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_04, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.4)
-                        model = LDA_ours_probs_04
+                        model = LDA_Nigam_04
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.5)
-                        LDA_ours_probs_05, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.5)
+                        LDA_Nigam_05, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_05, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_05, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.5)
-                        model = LDA_ours_probs_05
+                        model = LDA_Nigam_05
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.6)
-                        LDA_ours_probs_06, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.6)
+                        LDA_Nigam_06, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_06, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_06, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.6)
-                        model = LDA_ours_probs_06
+                        model = LDA_Nigam_06
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.7)
-                        LDA_ours_probs_07, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.7)
+                        LDA_Nigam_07, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_07, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_07, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.7)
-                        model = LDA_ours_probs_07
+                        model = LDA_Nigam_07
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.8)
-                        LDA_ours_probs_08, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.8)
+                        LDA_Nigam_08, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_08, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_08, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.8)
-                        model = LDA_ours_probs_08
+                        model = LDA_Nigam_08
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.9)
-                        LDA_ours_probs_09, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.9)
+                        LDA_Nigam_09, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_09, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_09, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.9)
-                        model = LDA_ours_probs_09
+                        model = LDA_Nigam_09
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(1.0)
-                        LDA_ours_probs_10, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(1.0)
+                        LDA_Nigam_10, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            LDA_ours_probs_10, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            LDA_Nigam_10, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=1.0)
-                        model = LDA_ours_probs_10
+                        model = LDA_Nigam_10
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
                         #### Threshold with our LDA classifier
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.0)
-                        LDA_ours_threshold_00, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_00, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.0)
+                        LDA_thresholding_00, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_00, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.0)
-                        model = LDA_ours_threshold_00
+                        model = LDA_thresholding_00
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.1)
-                        LDA_ours_threshold_01, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_01, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.1)
+                        LDA_thresholding_01, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_01, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.1)
-                        model = LDA_ours_threshold_01
+                        model = LDA_thresholding_01
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.2)
-                        LDA_ours_threshold_02, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_02, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.2)
+                        LDA_thresholding_02, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_02, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.2)
-                        model = LDA_ours_threshold_02
+                        model = LDA_thresholding_02
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.3)
-                        LDA_ours_threshold_03, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_03, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.3)
+                        LDA_thresholding_03, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_03, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.3)
-                        model = LDA_ours_threshold_03
+                        model = LDA_thresholding_03
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.4)
-                        LDA_ours_threshold_04, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_04, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.4)
+                        LDA_thresholding_04, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_04, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.4)
-                        model = LDA_ours_threshold_04
+                        model = LDA_thresholding_04
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.5)
-                        LDA_ours_threshold_05, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_05, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.5)
+                        LDA_thresholding_05, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_05, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.5)
-                        model = LDA_ours_threshold_05
+                        model = LDA_thresholding_05
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.6)
-                        LDA_ours_threshold_06, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_06, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.6)
+                        LDA_thresholding_06, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_06, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.6)
-                        model = LDA_ours_threshold_06
+                        model = LDA_thresholding_06
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.7)
-                        LDA_ours_threshold_07, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_07, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.7)
+                        LDA_thresholding_07, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_07, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.7)
-                        model = LDA_ours_threshold_07
+                        model = LDA_thresholding_07
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.8)
-                        LDA_ours_threshold_08, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_08, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.8)
+                        LDA_thresholding_08, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_08, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.8)
-                        model = LDA_ours_threshold_08
+                        model = LDA_thresholding_08
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.9)
-                        LDA_ours_threshold_09, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            LDA_ours_threshold_09, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.9)
+                        LDA_thresholding_09, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            LDA_thresholding_09, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.9)
-                        model = LDA_ours_threshold_09
+                        model = LDA_thresholding_09
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                    ############################# STATE OF THE ART LDA
-
-                    name = type_DA + '_' + 'state_art_soft_labels'
-                    LDA_state_art_soft_labels, results.at[
-                        idx, 'time_update' + '_' + name], results.at[
-                        idx, 'time_weight' + '_' + name], weight_vector = models.model_state_art_soft_labels(
-                        LDA_state_art_soft_labels, classes, trainFeatures, labeledGesturesFeatures,
-                        labeledGesturesLabels,
-                        type_DA, weak_model, gesture_N, gesture_mean, gesture_cov)
-                    model = LDA_state_art_soft_labels
-                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                             testGesturesLabels, model, classes, type_DA, reported_points,
-                                             numberGestures, printR, nameFile)
-
-                    name = type_DA + '_' + 'state_art_labels'
-                    LDA_state_art_labels, results.at[
-                        idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_labels(
-                        LDA_state_art_labels, classes, rand[1], type_DA, gesture_N, gesture_mean, gesture_cov)
-                    model = LDA_state_art_labels
-                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                             testGesturesLabels, model, classes, type_DA, reported_points,
-                                             numberGestures, printR, nameFile)
-
-                    if all_models == True:
-                        #### Probs with state_art LDA classifier
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.1)
-                        LDA_state_art_probs_01, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_01, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.1)
-                        model = LDA_state_art_probs_01
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.2)
-                        LDA_state_art_probs_02, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_02, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.2)
-                        model = LDA_state_art_probs_02
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.3)
-                        LDA_state_art_probs_03, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_03, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.3)
-                        model = LDA_state_art_probs_03
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.4)
-                        LDA_state_art_probs_04, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_04, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.4)
-                        model = LDA_state_art_probs_04
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.5)
-                        LDA_state_art_probs_05, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_05, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.5)
-                        model = LDA_state_art_probs_05
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.6)
-                        LDA_state_art_probs_06, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_06, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.6)
-                        model = LDA_state_art_probs_06
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.7)
-                        LDA_state_art_probs_07, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_07, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.7)
-                        model = LDA_state_art_probs_07
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.8)
-                        LDA_state_art_probs_08, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_08, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.8)
-                        model = LDA_state_art_probs_08
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.9)
-                        LDA_state_art_probs_09, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_09, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.9)
-                        model = LDA_state_art_probs_09
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(1.0)
-                        LDA_state_art_probs_10, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            LDA_state_art_probs_10, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=1.0)
-                        model = LDA_state_art_probs_10
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        #### Threshold with our LDA classifier
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.0)
-                        LDA_state_art_threshold_00, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_00, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.0)
-                        model = LDA_state_art_threshold_00
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.1)
-                        LDA_state_art_threshold_01, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_01, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.1)
-                        model = LDA_state_art_threshold_01
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.2)
-                        LDA_state_art_threshold_02, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_02, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.2)
-                        model = LDA_state_art_threshold_02
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.3)
-                        LDA_state_art_threshold_03, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_03, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.3)
-                        model = LDA_state_art_threshold_03
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.4)
-                        LDA_state_art_threshold_04, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_04, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.4)
-                        model = LDA_state_art_threshold_04
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.5)
-                        LDA_state_art_threshold_05, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_05, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.5)
-                        model = LDA_state_art_threshold_05
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.6)
-                        LDA_state_art_threshold_06, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_06, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.6)
-                        model = LDA_state_art_threshold_06
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.7)
-                        LDA_state_art_threshold_07, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_07, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.7)
-                        model = LDA_state_art_threshold_07
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.8)
-                        LDA_state_art_threshold_08, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_08, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.8)
-                        model = LDA_state_art_threshold_08
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.9)
-                        LDA_state_art_threshold_09, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            LDA_state_art_threshold_09, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.9)
-                        model = LDA_state_art_threshold_09
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
 
                     ################################################### QDA ########################################
                     type_DA = 'QDA'
@@ -842,7 +554,7 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                         idx, 'time_update' + '_' + name], results.at[
                         idx, 'time_weight' + '_' + name], weight_vector = models.model_ours_soft_labels(
                         QDA_ours_soft_labels, classes, trainFeatures, labeledGesturesFeatures, labeledGesturesLabels,
-                        type_DA, weak_model, gesture_N, gesture_mean, gesture_cov)
+                        type_DA, initial_model, gesture_N, gesture_mean, gesture_cov)
                     model = QDA_ours_soft_labels
                     results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                              testGesturesLabels, model, classes, type_DA, reported_points,
@@ -857,448 +569,255 @@ def evaluation(featureSet, nameFile, startPerson, endPerson, printR, initialSamp
                                              testGesturesLabels, model, classes, type_DA, reported_points,
                                              numberGestures, printR, nameFile)
 
+                    # Batch classifiers QDA
+
+                    name = type_DA + '_' + 'batch_weighted_soft_labels'
+                    QDA_batch_weighted_soft_labels, results.at[
+                        idx, 'time_update' + '_' + name], results.at[
+                        idx, 'time_weight' + '_' + name], weight_vector = models.model_batch_weighted_soft_labels(
+                        QDA_batch_weighted_soft_labels, classes, trainFeatures, labeledGesturesFeatures,
+                        labeledGesturesLabels,
+                        type_DA, initial_model, gesture_N, gesture_mean, gesture_cov)
+                    model = QDA_ours_soft_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+                    name = type_DA + '_' + 'batch_weighted_labels'
+                    QDA_batch_weighted_labels, results.at[
+                        idx, 'time_update' + '_' + name], weight_vector = models.model_batch_weighted_labels(
+                        QDA_batch_weighted_labels, classes, rand[1], type_DA, gesture_N, gesture_mean, gesture_cov)
+                    model = QDA_ours_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+                    name = type_DA + '_' + 'batch_traditional_soft_labels'
+                    QDA_batch_traditional_soft_labels, results.at[
+                        idx, 'time_update' + '_' + name], results.at[
+                        idx, 'time_weight' + '_' + name], weight_vector = models.model_batch_traditional_soft_labels(
+                        QDA_batch_traditional_soft_labels, classes, trainFeatures, labeledGesturesFeatures,
+                        labeledGesturesLabels,
+                        type_DA, initial_model, gesture_N, gesture_mean, gesture_cov)
+                    model = QDA_ours_soft_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
+                    name = type_DA + '_' + 'batch_traditional_labels'
+                    QDA_batch_traditional_labels, results.at[
+                        idx, 'time_update' + '_' + name], weight_vector = models.model_batch_traditional_labels(
+                        QDA_batch_traditional_labels, classes, rand[1], type_DA, gesture_N, gesture_mean, gesture_cov)
+                    model = QDA_ours_labels
+                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
+                                             testGesturesLabels, model, classes, type_DA, reported_points,
+                                             numberGestures, printR, nameFile)
+
                     if all_models == True:
                         #### Probs with our QDA classifier
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.1)
-                        QDA_ours_probs_01, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.1)
+                        QDA_Nigam_01, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_01, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_01, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.1)
-                        model = QDA_ours_probs_01
+                        model = QDA_Nigam_01
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.2)
-                        QDA_ours_probs_02, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.2)
+                        QDA_Nigam_02, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_02, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_02, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.2)
-                        model = QDA_ours_probs_02
+                        model = QDA_Nigam_02
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.3)
-                        QDA_ours_probs_03, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.3)
+                        QDA_Nigam_03, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_03, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_03, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.3)
-                        model = QDA_ours_probs_03
+                        model = QDA_Nigam_03
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.4)
-                        QDA_ours_probs_04, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.4)
+                        QDA_Nigam_04, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_04, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_04, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.4)
-                        model = QDA_ours_probs_04
+                        model = QDA_Nigam_04
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.5)
-                        QDA_ours_probs_05, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.5)
+                        QDA_Nigam_05, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_05, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_05, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.5)
-                        model = QDA_ours_probs_05
+                        model = QDA_Nigam_05
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.6)
-                        QDA_ours_probs_06, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.6)
+                        QDA_Nigam_06, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_06, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_06, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.6)
-                        model = QDA_ours_probs_06
+                        model = QDA_Nigam_06
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.7)
-                        QDA_ours_probs_07, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.7)
+                        QDA_Nigam_07, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_07, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_07, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.7)
-                        model = QDA_ours_probs_07
+                        model = QDA_Nigam_07
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.8)
-                        QDA_ours_probs_08, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.8)
+                        QDA_Nigam_08, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_08, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_08, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.8)
-                        model = QDA_ours_probs_08
+                        model = QDA_Nigam_08
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(0.9)
-                        QDA_ours_probs_09, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(0.9)
+                        QDA_Nigam_09, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_09, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_09, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=0.9)
-                        model = QDA_ours_probs_09
+                        model = QDA_Nigam_09
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_probs_' + str(1.0)
-                        QDA_ours_probs_10, results.at[
+                        name = type_DA + '_' + 'Nigam_' + str(1.0)
+                        QDA_Nigam_10, results.at[
                             idx, 'time_update' + '_' + name], weight_vector = models.model_ours_probabilities(
-                            QDA_ours_probs_10, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                            QDA_Nigam_10, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, weight=1.0)
-                        model = QDA_ours_probs_10
+                        model = QDA_Nigam_10
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
                         #### Threshold with our QDA classifier
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.0)
-                        QDA_ours_threshold_00, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_00, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.0)
+                        QDA_thresholding_00, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_00, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.0)
-                        model = QDA_ours_threshold_00
+                        model = QDA_thresholding_00
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.1)
-                        QDA_ours_threshold_01, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_01, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.1)
+                        QDA_thresholding_01, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_01, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.1)
-                        model = QDA_ours_threshold_01
+                        model = QDA_thresholding_01
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.2)
-                        QDA_ours_threshold_02, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_02, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.2)
+                        QDA_thresholding_02, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_02, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.2)
-                        model = QDA_ours_threshold_02
+                        model = QDA_thresholding_02
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.3)
-                        QDA_ours_threshold_03, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_03, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.3)
+                        QDA_thresholding_03, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_03, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.3)
-                        model = QDA_ours_threshold_03
+                        model = QDA_thresholding_03
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.4)
-                        QDA_ours_threshold_04, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_04, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.4)
+                        QDA_thresholding_04, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_04, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.4)
-                        model = QDA_ours_threshold_04
+                        model = QDA_thresholding_04
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.5)
-                        QDA_ours_threshold_05, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_05, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.5)
+                        QDA_thresholding_05, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_05, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.5)
-                        model = QDA_ours_threshold_05
+                        model = QDA_thresholding_05
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.6)
-                        QDA_ours_threshold_06, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_06, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.6)
+                        QDA_thresholding_06, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_06, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.6)
-                        model = QDA_ours_threshold_06
+                        model = QDA_thresholding_06
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.7)
-                        QDA_ours_threshold_07, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_07, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.7)
+                        QDA_thresholding_07, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_07, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.7)
-                        model = QDA_ours_threshold_07
+                        model = QDA_thresholding_07
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.8)
-                        QDA_ours_threshold_08, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_08, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.8)
+                        QDA_thresholding_08, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_08, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.8)
-                        model = QDA_ours_threshold_08
+                        model = QDA_thresholding_08
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                        name = type_DA + '_' + 'ours_threshold_' + str(0.9)
-                        QDA_ours_threshold_09, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_ours_threshold(
-                            QDA_ours_threshold_09, classes, trainFeatures, type_DA, weak_model, gesture_N, gesture_mean,
+                        name = type_DA + '_' + 'thresholding_' + str(0.9)
+                        QDA_thresholding_09, results.at[
+                            idx, 'time_update' + '_' + name], weight_vector = models.model_thresholding(
+                            QDA_thresholding_09, classes, trainFeatures, type_DA, initial_model, gesture_N, gesture_mean,
                             gesture_cov, threshold=0.9)
-                        model = QDA_ours_threshold_09
+                        model = QDA_thresholding_09
                         results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
                                                  testGesturesLabels, model, classes, type_DA, reported_points,
                                                  numberGestures, printR, nameFile)
 
-                    ############################# STATE OF THE ART QDA
-
-                    name = type_DA + '_' + 'state_art_soft_labels'
-                    QDA_state_art_soft_labels, results.at[
-                        idx, 'time_update' + '_' + name], results.at[
-                        idx, 'time_weight' + '_' + name], weight_vector = models.model_state_art_soft_labels(
-                        QDA_state_art_soft_labels, classes, trainFeatures, labeledGesturesFeatures,
-                        labeledGesturesLabels,
-                        type_DA, weak_model, gesture_N, gesture_mean, gesture_cov)
-                    model = QDA_state_art_soft_labels
-                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                             testGesturesLabels, model, classes, type_DA, reported_points,
-                                             numberGestures, printR, nameFile)
-
-                    name = type_DA + '_' + 'state_art_labels'
-                    QDA_state_art_labels, results.at[
-                        idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_labels(
-                        QDA_state_art_labels, classes, rand[1], type_DA, gesture_N, gesture_mean, gesture_cov)
-                    model = QDA_state_art_labels
-                    results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                             testGesturesLabels, model, classes, type_DA, reported_points,
-                                             numberGestures, printR, nameFile)
-
-                    if all_models == True:
-                        #### Probs with state_art QDA classifier
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.1)
-                        QDA_state_art_probs_01, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_01, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.1)
-                        model = QDA_state_art_probs_01
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.2)
-                        QDA_state_art_probs_02, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_02, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.2)
-                        model = QDA_state_art_probs_02
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.3)
-                        QDA_state_art_probs_03, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_03, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.3)
-                        model = QDA_state_art_probs_03
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.4)
-                        QDA_state_art_probs_04, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_04, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.4)
-                        model = QDA_state_art_probs_04
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.5)
-                        QDA_state_art_probs_05, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_05, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.5)
-                        model = QDA_state_art_probs_05
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.6)
-                        QDA_state_art_probs_06, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_06, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.6)
-                        model = QDA_state_art_probs_06
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.7)
-                        QDA_state_art_probs_07, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_07, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.7)
-                        model = QDA_state_art_probs_07
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.8)
-                        QDA_state_art_probs_08, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_08, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.8)
-                        model = QDA_state_art_probs_08
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(0.9)
-                        QDA_state_art_probs_09, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_09, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=0.9)
-                        model = QDA_state_art_probs_09
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_probs_' + str(1.0)
-                        QDA_state_art_probs_10, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_probabilities(
-                            QDA_state_art_probs_10, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean,
-                            gesture_cov, weight=1.0)
-                        model = QDA_state_art_probs_10
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        #### Threshold with our QDA classifier
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.0)
-                        QDA_state_art_threshold_00, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_00, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.0)
-                        model = QDA_state_art_threshold_00
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.1)
-                        QDA_state_art_threshold_01, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_01, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.1)
-                        model = QDA_state_art_threshold_01
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.2)
-                        QDA_state_art_threshold_02, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_02, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.2)
-                        model = QDA_state_art_threshold_02
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.3)
-                        QDA_state_art_threshold_03, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_03, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.3)
-                        model = QDA_state_art_threshold_03
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.4)
-                        QDA_state_art_threshold_04, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_04, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.4)
-                        model = QDA_state_art_threshold_04
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.5)
-                        QDA_state_art_threshold_05, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_05, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.5)
-                        model = QDA_state_art_threshold_05
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.6)
-                        QDA_state_art_threshold_06, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_06, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.6)
-                        model = QDA_state_art_threshold_06
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.7)
-                        QDA_state_art_threshold_07, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_07, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.7)
-                        model = QDA_state_art_threshold_07
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.8)
-                        QDA_state_art_threshold_08, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_08, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.8)
-                        model = QDA_state_art_threshold_08
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
-
-                        name = type_DA + '_' + 'state_art_threshold_' + str(0.9)
-                        QDA_state_art_threshold_09, results.at[
-                            idx, 'time_update' + '_' + name], weight_vector = models.model_state_art_threshold(
-                            QDA_state_art_threshold_09, classes, trainFeatures, type_DA, weak_model, gesture_N,
-                            gesture_mean, gesture_cov, threshold=0.9)
-                        model = QDA_state_art_threshold_09
-                        results = update_results(results, idx, name, weight_vector, true_weight, testGesturesFeatures,
-                                                 testGesturesLabels, model, classes, type_DA, reported_points,
-                                                 numberGestures, printR, nameFile)
 
                     if reported_points[-1] == numberGestures:
 
@@ -1353,17 +872,6 @@ def update_results(results, idx, name, weight_vector, true_weight, testGesturesF
     return results
 
 
-def update_model(name, results, idx, method, model, classes, trainFeatures, labeledGesturesFeatures,
-                 labeledGesturesLabels, type_DA, weak_model, gesture_N, gesture_mean, gesture_cov, true_weight):
-    w = np.zeros(classes)
-    exec(
-        model + ", results.at[idx, 'time_update' + '_' + name],results.at[idx, 'time_weight' + '_' + name], " +
-        "w = models." + method + "(" + model + ", classes, trainFeatures, " +
-        "labeledGesturesFeatures, labeledGesturesLabels,type_DA, weak_model, gesture_N, gesture_mean, gesture_cov)")
-
-    results.at[idx, 'error_1_weight' + '_' + name] = models.errorWeights_type1(w, true_weight)
-    results.at[idx, 'error_2_weight' + '_' + name] = models.errorWeights_type2(w, true_weight)
-
 
 def getGestureSet(dataMatrix, allFeatures, setGestures, person):
     Features = []
@@ -1383,25 +891,7 @@ def getGestureSet(dataMatrix, allFeatures, setGestures, person):
     return np.array(Features), np.array(Labels)
 
 
-def currentDistributionValues(trainFeatures, trainLabels, classes, allFeatures):
-    t = time.time()
-    currentValues = pd.DataFrame(
-        columns=['cov', 'mean', 'class', 'N', 'N_cov', 'LDAcov', 'N_LDA'])
-    trainLabelsAux = trainLabels[np.newaxis]
-    Matrix = np.hstack((trainFeatures, trainLabelsAux.T))
 
-    for cla in range(classes):
-        X = Matrix[np.where((Matrix[:, allFeatures] == cla + 1)), 0:allFeatures][0]
-        currentValues.at[cla, 'mean'] = DA_classifiers.mean(X, allFeatures)
-        currentValues.at[cla, 'cov'] = DA_classifiers.covariance(X, allFeatures, currentValues.loc[cla, 'mean'])
-        currentValues.at[cla, 'class'] = cla + 1
-        N = np.size(X, axis=0)
-        currentValues.at[cla, 'N'] = N
-    timeQDA = time.time() - t
-    currentValues.at[0, 'N_total'] = np.size(Matrix[:, 0:allFeatures], axis=0)
-    currentValues.at[0, 'LDAcov'] = DA_classifiers.LDA_Cov_weights(currentValues)
-    timeLDA = time.time() - t
-    return currentValues, timeLDA, timeQDA
 
 
 def systematicSampling(trainFeatures, trainLabels, numSamples, classes):
