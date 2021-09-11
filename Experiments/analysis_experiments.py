@@ -62,7 +62,6 @@ def friedman_test(*args):
 
     return iman_davenport, p_value, rankings_avg, rankings_cmp
 
-
 def holm_test(ranks, control=None):
     """
         From: https://github.com/citiususc/stac/blob/master/stac/nonparametric_tests.py
@@ -108,7 +107,6 @@ def holm_test(ranks, control=None):
 
     return comparisons, z_values, p_values, adj_p_values, keys[control_i]
 
-
 def friedman_analysis(data_frame):
     data_array = np.asarray(data_frame)
     num_datasets, num_methods = data_array.shape
@@ -140,8 +138,36 @@ def friedman_analysis(data_frame):
         holm_scores = pd.DataFrame({"p": adj_p_values, "sig": adj_p_values < alpha}, index=comparisons)
         print(holm_scores)
 
-
 # %% Upload results of the three databases
+
+def uploadResultsDatasets(folder, database, featureSet, times, shotStart, best_probs=0, best_threshold=0):
+    if database == 'Nina5':
+        samplesTrain = 4
+        classes = 18
+        people = 10
+        days = 1
+    elif database == 'Cote':
+        samplesTrain = 9
+        classes = 7
+        people = 17
+        days = 1
+    elif database == 'EPN_120':
+        samplesTrain = 25
+        classes = 5
+        people = 120
+        days = 1
+    elif database == 'Capgmyo_dbb':
+        samplesTrain = 7
+        classes = 8
+        people = 10
+        days = 2
+    elif database == 'LongTerm3DC':
+        samplesTrain = 2
+        classes = 11
+        people = 20
+        days = 3
+    return uploadResults(folder, database, samplesTrain, people, times, featureSet, classes, days, shotStart,
+                         best_probs, best_threshold)
 
 def uploadResults(folder, database, samplesTrain, people, times, featureSet, classes, days, shotStart, best_probs,
                   best_threshold):
@@ -173,12 +199,10 @@ def uploadResults(folder, database, samplesTrain, people, times, featureSet, cla
                 dataFrame = dataFrame.append(resultsTest)
 
             except:
-                a = 3
-                # print('error' + '_time' + str(time) + '_person' + str(person) + '_FS' + str(featureSet))
+                print('error' + '_time' + str(time) + '_person' + str(person) + '_FS' + str(featureSet))
 
     data_acc_mean_all = get_data_acc_mean_all(dataFrame, gestureSet)
     if best_probs != 0 and best_threshold != 0:
-        # data_acc_best = get_data_acc_best(dataFrame, gestureSet, best_probs, best_threshold)
         data_acc_mean_best = get_data_acc_mean_ours_all(dataFrame, gestureSet, best_probs, best_threshold)
         data_acc_best = get_data_acc_ours_all(dataFrame, gestureSet, best_probs, best_threshold)
 
@@ -186,21 +210,8 @@ def uploadResults(folder, database, samplesTrain, people, times, featureSet, cla
         data_acc_mean_best = 0
         data_acc_best = 0
         get_data_time(dataFrame, gestureSet)
-    data_acc_mean_improve = get_data_acc_mean_improve(dataFrame, gestureSet, best_probs, best_threshold)
-    # data_acc_mean_batch = get_data_acc_mean_batch(dataFrame, gestureSet)
-    # data_acc_batch = get_data_acc_batch(dataFrame, gestureSet)
-
-    # data_acc = get_data_acc(dataFrame, gestureSet)
-
-    # data_time_update = get_data_time_update(dataFrame, gestureSet)
-    # data_time_update = np.vstack((np.ones((1, np.size(data_time_update, axis=1))) * 0, data_time_update))
-
-    # data_time_weight = get_data_time_weight(dataFrame, gestureSet)
-    # data_weight = get_data_weight(dataFrame, gestureSet, classes, database)
-    # data_weight = np.vstack((np.ones((1, np.size(data_weight, axis=1))) * 0, data_weight))
-
-    return data_acc_mean_all, data_acc_mean_best, data_acc_best, data_acc_mean_improve, 0
-
+    data_acc_mean_batch = get_data_acc_mean_batch(dataFrame, gestureSet)
+    return data_acc_mean_all, data_acc_mean_best, data_acc_best, data_acc_mean_batch
 
 def get_data_acc_mean_all(dataFrame, gestureSet):
     metric = 'acc'
@@ -227,7 +238,6 @@ def get_data_acc_mean_all(dataFrame, gestureSet):
             data.at[0, classifier] = vect.mean() - weak_vect.mean()
 
     return data
-
 
 def get_data_acc_mean_ours_all(dataFrame, gestureSet, best_probs, best_threshold):
     metric = 'acc'
@@ -289,9 +299,6 @@ def get_data_time(dataFrame, gestureSet):
 
             print('time: '+classifier,round(vect.mean()*1000,2),round(vect.std()*1000,2))
 
-
-
-
 def get_data_acc_ours_all(dataFrame, gestureSet, best_probs, best_threshold):
     metric = 'acc'
     data = pd.DataFrame()
@@ -320,33 +327,10 @@ def get_data_acc_ours_all(dataFrame, gestureSet, best_probs, best_threshold):
                 dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
             data[classifierSet_names[i]] = vect
 
-    # for type_DA in ['LDA', 'QDA']:
-    #     for type_model in ['best_probs', 'best_threshold']:
-    #         _, p = stats.wilcoxon(data[type_DA + '_ours_soft_labels'], data[type_DA + '_ours_' + type_model])
-    #
-    #         if p > p_value_control:
-    #             print(
-    #                 type_DA + '_ours_' + type_model + ' and ' + type_DA + '_ours_soft_labels and comes from the same distribution')
-
-    # print('\n\nFRIEDMAN TOTAL (CONFIDENCE LEVEL 95%) soft-labelling techniques')
-    # frame = pd.DataFrame()
-    # for type_DA in ['LDA', 'QDA']:
-    #     print('\nType DA classifier: ' + type_DA)
-    #     for type_model in ['ours']:
-    #         classifierSet_names = []
-    #         for type_updating in ['soft_labels', 'best_probs', 'best_threshold']:
-    #             classifierSet_names.append(type_DA + '_' + type_model + '_' + type_updating)
-    #
-    #         aux_frame = data[classifierSet_names]
-    #         aux_frame.columns = ['ours_soft_labelling', 'best_probs', 'best_threshold']
-    #         frame = frame.append(aux_frame, ignore_index=True, sort=False)
-    #
-    #     friedman_analysis(frame)
 
     return data
 
-
-def get_data_acc_mean_improve(dataFrame, gestureSet, best_probs, best_threshold):
+def get_data_acc_mean_batch(dataFrame, gestureSet):
     metric = 'acc'
     p_value_control = 0.05
 
@@ -356,10 +340,6 @@ def get_data_acc_mean_improve(dataFrame, gestureSet, best_probs, best_threshold)
         for type_model in [['ours', 0], ['state_art', 1]]:
             classifierSet.append(type_DA[0] + '_' + type_model[0] + '_soft_labels')
             classifierSet.append(type_DA[0] + '_' + type_model[0] + '_labels')
-            # classifierSet.append(
-            #     type_DA[0] + '_' + type_model[0] + '_probs_' + str(best_probs[type_model[1]][type_DA[1]]))
-            # classifierSet.append(
-            #     type_DA[0] + '_' + type_model[0] + '_threshold_' + str(best_threshold[type_model[1]][type_DA[1]]))
 
         weak_vect = dataFrame[metric + '_' + type_DA[0] + '_' + 'weak'].loc[
             dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
@@ -394,313 +374,6 @@ def get_data_acc_mean_improve(dataFrame, gestureSet, best_probs, best_threshold)
 
     return data
 
-
-def get_data_acc_best(dataFrame, gestureSet, best_probs, best_threshold):
-    metric = 'acc'
-    data = pd.DataFrame()
-
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = []
-        classifierSet_names = []
-        for type_model in [['ours', 0], ['state_art', 1]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_soft_labels')
-            classifierSet_names.append(type_DA[0] + '_' + type_model[0] + '_soft_labels')
-
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_probs_' + str(best_probs[type_model[1]][type_DA[1]]))
-            classifierSet_names.append(type_DA[0] + '_' + type_model[0] + '_best_probs')
-
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_threshold_' + str(best_threshold[type_model[1]][type_DA[1]]))
-            classifierSet_names.append(type_DA[0] + '_' + type_model[0] + '_best_threshold')
-
-        for i in range(len(classifierSet)):
-            vect = dataFrame[metric + '_' + classifierSet[i]].loc[
-                dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
-            data[classifierSet_names[i]] = vect
-
-    return data
-
-
-def get_data_acc_mean_batch(dataFrame, gestureSet):
-    metric = 'acc'
-    p_value_control = 0.05
-
-    data = pd.DataFrame()
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = [type_DA[0] + '_' + 'weak', type_DA[0] + '_' + 'batch']
-        for type_model in [['ours', 0]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_labels')
-
-        batch_vect = dataFrame[metric + '_' + type_DA[0] + '_' + 'batch'].loc[
-            dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
-        for classifier in classifierSet:
-            vect = dataFrame[metric + '_' + classifier].loc[
-                dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
-
-            if classifier == type_DA[0] + '_' + 'ours' + '_labels':
-                _, p = stats.wilcoxon(vect, batch_vect)
-
-                if p < p_value_control:
-                    print(
-                        type_DA[0]
-                        + ' the mean of the accuracy of the batch and our classifier is different (wilcoxon)')
-                    if vect.mean() > batch_vect.mean():
-                        print('best ours', vect.mean(), batch_vect.mean())
-                    else:
-                        print('best batch', vect.mean(), batch_vect.mean())
-
-            data.at[0, classifier] = vect.mean()
-
-    return data
-
-
-def get_data_acc_batch(dataFrame, gestureSet):
-    metric = 'acc'
-    data = pd.DataFrame()
-
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = [type_DA[0] + '_' + 'weak', type_DA[0] + '_' + 'batch']
-        for type_model in [['ours', 0]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_labels')
-
-        for i in range(len(classifierSet)):
-            vect = dataFrame[metric + '_' + classifierSet[i]].loc[
-                dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
-            data[classifierSet[i]] = vect
-
-    return data
-
-
-def get_data_weight(dataFrame, gestureSet, classes, database):
-    metric = 'weight'
-
-    if database == 'Nina5':
-        b_wp = 0.6
-        b_t = 0.1
-    elif database == 'Cote':
-        b_wp = 1.0
-        b_t = 0.4
-    elif database == 'LongTerm3DC':
-        b_wp = 1.0
-        b_t = 0.7
-    elif database == 'Capgmyo_dbb':
-        b_wp = 1.0
-        b_t = 0.5
-
-    classifierSet = ['incre_proposed_semi']
-    classifierSet.append('incre_weight_postprobability_' + str(b_wp))
-    classifierSet.append('incre_threshold_' + str(b_t))
-    numberClassifiers = 6
-    data = np.zeros((len(gestureSet), numberClassifiers))
-    typeDA = 'LDA'
-    for classifier in range(numberClassifiers):
-        if classifier >= numberClassifiers / 2:
-            typeDA = 'QDA'
-            classifier_aux = classifier - int(numberClassifiers / 2)
-        else:
-            classifier_aux = classifier
-        idx = 0
-        for gesture in gestureSet:
-            arrays_string = dataFrame[metric + '_' + typeDA + '_' + classifierSet[classifier_aux]].loc[
-                dataFrame['unlabeled Gesture'] == gesture].sum()
-            arrays_string = np.array(re.split(']\[|]|\[', arrays_string))
-            classifier_weights = np.zeros((len(arrays_string) - 2, classes))
-            for i in range(1, len(arrays_string) - 1):
-                aux = np.array(arrays_string[i].split())
-                classifier_weights[i - 1, :] = aux.astype(np.float)
-
-            arrays_string = dataFrame[metric + '_' + typeDA + '_' + 'incre_proposed_sup'].loc[
-                dataFrame['unlabeled Gesture'] == gesture].sum()
-            arrays_string = np.array(re.split(']\[|]|\[', arrays_string))
-            real_weights = np.zeros((len(arrays_string) - 2, classes))
-            for i in range(1, len(arrays_string) - 1):
-                aux = np.array(arrays_string[i].split())
-                real_weights[i - 1, :] = aux.astype(np.float)
-
-            data[idx, classifier] = models.errorWeights_type2_mse(classifier_weights, real_weights)
-            idx += 1
-    aux_data = data.copy()
-    ###accumulated error
-    for i in range(len(data)):
-        data[i, :] = aux_data[:i + 1, :].sum(axis=0)
-    return data
-
-
-def get_data_time_weight(dataFrame, gestureSet):
-    metric = 'time_weight'
-    numberClassifiers = 6
-
-    classifierSet = ['LDA_incre_proposed_semi', 'incre_weight_postprobability_LDA', 'incre_threshold_LDA',
-                     'QDA_incre_proposed_semi', 'incre_weight_postprobability_QDA', 'incre_threshold_QDA']
-
-    data = np.zeros((len(gestureSet), numberClassifiers))
-    typeDA = 'LDA'
-    for classifier in range(numberClassifiers):
-        if classifier >= numberClassifiers / 2:
-            typeDA = 'QDA'
-            classifier_aux = classifier - int(numberClassifiers / 2)
-        else:
-            classifier_aux = classifier
-        idx = 0
-        for gesture in gestureSet:
-            data[idx, classifier] = \
-                dataFrame[metric + '_' + classifierSet[classifier_aux]].loc[
-                    dataFrame['unlabeled Gesture'] == gesture].mean()
-            idx += 1
-    return data
-
-
-def get_data_time_update(dataFrame, gestureSet):
-    metric = 'time_update'
-    numberClassifiers = 6
-
-    classifierSet = ['batch', 'incre_proposed_sup', 'incre_proposed_semi']
-
-    data = np.zeros((len(gestureSet), numberClassifiers))
-    typeDA = 'LDA'
-    for classifier in range(numberClassifiers):
-        if classifier >= numberClassifiers / 2:
-            typeDA = 'QDA'
-            classifier_aux = classifier - int(numberClassifiers / 2)
-        else:
-            classifier_aux = classifier
-        idx = 0
-        for gesture in gestureSet:
-            data[idx, classifier] = \
-                dataFrame[metric + '_' + typeDA + '_' + classifierSet[classifier_aux]].loc[
-                    dataFrame['unlabeled Gesture'] == gesture].mean()
-            idx += 1
-    return data
-
-
-def get_data_acc_mean_best_weak(dataFrame, gestureSet, best_probs, best_threshold):
-    metric = 'acc'
-
-    data = pd.DataFrame()
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = [type_DA[0] + '_' + 'weak']
-        for type_model in [['ours', 0], ['state_art', 1]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_soft_labels')
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_probs_' + str(best_probs[type_model[1]][type_DA[1]]))
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_threshold_' + str(best_threshold[type_model[1]][type_DA[1]]))
-
-        for classifier in classifierSet:
-            vect = dataFrame[metric + '_' + classifier].loc[
-                dataFrame['number gesture'] == gestureSet[len(gestureSet) - 1]]
-
-            data.at[0, classifier] = vect.mean()
-
-    return data
-
-
-def uploadResultsDatabasesVF1(folder, database, featureSet, times, shotStart, best_probs=0, best_threshold=0):
-    if database == 'Nina5':
-        samplesTrain = 4
-        samplesTest = 2
-        classes = 18
-        people = 10
-        days = 1
-    elif database == 'Cote':
-        samplesTrain = 9
-        samplesTest = 3
-        classes = 7
-        people = 17
-        days = 1
-    elif database == 'EPN_120':
-        samplesTrain = 25
-        samplesTest = 25
-        classes = 5
-        people = 120
-        days = 1
-    elif database == 'Capgmyo_dbb':
-        samplesTrain = 7
-        samplesTest = 3
-        classes = 8
-        people = 10
-        days = 2
-    elif database == 'LongTerm3DC':
-        samplesTrain = 2
-        samplesTest = 1
-        classes = 11
-        people = 20
-        days = 3
-    return uploadResults(folder, database, samplesTrain, people, times, featureSet, classes, days, shotStart,
-                         best_probs, best_threshold)
-
-
-def plot_arrays(data, database, ax, type_DA, classifierSet, x_ticks, ylabel, gestureSet):
-    for classifier in classifierSet:
-        ax.plot(gestureSet, data[type_DA + '_' + classifier], label=type_DA + '_' + classifier)
-        ax.set_xticks(x_ticks)
-        ax.grid(color='gainsboro', linewidth=1)
-    ax.set_ylabel(ylabel + ' (' + database + ')')
-
-
-def plot_bar(data, database, ax, type_DA, classifierSet, x_ticks, ylabel, gestureSet):
-    ax.bar()
-    for classifier in classifierSet:
-        ax.plot(gestureSet, data[type_DA + '_' + classifier], label=type_DA + '_' + classifier)
-        ax.set_xticks(x_ticks)
-        ax.grid(color='gainsboro', linewidth=1)
-    ax.set_ylabel(ylabel + ' (' + database + ')')
-
-
-def print_ACC(data, type_DA, classifierSet):
-    values = []
-    for classifier in classifierSet:
-        values.append(data.loc[len(data) - 1, type_DA + '_' + classifier])
-    values = np.array(values)
-
-    aux_values = values[1:int((len(values) - 1) / 2) + 1]
-    aux_classifierSet = classifierSet[1:int((len(values) - 1) / 2) + 1]
-    idx = np.argmax(aux_values)
-    print('best classifier using ours updating: ', aux_classifierSet[idx], ', ACC =', aux_values[idx])
-
-    aux_values = values[int((len(values) - 1) / 2) + 1:]
-    aux_classifierSet = classifierSet[int((len(values) - 1) / 2) + 1:]
-    idx = np.argmax(aux_values)
-    print('best classifier using state-of-the-art updating: ', aux_classifierSet[idx], ', ACC = ', aux_values[idx])
-
-
-def set_title_labeles_legend(ax):
-    ax[0, 0].set_title('LDA')
-    ax[0, 1].set_title('QDA')
-    ax[3, 0].set_xlabel('Number of Labled/Unlabeled sets')
-    ax[3, 1].set_xlabel('Number of Labled/Unlabeled sets')
-    ax[3, 1].legend()
-
-
-def vect_bar(vect, data, best_probs, best_threshold):
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = [type_DA[0] + '_' + 'weak']
-        for type_model in [['ours', 0], ['state_art', 1]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_soft_labels')
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_probs_' + str(best_probs[type_model[1]][type_DA[1]]))
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_threshold_' + str(best_threshold[type_model[1]][type_DA[1]]))
-
-        vect.append(list(data[classifierSet].loc[len(data) - 1].values * 100))
-    return vect
-
-
-def vect_bar_soft_labeling(vect, data, best_probs, best_threshold):
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = []
-        for type_model in [['ours', 0], ['state_art', 1]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_soft_labels')
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_probs_' + str(best_probs[type_model[1]][type_DA[1]]))
-            classifierSet.append(
-                type_DA[0] + '_' + type_model[0] + '_threshold_' + str(best_threshold[type_model[1]][type_DA[1]]))
-
-        vect.append(list(data[classifierSet].loc[len(data) - 1].values * 100))
-    return vect
-
-
 def vect_bar_ours_all(vect, data, best_probs, best_threshold):
     for type_DA in [['LDA', 0], ['QDA', 1]]:
         classifierSet = [type_DA[0] + '_' + 'weak']
@@ -715,7 +388,6 @@ def vect_bar_ours_all(vect, data, best_probs, best_threshold):
         vect.append(list(data[classifierSet].loc[len(data) - 1].values * 100))
     return vect
 
-
 def vect_bar_improve(vect_LDA, vect_QDA, data,type_label):
     for type_DA in [['LDA', 0], ['QDA', 1]]:
         classifierSet = []
@@ -727,19 +399,7 @@ def vect_bar_improve(vect_LDA, vect_QDA, data,type_label):
             vect_QDA.append(list(data[classifierSet].loc[len(data) - 1].values * 100))
     return vect_LDA, vect_QDA
 
-
-
-
-def vect_bar_labels(vect, data):
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        classifierSet = [type_DA[0] + '_' + 'weak', type_DA[0] + '_' + 'batch']
-        for type_model in [['ours', 0]]:
-            classifierSet.append(type_DA[0] + '_' + type_model[0] + '_labels')
-        vect.append(list(data[classifierSet].loc[len(data) - 1].values * 100))
-    return vect
-
-
-def vect_bar_PROBS_batch_best(data_acc):
+def vect_bar_NIGAM(data_acc):
     best_parameters = []
     for type_DA in [['LDA', 0], ['QDA', 1]]:
         aux_best_parameters = []
@@ -757,52 +417,12 @@ def vect_bar_PROBS_batch_best(data_acc):
             aux_best_parameters.append(list_weight[idx])
         best_parameters.append(aux_best_parameters)
     return best_parameters
-
-
-def vect_bar_THRESHOLD_batch_best(data_acc):
-    best_parameters = []
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        aux_best_parameters = []
-        for type_model in [['ours', 0]]:
-            classifierSet = []
-            list_threshold = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-            for threshold in list_threshold:
-                classifierSet.append(type_DA[0] + '_' + type_model[0] + '_threshold_' + str(threshold))
-
-            values = data_acc[classifierSet].loc[len(data_acc) - 1].values
-            idx = np.argmax(values)
-            print('Best classifier (threshold) is ' + classifierSet[idx] + '. Improve acc=' + str(
-                round(values[idx] * 100, 2)))
-            aux_best_parameters.append(list_threshold[idx])
-        best_parameters.append(aux_best_parameters)
-    return best_parameters
-
-
-def vect_bar_PROBS(data_acc):
-    best_parameters = []
-    for type_DA in [['LDA', 0], ['QDA', 1]]:
-        aux_best_parameters = []
-
-        for type_model in [['ours', 0], ['state_art', 1]]:
-            classifierSet = []
-            list_weight = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-            for weight in list_weight:
-                classifierSet.append(type_DA[0] + '_' + type_model[0] + '_probs_' + str(weight))
-
-            values = data_acc[classifierSet].loc[len(data_acc) - 1].values
-            idx = np.argmax(values)
-            print('Best classifier (posterior probability) is ' + classifierSet[idx] + '. Improve acc=' + str(
-                round(values[idx] * 100, 2)))
-            aux_best_parameters.append(list_weight[idx])
-        best_parameters.append(aux_best_parameters)
-    return best_parameters
-
 
 def vect_bar_THRESHOLD(data_acc):
     best_parameters = []
     for type_DA in [['LDA', 0], ['QDA', 1]]:
         aux_best_parameters = []
-        for type_model in [['ours', 0], ['state_art', 1]]:
+        for type_model in [['ours', 0]]:
             classifierSet = []
             list_threshold = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
             for threshold in list_threshold:
@@ -817,229 +437,227 @@ def vect_bar_THRESHOLD(data_acc):
     return best_parameters
 
 
-# %% set initial variables
+#%% set initial variables
 
-featureSet = 1
 times = 2
 windowSize = 290
 shotStart = 1
 
-print(times)
-# %% GRAPH PAPER ACC IMPROVE
+# %% GRAPH online classifiers
+def graph_experiment1():
+    data_frame_total = pd.DataFrame()
+    fig, ax = plt.subplots(nrows=5, ncols=1, figsize=(8, 11), sharex=True)
+    idx = 0
+    database_names=['NinaPro5', 'Capgmyo_dbb','MyoArmband','Long-Term 3DC','EMG-EPN-120']
 
-vect_LDA_soft = []
-vect_QDA_soft = []
-vect_LDA_label = []
-vect_QDA_label = []
-for database in ['Nina5', 'Capgmyo_dbb', 'Cote', 'LongTerm3DC', 'EPN_120']:
-    print('\n' + database)
-    folder = '../Results/'
-    data_frame_database = pd.DataFrame()
+    for database in ['Nina5', 'Capgmyo_dbb', 'Cote', 'LongTerm3DC', 'EPN_120']:
+        print('\n' + database)
+        folder = '../Results/'
+        data_frame_database = pd.DataFrame()
 
-    print('\nANALYSIS WILCOXON (CONFIDENCE LEVEL 95%): ' + database)
+        data_acc_mean_all_1, _, _, _ = uploadResultsDatasets(
+            folder, database, 1, times, shotStart, best_probs=0, best_threshold=0)
 
-    print('\nFEATURE 1: ' + database)
-    _, _, _, data_acc_improve1, _ = uploadResultsDatabasesVF1(
-        folder, database, 1, times, shotStart, best_probs=0, best_threshold=0)
+        data_acc_mean_all_2, _, _, _= uploadResultsDatasets(
+            folder, database, 2, times, shotStart, best_probs=0, best_threshold=0)
 
-    print('\nFEATURE 2: ' + database)
-    _, _, _, data_acc_improve2, _ = uploadResultsDatabasesVF1(
-        folder, database, 2, times, shotStart, best_probs=0, best_threshold=0)
+        data_acc_mean_all_3, _, _, _ = uploadResultsDatasets(
+            folder, database, 3, times, shotStart, best_probs=0, best_threshold=0)
 
-    print('\nFEATURE 3: ' + database)
-    _, _, _, data_acc_improve3, _ = uploadResultsDatabasesVF1(
-        folder, database, 3, times, shotStart, best_probs=0, best_threshold=0)
+        ##### graph best acc
+        print('\nFEATURE 1: ' + database)
+        best_probs1 = vect_bar_NIGAM(data_acc_mean_all_1)
+        best_threshold1 = vect_bar_THRESHOLD(data_acc_mean_all_1)
+        print('FEATURE 2: ' + database)
+        best_probs2 = vect_bar_NIGAM(data_acc_mean_all_2)
+        best_threshold2 = vect_bar_THRESHOLD(data_acc_mean_all_2)
+        print('FEATURE 3: ' + database)
+        best_probs3 = vect_bar_NIGAM(data_acc_mean_all_3)
+        best_threshold3 = vect_bar_THRESHOLD(data_acc_mean_all_3)
 
-    ##### graph best acc
-    type_label='soft_labels'
-    vect_LDA_soft, vect_QDA_soft = vect_bar_improve(vect_LDA_soft, vect_QDA_soft, data_acc_improve1,type_label)
-    vect_LDA_soft, vect_QDA_soft = vect_bar_improve(vect_LDA_soft, vect_QDA_soft, data_acc_improve2,type_label)
-    vect_LDA_soft, vect_QDA_soft = vect_bar_improve(vect_LDA_soft, vect_QDA_soft, data_acc_improve3,type_label)
+        print('\nANALYSIS WILCOXON (CONFIDENCE LEVEL 95%): ' + database)
 
-    type_label = 'labels'
-    vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve1, type_label)
-    vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve2, type_label)
-    vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve3, type_label)
+        print('\nFEATURE 1: ' + database)
+        _, data_acc_mean_best1, data_acc_best1, _= uploadResultsDatasets(
+            folder, database, 1, times, shotStart, best_probs=best_probs1, best_threshold=best_threshold1)
+        data_frame_database = data_frame_database.append(data_acc_best1, ignore_index=True, sort=False)
 
+        print('\nFEATURE 2: ' + database)
+        _, data_acc_mean_best2, data_acc_best2, _ = uploadResultsDatasets(
+            folder, database, 2, times, shotStart, best_probs=best_probs2, best_threshold=best_threshold2)
+        data_frame_database = data_frame_database.append(data_acc_best2, ignore_index=True, sort=False)
 
-fig, ax = plt.subplots(nrows=4, ncols=1, figsize=(9, 72/7), sharex=True)
-vect_list = [vect_LDA_label, vect_QDA_label]
-classifierSet_names = []
-list_colors = ['k', 'tab:blue']
-for type_model in [['Traditional classifier', 0], ['Weighted classifier', 1]]:
-    classifierSet_names.append(type_model[0])
-X = np.arange(3 * 5)
-slide = 0.25
-for j in range(2):
-    vect=vect_list[j]
-    vect = np.array(vect)
-    ax[j].grid(axis='y', color='gainsboro', linewidth=1, zorder=1)
-    for i in range(len(classifierSet_names)):
-        ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
+        print('\nFEATURE 3: ' + database)
+        _, data_acc_mean_best3, data_acc_best3, _ = uploadResultsDatasets(
+            folder, database, 3, times, shotStart, best_probs=best_probs3, best_threshold=best_threshold3)
+        data_frame_database = data_frame_database.append(data_acc_best3, ignore_index=True, sort=False)
 
-    ax[j].set_ylabel('accuracy difference[%]')
+        data_frame_total = data_frame_total.append(data_frame_database, ignore_index=True, sort=False)
 
-ax[0].set_title('Labeled Gestures')
+        ##### graph best acc
+        vect = []
+        vect = vect_bar_ours_all(vect, data_acc_mean_best1, best_probs1, best_threshold1)
+        vect = vect_bar_ours_all(vect, data_acc_mean_best2, best_probs2, best_threshold2)
+        vect = vect_bar_ours_all(vect, data_acc_mean_best3, best_probs3, best_threshold3)
 
-vect_list = [vect_LDA_soft, vect_QDA_soft]
-classifierSet_names = []
-for type_model in [['Traditional classifier', 0], ['Weighted classifier', 1]]:
-    classifierSet_names.append(type_model[0])
-X = np.arange(3 * 5)
-slide = 0.25
-for j in range(2,4):
-    vect=vect_list[j-2]
-    vect = np.array(vect)
-    ax[j].grid(axis='y', color='gainsboro', linewidth=1, zorder=1)
+        classifierSet_names_all = ['Initial classifier']
+        classifierSet_names_all.append('Nigam-based classifier')
+        classifierSet_names_all.append('Thresholding-based classifier')
+        classifierSet_names_all.append('Our online classifier using pseudo-labels')
+        classifierSet_names_all.append('Our online classifier using labels')
 
-    for i in range(len(classifierSet_names)):
-        ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
+        vect = np.array(vect)
+        ax[idx].grid(axis='y', color='gainsboro', linewidth=1, zorder=1)
+        X = np.arange(2 * 3)
 
-    ax[j].set_ylabel('accuracy difference[%]')
+        slide = 0.1
+        list_colors = ['tab:gray', 'tab:orange', 'tab:green', 'tab:red', 'tab:blue']
+        for i in range(len(classifierSet_names_all)):
+            ax[idx].bar(X + (slide + 0.009) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
 
-ax[2].set_title('Pseudo-Labeled Gestures')
-ax[3].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
-             fancybox=True, shadow=True, labels=classifierSet_names, ncol=2)
-plt.xticks(X + (slide + 0.01) * 0.5,
-           ('FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3','FS1', 'FS2', 'FS3','FS1', 'FS2', 'FS3','FS1', 'FS2', 'FS3'))
-plt.tight_layout()
-plt.savefig('../images/acc_improve.png', dpi=300)
-plt.show()
+            if idx == 0:
+                ax[idx].set_yticks(np.arange(30, 76, step=5))
+                ax[idx].set_ylim([30, 76])
+            elif idx == 1:
+                ax[idx].set_yticks(np.arange(70, 101, step=5))
+                ax[idx].set_ylim([70, 101])
+            elif idx == 2:
+                ax[idx].set_yticks(np.arange(80, 101, step=5))
+                ax[idx].set_ylim([80, 101])
+            elif idx == 3:
+                ax[idx].set_yticks(np.arange(60, 91, step=5))
+                ax[idx].set_ylim([60, 91])
+            elif idx == 4:
+                ax[idx].set_yticks(np.arange(55, 91, step=5))
+                ax[idx].set_ylim([55, 91])
 
+        ax[idx].set_title(database_names[idx] )
+        ax[idx].set_ylabel('accuracy [%]')
 
-# %% GRAPH PAPER ACC all
-data_frame_total = pd.DataFrame()
-fig, ax = plt.subplots(nrows=5, ncols=1, figsize=(8, 11), sharex=True)
-idx = 0
-database_names=['NinaPro5', 'Capgmyo_dbb','MyoArmband','Long-Term 3DC','EMG-EPN-120']
-
-for database in ['Nina5', 'Capgmyo_dbb', 'Cote', 'LongTerm3DC', 'EPN_120']:
-    print('\n' + database)
-    folder = '../Results/'
-    data_frame_database = pd.DataFrame()
-
-    data_acc_mean_all_1, _, _, _, _ = uploadResultsDatabasesVF1(
-        folder, database, 1, times, shotStart, best_probs=0, best_threshold=0)
-
-    data_acc_mean_all_2, _, _, _, _ = uploadResultsDatabasesVF1(
-        folder, database, 2, times, shotStart, best_probs=0, best_threshold=0)
-
-    data_acc_mean_all_3, _, _, _, _ = uploadResultsDatabasesVF1(
-        folder, database, 3, times, shotStart, best_probs=0, best_threshold=0)
-
-    ##### graph best acc
-    print('\nFEATURE 1: ' + database)
-    best_probs1 = vect_bar_PROBS_batch_best(data_acc_mean_all_1)
-    best_threshold1 = vect_bar_THRESHOLD_batch_best(data_acc_mean_all_1)
-    print('FEATURE 2: ' + database)
-    best_probs2 = vect_bar_PROBS_batch_best(data_acc_mean_all_2)
-    best_threshold2 = vect_bar_THRESHOLD_batch_best(data_acc_mean_all_2)
-    print('FEATURE 3: ' + database)
-    best_probs3 = vect_bar_PROBS_batch_best(data_acc_mean_all_3)
-    best_threshold3 = vect_bar_THRESHOLD_batch_best(data_acc_mean_all_3)
-
-    print('\nANALYSIS WILCOXON (CONFIDENCE LEVEL 95%): ' + database)
-
-    print('\nFEATURE 1: ' + database)
-    _, data_acc_mean_best1, data_acc_best1, _, _ = uploadResultsDatabasesVF1(
-        folder, database, 1, times, shotStart, best_probs=best_probs1, best_threshold=best_threshold1)
-    data_frame_database = data_frame_database.append(data_acc_best1, ignore_index=True, sort=False)
-
-    print('\nFEATURE 2: ' + database)
-    _, data_acc_mean_best2, data_acc_best2, _, _ = uploadResultsDatabasesVF1(
-        folder, database, 2, times, shotStart, best_probs=best_probs2, best_threshold=best_threshold2)
-    data_frame_database = data_frame_database.append(data_acc_best2, ignore_index=True, sort=False)
-
-    print('\nFEATURE 3: ' + database)
-    _, data_acc_mean_best3, data_acc_best3, _, _ = uploadResultsDatabasesVF1(
-        folder, database, 3, times, shotStart, best_probs=best_probs3, best_threshold=best_threshold3)
-    data_frame_database = data_frame_database.append(data_acc_best3, ignore_index=True, sort=False)
-
-    data_frame_total = data_frame_total.append(data_frame_database, ignore_index=True, sort=False)
-
-    ##### graph best acc
-    vect = []
-    vect = vect_bar_ours_all(vect, data_acc_mean_best1, best_probs1, best_threshold1)
-    vect = vect_bar_ours_all(vect, data_acc_mean_best2, best_probs2, best_threshold2)
-    vect = vect_bar_ours_all(vect, data_acc_mean_best3, best_probs3, best_threshold3)
-
-    classifierSet_names_all = ['Initial classifier']
-    classifierSet_names_all.append('Nigam-based classifier')
-    classifierSet_names_all.append('Thresholding-based classifier')
-    classifierSet_names_all.append('Our online classifier using pseudo-labels')
-    classifierSet_names_all.append('Our online classifier using labels')
-
-    vect = np.array(vect)
-    ax[idx].grid(axis='y', color='gainsboro', linewidth=1, zorder=1)
-    X = np.arange(2 * 3)
-
-    slide = 0.1
-    list_colors = ['tab:gray', 'tab:orange', 'tab:green', 'tab:red', 'tab:blue']
-    for i in range(len(classifierSet_names_all)):
-        ax[idx].bar(X + (slide + 0.009) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
-
-        if idx == 0:
-            ax[idx].set_yticks(np.arange(30, 76, step=5))
-            ax[idx].set_ylim([30, 76])
-        elif idx == 1:
-            ax[idx].set_yticks(np.arange(70, 101, step=5))
-            ax[idx].set_ylim([70, 101])
-        elif idx == 2:
-            ax[idx].set_yticks(np.arange(80, 101, step=5))
-            ax[idx].set_ylim([80, 101])
-        elif idx == 3:
-            ax[idx].set_yticks(np.arange(60, 91, step=5))
-            ax[idx].set_ylim([60, 91])
-        elif idx == 4:
-            ax[idx].set_yticks(np.arange(55, 91, step=5))
-            ax[idx].set_ylim([55, 91])
-
-    ax[idx].set_title(database_names[idx] )
-    ax[idx].set_ylabel('accuracy [%]')
-
-    idx += 1
+        idx += 1
 
 
 
-print('\n\nFRIEDMAN TOTAL (CONFIDENCE LEVEL 95%) soft-labelling techniques')
-frame = pd.DataFrame()
-for type_DA in ['LDA', 'QDA']:
-    print('\nType DA classifier: ' + type_DA)
-    for type_model in ['ours']:
-        classifierSet_names = []
-        for type_updating in ['soft_labels', 'best_probs', 'best_threshold']:
-            classifierSet_names.append(type_DA + '_' + type_model + '_' + type_updating)
-
-        aux_frame = data_frame_total[classifierSet_names]
-        aux_frame.columns = ['ours_soft_labelling', 'best_probs', 'best_threshold']
-        frame = frame.append(aux_frame, ignore_index=True, sort=False)
-
-    friedman_analysis(frame)
-
-
-print('\n\nFRIEDMAN TOTAL (CONFIDENCE LEVEL 95%) soft-labelling techniques')
-
-for type_updating in ['labels','soft_labels']:
+    print('\n\nFRIEDMAN TOTAL (CONFIDENCE LEVEL 95%) soft-labelling techniques')
+    frame = pd.DataFrame()
     for type_DA in ['LDA', 'QDA']:
-        frame = pd.DataFrame()
-        classifierSet_names = []
         print('\nType DA classifier: ' + type_DA)
-        for type_model in ['ours', 'state_art']:
-            classifierSet_names.append(type_DA + '_' + type_model + '_' + type_updating)
-        aux_frame = data_frame_total[classifierSet_names]
-        aux_frame.columns = ['ours', 'state_art']
-        frame = frame.append(aux_frame, ignore_index=True, sort=False)
-        print(type_updating)
+        for type_model in ['ours']:
+            classifierSet_names = []
+            for type_updating in ['soft_labels', 'best_probs', 'best_threshold']:
+                classifierSet_names.append(type_DA + '_' + type_model + '_' + type_updating)
+
+            aux_frame = data_frame_total[classifierSet_names]
+            aux_frame.columns = ['ours_soft_labelling', 'best_probs', 'best_threshold']
+            frame = frame.append(aux_frame, ignore_index=True, sort=False)
+
         friedman_analysis(frame)
 
 
+    print('\n\nFRIEDMAN TOTAL (CONFIDENCE LEVEL 95%) soft-labelling techniques')
 
-plt.xticks(X + (slide + 0.009) * 2,
-           ('LDA FS1', 'QDA FS1', 'LDA FS2', 'QDA FS2', 'LDA FS3', 'QDA FS3'))
-ax[idx - 1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
-                   fancybox=True, shadow=True, labels=classifierSet_names_all, ncol=2)
-plt.tight_layout()
-plt.savefig('../images/acc2.png', dpi=300)
-plt.show()
+    for type_updating in ['labels','soft_labels']:
+        for type_DA in ['LDA', 'QDA']:
+            frame = pd.DataFrame()
+            classifierSet_names = []
+            print('\nType DA classifier: ' + type_DA)
+            for type_model in ['ours', 'state_art']:
+                classifierSet_names.append(type_DA + '_' + type_model + '_' + type_updating)
+            aux_frame = data_frame_total[classifierSet_names]
+            aux_frame.columns = ['ours', 'state_art']
+            frame = frame.append(aux_frame, ignore_index=True, sort=False)
+            print(type_updating)
+            friedman_analysis(frame)
 
+
+
+    plt.xticks(X + (slide + 0.009) * 2,
+               ('LDA FS1', 'QDA FS1', 'LDA FS2', 'QDA FS2', 'LDA FS3', 'QDA FS3'))
+    ax[idx - 1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
+                       fancybox=True, shadow=True, labels=classifierSet_names_all, ncol=2)
+    plt.tight_layout()
+    plt.savefig('../images/acc2.png', dpi=300)
+    plt.show()
+
+
+# %% GRAPH Batch classifiers
+def graph_experiment2():
+    vect_LDA_soft = []
+    vect_QDA_soft = []
+    vect_LDA_label = []
+    vect_QDA_label = []
+    for database in ['Nina5', 'Capgmyo_dbb', 'Cote', 'LongTerm3DC', 'EPN_120']:
+        print('\n' + database)
+        folder = '../Results/'
+        data_frame_database = pd.DataFrame()
+
+        print('\nANALYSIS WILCOXON (CONFIDENCE LEVEL 95%): ' + database)
+
+        print('\nFEATURE 1: ' + database)
+        _, _, _, data_acc_improve1 = uploadResultsDatasets(
+            folder, database, 1, times, shotStart, best_probs=0, best_threshold=0)
+
+        print('\nFEATURE 2: ' + database)
+        _, _, _, data_acc_improve2 = uploadResultsDatasets(
+            folder, database, 2, times, shotStart, best_probs=0, best_threshold=0)
+
+        print('\nFEATURE 3: ' + database)
+        _, _, _, data_acc_improve3 = uploadResultsDatasets(
+            folder, database, 3, times, shotStart, best_probs=0, best_threshold=0)
+
+        ##### graph best acc
+        type_label = 'soft_labels'
+        vect_LDA_soft, vect_QDA_soft = vect_bar_improve(vect_LDA_soft, vect_QDA_soft, data_acc_improve1, type_label)
+        vect_LDA_soft, vect_QDA_soft = vect_bar_improve(vect_LDA_soft, vect_QDA_soft, data_acc_improve2, type_label)
+        vect_LDA_soft, vect_QDA_soft = vect_bar_improve(vect_LDA_soft, vect_QDA_soft, data_acc_improve3, type_label)
+
+        type_label = 'labels'
+        vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve1, type_label)
+        vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve2, type_label)
+        vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve3, type_label)
+
+    fig, ax = plt.subplots(nrows=4, ncols=1, figsize=(9, 72 / 7), sharex=True)
+    vect_list = [vect_LDA_label, vect_QDA_label]
+    classifierSet_names = []
+    list_colors = ['k', 'tab:blue']
+    for type_model in [['Traditional classifier', 0], ['Weighted classifier', 1]]:
+        classifierSet_names.append(type_model[0])
+    X = np.arange(3 * 5)
+    slide = 0.25
+    for j in range(2):
+        vect = vect_list[j]
+        vect = np.array(vect)
+        ax[j].grid(axis='y', color='gainsboro', linewidth=1, zorder=1)
+        for i in range(len(classifierSet_names)):
+            ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
+
+        ax[j].set_ylabel('accuracy difference[%]')
+
+    ax[0].set_title('Labeled Gestures')
+
+    vect_list = [vect_LDA_soft, vect_QDA_soft]
+    classifierSet_names = []
+    for type_model in [['Traditional classifier', 0], ['Weighted classifier', 1]]:
+        classifierSet_names.append(type_model[0])
+    X = np.arange(3 * 5)
+    slide = 0.25
+    for j in range(2, 4):
+        vect = vect_list[j - 2]
+        vect = np.array(vect)
+        ax[j].grid(axis='y', color='gainsboro', linewidth=1, zorder=1)
+
+        for i in range(len(classifierSet_names)):
+            ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
+
+        ax[j].set_ylabel('accuracy difference[%]')
+
+    ax[2].set_title('Pseudo-Labeled Gestures')
+    ax[3].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
+                 fancybox=True, shadow=True, labels=classifierSet_names, ncol=2)
+    plt.xticks(X + (slide + 0.01) * 0.5,
+               (
+               'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3'))
+    plt.tight_layout()
+    plt.savefig('../images/acc_improve.png', dpi=300)
+    plt.show()
 
