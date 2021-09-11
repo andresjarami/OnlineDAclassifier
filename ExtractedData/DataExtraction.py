@@ -96,12 +96,12 @@ def min_max_normalization(emg, bit_resolution):
     # return emg
 
 
-# for database in ['Nina5', 'Cote', 'Capgmyo_dbb', 'LongTerm3DC', 'EPN_612']:
-for database in ['EPN_120']:
+for database in ['Nina5', 'Cote', 'Capgmyo_dbb', 'LongTerm3DC', 'EPN_612']:
+
     window = 290
     overlap = 280
     windowFile = '_290ms'
-    place = '../../DatabasesEMG'
+    place = '../Datasets'
     print(database)
 
     if database == 'Nina5':
