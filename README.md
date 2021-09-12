@@ -4,6 +4,9 @@ This repository describes the three experiments performed in the paper *Towards 
 Online Active Learning via Myoelectric Interfaces*. We implemented the experiments using 
 [python 3.7](https://www.python.org/downloads/release/python-377/).
 
+*NOTE:* This [link](https://anonymous.4open.science/r/Discriminant_Classifiers_Online_Active_learning-5191/README.md) is an anonymous git version of this repository.
+
+
 
 ## Required libraries 
 Numpy [https://numpy.org/install/](https://numpy.org/install/)
