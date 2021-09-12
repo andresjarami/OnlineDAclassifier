@@ -47,4 +47,4 @@ For the experiment 1 and 2, we run over Gadi five batch files (one per database)
 ## Visualization of the two experiments:
 After the experiments' execution, we use Jupyter notebooks to analyze and develop the graphs presented in the paper.
 
-[Experiments](Experiments_visualization.ipynb) (jupyter notebook) or [Experiments](Experiments_visualization/Experiments.md) (markdown file)
+[Experiments](Experiments_visualization.ipynb) (jupyter notebook) or [Experiments](Experiments_in_Markdown/Experiments_visualization.md) (markdown file)
