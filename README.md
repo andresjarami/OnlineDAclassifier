@@ -49,6 +49,5 @@ Note: The step 2 was performed over a supercomputer in [NCI Gadi](http://nci.org
 
 
 ## Visualization of the two experiments:
-After the experiments' execution, we use Jupyter notebooks to analyze and develop the graphs presented in the paper.
+After the experiments' execution, we use Jupyter notebook ([Experiments](Experiments_visualization.ipynb)) to analyze and develop the graphs presented in the paper.
 
-[Experiments](Experiments_visualization.ipynb) (jupyter notebook) or [Experiments](Experiments_in_Markdown/Experiments_visualization.md) (markdown file)
