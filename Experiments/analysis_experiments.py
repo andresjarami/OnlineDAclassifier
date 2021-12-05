@@ -590,7 +590,7 @@ def experiment1(best_parameters_Nigam_thresholding=False, analysis_time=False, g
         ax[idx - 1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
                            fancybox=True, shadow=True, labels=classifierSet_names_all, ncol=2)
         plt.tight_layout()
-        # plt.savefig('../images/acc2.png', dpi=300)
+        # plt.savefig('Images/acc2.png', dpi=300)
         plt.show()
 
 
@@ -637,6 +637,7 @@ def experiment2():
         classifierSet_names.append(type_model[0])
     X = np.arange(3 * 5)
     slide = 0.25
+    name_DA=['LDA','QDA','LDA','QDA']
     for j in range(2):
         vect = vect_list[j]
         vect = np.array(vect)
@@ -644,7 +645,7 @@ def experiment2():
         for i in range(len(classifierSet_names)):
             ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
 
-        ax[j].set_ylabel('accuracy difference[%]')
+        ax[j].set_ylabel(name_DA[j]+'\naccuracy difference[%]')
 
     ax[0].set_title('Labeled Gestures')
 
@@ -662,7 +663,7 @@ def experiment2():
         for i in range(len(classifierSet_names)):
             ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
 
-        ax[j].set_ylabel('accuracy difference[%]')
+        ax[j].set_ylabel(name_DA[j]+'\naccuracy difference[%]')
 
     ax[2].set_title('Pseudo-Labeled Gestures')
     ax[3].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
@@ -672,8 +673,8 @@ def experiment2():
                    'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2',
                    'FS3'))
     plt.tight_layout()
-    # plt.savefig('../images/acc_improve.png', dpi=300)
+    plt.savefig('Images/acc_improve.png', dpi=300)
     plt.show()
 
-
+# experiment2()
 
