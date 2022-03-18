@@ -452,7 +452,7 @@ def experiment1(best_parameters_Nigam_thresholding=False, analysis_time=False, g
 
     data_frame_total = pd.DataFrame()
     if graph_acc:
-        fig, ax = plt.subplots(nrows=5, ncols=1, figsize=(8, 11), sharex=True)
+        fig, ax = plt.subplots(nrows=5, ncols=1, figsize=(8, 11), sharex='col')
     idx = 0
     database_names = ['NinaPro5', 'Capgmyo_dbb', 'MyoArmband', 'Long-Term 3DC', 'EMG-EPN-120']
 
