@@ -1,11 +1,10 @@
 # Experiments of the paper "Towards Discriminant Analysis Classifiers using Online Active Learning via Myoelectric Interfaces"
 
-This repository describes the three experiments performed in the paper *Towards Discriminant Analysis Classifiers using 
-Online Active Learning via Myoelectric Interfaces*. We implemented the experiments using 
+This repository describes the three experiments performed in the paper *"Towards Discriminant Analysis Classifiers using 
+Online Active Learning via Myoelectric Interfaces"* that was presented in the AAAi-22 conference. We implemented the experiments using 
 [python 3.7](https://www.python.org/downloads/release/python-377/).
 
-*NOTE:* This [link](https://anonymous.4open.science/r/Discriminant_Classifiers_Online_Active_learning-5191/README.md) is an anonymous git version of this repository.
-
+The technical appendix of this paper can be found in this [link](Appendix).
 
 
 ## Required libraries 
