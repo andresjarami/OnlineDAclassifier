@@ -4,7 +4,7 @@ This repository describes the three experiments performed in the paper *"Towards
 Online Active Learning via Myoelectric Interfaces"* that was presented in the AAAi-22 conference. We implemented the experiments using 
 [python 3.7](https://www.python.org/downloads/release/python-377/).
 
-The technical appendix of this paper can be found in this [link](Appendix).
+The technical appendix of this paper can be found in this [link](Appendix.pdf).
 
 
 ## Required libraries 
