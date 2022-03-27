@@ -166,7 +166,7 @@ def uploadResultsDatasets(folder, database, featureSet, times, shotStart, analys
         people = 20
         days = 3
 
-    folder = folder + '_' + database
+    folder = folder + 'Results/_' + database
 
     all_samples = (samplesTrain - shotStart) * classes
     number_gestures = 5
@@ -444,7 +444,7 @@ def vect_bar_THRESHOLD(data_acc, best_parameters_Nigam_thresholding):
 times = 2
 windowSize = 290
 shotStart = 1
-folder = 'Results/'
+folder = ''
 
 # %% GRAPH online classifiers
 
@@ -548,8 +548,8 @@ def experiment1(best_parameters_Nigam_thresholding=False, analysis_time=False, g
                     ax[idx].set_yticks(np.arange(55, 91, step=5))
                     ax[idx].set_ylim([55, 91])
 
-            ax[idx].set_title(database_names[idx])
-            ax[idx].set_ylabel('accuracy [%]')
+            ax[idx].set_title(database_names[idx], fontsize=15,fontweight='bold')
+            ax[idx].set_ylabel('accuracy [%]', fontsize=14)
 
         idx += 1
 
@@ -586,11 +586,11 @@ def experiment1(best_parameters_Nigam_thresholding=False, analysis_time=False, g
 
     if graph_acc:
         plt.xticks(X + (slide + 0.009) * 2,
-                   ('LDA FS1', 'QDA FS1', 'LDA FS2', 'QDA FS2', 'LDA FS3', 'QDA FS3'))
-        ax[idx - 1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
-                           fancybox=True, shadow=True, labels=classifierSet_names_all, ncol=2)
+                   ('LDA FS1', 'QDA FS1', 'LDA FS2', 'QDA FS2', 'LDA FS3', 'QDA FS3'), fontsize=14)
+        ax[idx - 1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.16),
+                           fancybox=True, shadow=True, labels=classifierSet_names_all, ncol=2, fontsize=11)
         plt.tight_layout()
-        # plt.savefig('Images/acc2.png', dpi=300)
+        plt.savefig(folder+'Images/acc2_new.png', dpi=300)
         plt.show()
 
 
@@ -629,7 +629,7 @@ def experiment2():
         vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve2, type_label)
         vect_LDA_label, vect_QDA_label = vect_bar_improve(vect_LDA_label, vect_QDA_label, data_acc_improve3, type_label)
 
-    fig, ax = plt.subplots(nrows=4, ncols=1, figsize=(9, 72 / 7), sharex=True)
+    fig, ax = plt.subplots(nrows=4, ncols=1, figsize=(8, 10), sharex=True)
     vect_list = [vect_LDA_label, vect_QDA_label]
     classifierSet_names = []
     list_colors = ['k', 'tab:blue']
@@ -645,9 +645,9 @@ def experiment2():
         for i in range(len(classifierSet_names)):
             ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
 
-        ax[j].set_ylabel(name_DA[j]+'\naccuracy difference[%]')
+        ax[j].set_ylabel(name_DA[j]+'\naccuracy \ndifference[%]', fontsize=14)
 
-    ax[0].set_title('Labeled Gestures')
+    ax[0].set_title('Labeled Gestures', fontsize=15,fontweight='bold')
 
     vect_list = [vect_LDA_soft, vect_QDA_soft]
     classifierSet_names = []
@@ -663,18 +663,18 @@ def experiment2():
         for i in range(len(classifierSet_names)):
             ax[j].bar(X + (slide + 0.01) * i, vect[:, i], width=slide, zorder=i + 2, color=list_colors[i])
 
-        ax[j].set_ylabel(name_DA[j]+'\naccuracy difference[%]')
+        ax[j].set_ylabel(name_DA[j]+'\naccuracy \ndifference[%]', fontsize=14)
 
-    ax[2].set_title('Pseudo-Labeled Gestures')
+    ax[2].set_title('Pseudo-Labeled Gestures', fontsize=15,fontweight='bold')
     ax[3].legend(loc='upper center', bbox_to_anchor=(0.5, -0.13),
-                 fancybox=True, shadow=True, labels=classifierSet_names, ncol=2)
+                 fancybox=True, shadow=True, labels=classifierSet_names, ncol=2, fontsize=12)
     plt.xticks(X + (slide + 0.01) * 0.5,
                (
                    'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2', 'FS3', 'FS1', 'FS2',
-                   'FS3'))
+                   'FS3'), fontsize=12)
     plt.tight_layout()
-    plt.savefig('Images/acc_improve.png', dpi=300)
+    plt.savefig(folder+'Images/acc_improve_new.png', dpi=300)
     plt.show()
 
+# experiment1(graph_acc=True)
 # experiment2()
-
