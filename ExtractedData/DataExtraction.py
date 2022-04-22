@@ -96,7 +96,7 @@ def min_max_normalization(emg, bit_resolution):
     # return emg
 
 
-for database in ['Nina5', 'Cote', 'Capgmyo_dbb', 'LongTerm3DC', 'EPN_612']:
+for database in ['Nina5', 'Cote', 'Capgmyo_dbb', 'LongTerm3DC', 'EPN_120']:
 
     window = 290
     overlap = 280
